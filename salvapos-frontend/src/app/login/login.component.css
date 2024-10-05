@@ -1,0 +1,59 @@
+/* Fondo degradado para el login */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #6e9cff, #5078e1); /* Degradado en azul */
+}
+
+  /* Estilos generales */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif; /* Usamos una fuente moderna */
+}
+
+  /* Estilos para la tarjeta del login */
+.card {
+    border: none;
+    border-radius: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.2); /* Más sombra al hacer hover */
+}
+
+  /* Estilo de los inputs */
+.form-control {
+    padding: 20px 15px;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-floating > label {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+  /* Botón de inicio de sesión */
+.btn-primary {
+    background-color: #5078e1;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #6e9cff;
+}
+
+  /* Mejora de enlaces */
+a {
+    color: #5078e1;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #6e9cff;
+    text-decoration: underline;
+}

@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterModule } from '@angular/router'; // Importamos RouterModule
+import { LoginComponent } from './login/login.component'; // Importamos el LoginComponent
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css'],
+  imports: [RouterModule, LoginComponent] // Importamos RouterModule aquí
 })
 export class AppComponent {
-  title = 'salvapos';
+  title = 'SalvaPOS';
 }
