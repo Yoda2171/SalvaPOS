@@ -1,0 +1,52 @@
+<div class="container mt-5">
+    <div class="card shadow p-4">
+    <h3 class="mb-3">Add New Medicine</h3>
+    <p class="text-muted">*All fields are mandatory, except mentioned as (optional).</p>
+
+    <form (ngSubmit)="onSubmit()">
+        <!-- Row for Medicine Name and Medicine ID -->
+        <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="medicineName" class="form-label">Medicine Name</label>
+            <input type="text" id="medicineName" class="form-control" placeholder="Enter Medicine Name" required />
+        </div>
+        <div class="col-md-6">
+            <label for="medicineId" class="form-label">Medicine ID</label>
+            <input type="text" id="medicineId" class="form-control" placeholder="Enter Medicine ID" required />
+        </div>
+        </div>
+
+        <!-- Row for Medicine Group and Quantity -->
+        <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="medicineGroup" class="form-label">Medicine Group</label>
+            <select id="medicineGroup" class="form-select" required>
+            <option value="">- Select Group -</option>
+            <option value="group1">Group 1</option>
+            <option value="group2">Group 2</option>
+            <option value="group3">Group 3</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label for="quantity" class="form-label">Quantity in Number</label>
+            <input type="number" id="quantity" class="form-control" placeholder="Enter Quantity" required />
+        </div>
+        </div>
+
+        <!-- Row for How to Use -->
+        <div class="mb-3">
+        <label for="howToUse" class="form-label">How to Use</label>
+        <textarea id="howToUse" class="form-control" rows="3" placeholder="Enter instructions" required></textarea>
+        </div>
+
+        <!-- Row for Side Effects -->
+        <div class="mb-3">
+        <label for="sideEffects" class="form-label">Side Effects</label>
+        <textarea id="sideEffects" class="form-control" rows="3" placeholder="Enter side effects (optional)"></textarea>
+        </div>
+
+        <!-- Save Button -->
+        <button type="submit" class="btn btn-primary w-100">Save Details</button>
+    </form>
+    </div>
+</div>
