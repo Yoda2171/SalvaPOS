@@ -1,23 +1,26 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-root', // Asegúrate de que el selector es 'app-login' si es el que usas en el HTML
-  standalone: true,      // Declara que es un componente standalone
+  selector: 'app-root', // Esto hace que el login sea el componente raíz (app-root)
+  standalone: true,
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
   imports: [FormsModule]
 })
 export class LoginComponent {
-
   username: string = '';
   password: string = '';
 
+  constructor(private router: Router) {}
+
   onSubmit() {
-    if (this.username && this.password) {
-      console.log('Iniciando sesión con:', this.username, this.password);
+    if (this.username === 'admin' && this.password === 'admin123') {
+      // Redirigir a Home después de iniciar sesión correctamente
+      this.router.navigate(['/home']);
     } else {
-      alert('Por favor, complete todos los campos.');
+      alert('Credenciales incorrectas');
     }
   }
 }
