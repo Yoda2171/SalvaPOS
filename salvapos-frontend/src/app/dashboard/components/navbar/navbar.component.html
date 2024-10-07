@@ -1,0 +1,19 @@
+<div id="Sidebar">
+  <div class="SidebarOptions">
+    @for (item of menuItems; track $index) {
+    <a [routerLink]="item.path">{{ item.title }}</a>
+
+    }
+
+    <!-- <a [routerLink]="['reportes']">Reportes</a>
+
+    <a [routerLink]="['venta']">Venta</a>
+
+    <a [routerLink]="['inventario']">Inventario</a>
+    <a [routerLink]="['reportes']">Reportes</a>
+ -->
+    <a [routerLink]="['/login']">Login</a>
+    <a [routerLink]="['/register']">Register</a>
+    <a href="">Logout</a>
+  </div>
+</div>

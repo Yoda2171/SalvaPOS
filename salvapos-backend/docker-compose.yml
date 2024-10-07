@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456 # Cambia esto a tu password de root
+      MYSQL_DATABASE: salvapos_db         # Nombre de la base de datos inicial
+      MYSQL_USER: user_salvapos                   # Usuario personalizado
+      MYSQL_PASSWORD: 123456      # Contraseña del usuario
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mysql_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  mysql_network:
+    driver: bridge
