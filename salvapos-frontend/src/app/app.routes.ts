@@ -4,6 +4,7 @@ import { RegisterComponent } from './register/register.component';
 import { InventarioComponent } from './inventario/inventario.component'; 
 import { ProductosComponent } from './navbar_productos/productos.component';
 
+
 // Definimos las rutas de la aplicación
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },  
