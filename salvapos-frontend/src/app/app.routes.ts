@@ -4,7 +4,7 @@ import { RegisterComponent } from './register/register.component'; // Asegúrate
 //import { InventarioComponent } from './inventario/inventario.component'; // Asegúrate de que el componente de Inventario está importado
 
 // Definimos las rutas de la aplicación
-export const appRoutes: Routes = [
+export const routes: Routes = [
   { path: 'login', component: LoginComponent },  // Ruta para la página de Login
   { path: 'registro', component: RegisterComponent },  // Ruta para la página de Registro
   //{ path: 'inventario', component: InventarioComponent },  // Ruta para la página de Inventario
