@@ -1,15 +1,32 @@
-<div class="container mt-5">
-    <h2>Iniciar Sesión</h2>
-    <form (ngSubmit)="onSubmit()">
-    <div class="mb-3">
-        <label for="username" class="form-label">Nombre de Usuario</label>
-        <input type="text" id="username" class="form-control" [(ngModel)]="username" name="username" required>
-    </div>
-    <div class="mb-3">
-        <label for="password" class="form-label">Contraseña</label>
-        <input type="password" id="password" class="form-control" [(ngModel)]="password" name="password" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-    </form>
-</div>
+<div class="container-fluid vh-100 d-flex justify-content-center align-items-center">
+    <div class="login-card card shadow p-4" style="width: 400px;">
+    <!-- Logo o Imagen de cabecera -->
+    <img src="assets/login.png" class="card-img-top mb-4 mx-auto d-block" alt="Logo de la Farmacia" style="width: 100px;" />
 
+    <!-- Título del formulario -->
+    <h3 class="text-center mb-3">Iniciar Sesión</h3>
+
+    <!-- Formulario de Login -->
+    <form (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+        <label for="username" class="form-label">Nombre de Usuario</label>
+        <input type="text" id="username" class="form-control" [(ngModel)]="username" name="username" required placeholder="Ingrese su nombre de usuario">
+        </div>
+
+        <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <input type="password" id="password" class="form-control" [(ngModel)]="password" name="password" required placeholder="Ingrese su contraseña">
+        </div>
+
+        <!-- Botón de iniciar sesión -->
+        <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+        </div>
+
+        <!-- Enlace para recuperar contraseña -->
+        <div class="text-center mt-3">
+        <a href="/register" class="text-decoration-none">¿Se te olvidó la contraseña?</a>
+        </div>
+    </form>
+    </div>
+</div>

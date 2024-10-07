@@ -1,18 +1,40 @@
-<div class="container mt-5">
-    <h2>Registro de Usuario</h2>
-    <form>
-    <div class="mb-3">
-        <label for="nombre" class="form-label">Nombre completo</label>
-        <input type="text" id="nombre" class="form-control" placeholder="Ingrese su nombre completo" required />
-    </div>
-    <div class="mb-3">
-        <label for="email" class="form-label">Correo electrónico</label>
-        <input type="email" id="email" class="form-control" placeholder="Ingrese su correo electrónico" required />
-    </div>
-    <div class="mb-3">
+<div class="container-fluid vh-100 d-flex justify-content-center align-items-center">
+    <div class="card shadow p-4" style="width: 450px;">
+    <!-- Logo o Imagen de cabecera -->
+    <img src="assets/Registro.png" class="card-img-top mb-4 mx-auto d-block" alt="Logo de la Farmacia" style="width: 100px;" />
+
+    <!-- Título del formulario -->
+    <h3 class="text-center mb-4">Registrar Nuevo Usuario</h3>
+
+    <!-- Formulario de Registro -->
+    <form (ngSubmit)="onSubmit()">
+        <!-- Nombre completo -->
+        <div class="mb-3">
+        <label for="fullname" class="form-label">Nombre Completo</label>
+        <input type="text" id="fullname" class="form-control" [(ngModel)]="fullname" name="fullname" required placeholder="Ingrese su nombre completo">
+        </div>
+
+        <!-- Correo electrónico -->
+        <div class="mb-3">
+        <label for="email" class="form-label">Correo Electrónico</label>
+        <input type="email" id="email" class="form-control" [(ngModel)]="email" name="email" required placeholder="Ingrese su correo">
+        </div>
+
+        <!-- Contraseña -->
+        <div class="mb-3">
         <label for="password" class="form-label">Contraseña</label>
-        <input type="password" id="password" class="form-control" placeholder="Ingrese su contraseña" required />
-    </div>
-    <button type="submit" class="btn btn-primary w-100">Registrarr</button>
+        <input type="password" id="password" class="form-control" [(ngModel)]="password" name="password" required placeholder="Ingrese su contraseña">
+        </div>
+
+        <!-- Botón de Registrar -->
+        <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-success">Registrar</button>
+        </div>
+
+        <!-- Enlace a la página de Login -->
+        <div class="text-center mt-3">
+        <a href="/login" class="text-decoration-none">¿Ya tienes una cuenta? Inicia Sesión</a>
+        </div>
     </form>
+    </div>
 </div>

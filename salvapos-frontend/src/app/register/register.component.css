@@ -1,0 +1,48 @@
+/* Fondo con degradado suave */
+.container-fluid {
+    background: linear-gradient(135deg, #e0f7fa 0%, #f0f4c3 100%);
+}
+
+  /* Estilo de la tarjeta de registro */
+.card {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+  /* Imagen del logo */
+.card-img-top {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 20px;
+}
+
+  /* Estilos de los campos del formulario */
+.form-control {
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: none;
+}
+
+  /* Botón de registrar */
+.btn-success {
+    background-color: #28a745;
+    border: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+  /* Enlace estilizado */
+a {
+    color: #007bff;
+}
+
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}

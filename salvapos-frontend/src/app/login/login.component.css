@@ -1,59 +1,47 @@
-/* Fondo degradado para el login */
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #6e9cff, #5078e1); /* Degradado en azul */
+/* Fondo limpio y profesional */
+.container-fluid {
+  background: linear-gradient(135deg, #e8f0fe 0%, #ffffff 100%);
 }
 
-  /* Estilos generales */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif; /* Usamos una fuente moderna */
+/* Estilo de la tarjeta de login */
+.login-card {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-  /* Estilos para la tarjeta del login */
-.card {
-    border: none;
-    border-radius: 15px;
-    background-color: #ffffff;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease-in-out;
+/* Imagen del logo */
+.card-img-top {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 20px;
 }
 
-.card:hover {
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.2); /* Más sombra al hacer hover */
-}
-
-  /* Estilo de los inputs */
-.form-control {
-    padding: 20px 15px;
-    border-radius: 8px;
-    font-size: 1rem;
-}
-
-.form-floating > label {
-    padding: 10px 15px;
-    font-size: 0.9rem;
-    color: #6c757d;
-}
-
-  /* Botón de inicio de sesión */
+/* Botón de inicio de sesión */
 .btn-primary {
-    background-color: #5078e1;
-    border: none;
-    transition: background-color 0.3s ease;
+  background-color: #007bff;
+  border: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
 }
 
 .btn-primary:hover {
-    background-color: #6e9cff;
+  background-color: #0056b3;
 }
 
-  /* Mejora de enlaces */
+/* Enlace estilizado */
 a {
-    color: #5078e1;
-    transition: color 0.3s ease;
+  color: #007bff;
 }
 
 a:hover {
-    color: #6e9cff;
-    text-decoration: underline;
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+/* Campos de formulario */
+.form-control {
+  border-radius: 5px;
+  padding: 10px;
 }
