@@ -1,14 +1,15 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router'; // Importamos RouterModule
-import { LoginComponent } from './login/login.component'; // Importamos el LoginComponent
-
+import { RouterOutlet } from '@angular/router';
+import { ProductosComponent } from './navbar_productos/productos.component';
+import { BodyProductosComponent } from './body-productos/body-productos.component';
+import { LoginComponent } from './login/login.component';
 @Component({
   selector: 'app-root',
   standalone: true,
+  imports: [RouterOutlet, ProductosComponent, BodyProductosComponent, LoginComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  imports: [RouterModule, LoginComponent] // Importamos RouterModule aquí
 })
 export class AppComponent {
-  title = 'SalvaPOS';
+  title = 'salvapos';
 }
