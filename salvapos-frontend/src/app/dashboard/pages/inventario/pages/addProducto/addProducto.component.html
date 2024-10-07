@@ -1,0 +1,123 @@
+<div class="container">
+  <app-navbar></app-navbar>
+  <div class="container-fluid">
+    <div class="container-fluid vh-100">
+      <!-- Barra superior -->
+      <div
+        class="row bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center"
+      >
+        <div class="col-auto">
+          <button class="btn btn-primary" id="menuButton">
+            <i class="bi bi-list" style="font-size: 24px"></i>
+            <!-- Icono de menú -->
+          </button>
+        </div>
+        <div class="col-auto">
+          <span class="fs-5">Inventario 2</span>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary">
+            <i class="bi bi-box-arrow-right" style="font-size: 24px"></i>
+            <!-- Icono de logout -->
+          </button>
+        </div>
+      </div>
+
+      <!-- Formulario de agregar medicamento -->
+      <div class="container mt-5">
+        <div class="card shadow-sm p-4">
+          <h3 class="mb-3">Add New Medicine</h3>
+          <p class="text-muted">
+            *All fields are mandatory, except mentioned as (optional).
+          </p>
+
+          <form>
+            <!-- Fila para nombre e ID del medicamento -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="medicineName" class="form-label"
+                  >Medicine Name</label
+                >
+                <input
+                  type="text"
+                  id="medicineName"
+                  class="form-control"
+                  placeholder="Enter Medicine Name"
+                  required
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="medicineId" class="form-label">Medicine ID</label>
+                <input
+                  type="text"
+                  id="medicineId"
+                  class="form-control"
+                  placeholder="Enter Medicine ID"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Fila para grupo del medicamento y cantidad -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="medicineGroup" class="form-label"
+                  >Medicine Group</label
+                >
+                <select id="medicineGroup" class="form-select" required>
+                  <option value="">- Select Group -</option>
+                  <option value="group1">Group 1</option>
+                  <option value="group2">Group 2</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="quantity" class="form-label"
+                  >Quantity in Number</label
+                >
+                <input
+                  type="number"
+                  id="quantity"
+                  class="form-control"
+                  placeholder="Enter Quantity"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Fila para cómo usar el medicamento -->
+            <div class="mb-3">
+              <label for="howToUse" class="form-label">How to Use</label>
+              <textarea
+                id="howToUse"
+                class="form-control"
+                rows="3"
+                placeholder="Enter instructions"
+                required
+              ></textarea>
+            </div>
+
+            <!-- Fila para efectos secundarios -->
+            <div class="mb-3">
+              <label for="sideEffects" class="form-label"
+                >Side Effects (optional)</label
+              >
+              <textarea
+                id="sideEffects"
+                class="form-control"
+                rows="3"
+                placeholder="Enter side effects"
+              ></textarea>
+            </div>
+
+            <!-- Botón para guardar detalles -->
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">
+                Save Details
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
