@@ -1,0 +1,26 @@
+#BodyProductos {
+    text-align: center;
+    
+}
+
+img {
+    height: auto;
+    width: 700px;
+    max-width: 100%; /* Asegura que la imagen no exceda el ancho del contenedor */
+    margin-top: 16px;
+    border-radius: 15px;
+}
+#VerProductos{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 16px;
+}
+#VerProductos button{
+    background-color: #264ECA;;
+    color: white;
+}
+#VerProductos a{
+    text-decoration: none;
+    color: white;
+}
