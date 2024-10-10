@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
+import { ProductoModule } from './producto/producto.module';
+import { CategoriaModule } from './categoria/categoria.module';
 
 @Module({
   imports: [
@@ -13,11 +15,12 @@ import { UsersModule } from './users/users.module';
       username: 'salvapos_user',
       password: '123456',
       database: 'salvapos_db',
-      entities: [__dirname + '/**/*.entity.ts'],
+      autoLoadEntities: true,
       synchronize: true,
     }),
-
     UsersModule,
+    ProductoModule,
+    CategoriaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
