@@ -18,8 +18,8 @@ export class CategoriaController {
   constructor(private readonly categoriaService: CategoriaService) {}
 
   @Post()
-  create(@Body() createCategoriaDto: CreateCategoriaDto) {
-    return this.categoriaService.create(createCategoriaDto);
+  createCategory(@Body() createCategoriaDto: CreateCategoriaDto) {
+    return this.categoriaService.createCategory(createCategoriaDto);
   }
 
   @Get()
@@ -33,15 +33,15 @@ export class CategoriaController {
   }
 
   @Patch(':id')
-  update(
+  updateCategory(
     @Param('id') id: string,
     @Body() updateCategoriaDto: UpdateCategoriaDto,
   ) {
-    return this.categoriaService.update(+id, updateCategoriaDto);
+    return this.categoriaService.updateCategory(+id, updateCategoriaDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoriaService.remove(+id);
+  removeCategory(@Param('id') id: string) {
+    return this.categoriaService.removeCategory(+id);
   }
 }

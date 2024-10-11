@@ -10,11 +10,13 @@ import { CategoriaService } from 'src/categoria/categoria.service';
 export class ProductoService {
   constructor(
     @InjectRepository(Producto)
-    private productoRepository: Repository<Producto>,
-    private categoriaService: CategoriaService, // Servicio para buscar categoría
+    private readonly productoRepository: Repository<Producto>,
+    private readonly categoriaService: CategoriaService, // Servicio para buscar categoría
   ) {}
 
-  async create(createProductoDto: CreateProductoDto): Promise<Producto> {
+  async createProducto(
+    createProductoDto: CreateProductoDto,
+  ): Promise<Producto> {
     const categoria = await this.categoriaService.findById(
       createProductoDto.categoriaId,
     );
@@ -29,19 +31,33 @@ export class ProductoService {
     return await this.productoRepository.save(nuevoProducto);
   }
 
-  async findAll(): Promise<Producto[]> {
+  async findAllProducts(): Promise<Producto[]> {
     return await this.productoRepository.find({ relations: ['categoria'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} producto`;
+  async findOneProduct(id: number): Promise<Producto> {
+    return await this.productoRepository.findOneBy({ id });
   }
 
-  update(id: number, updateProductoDto: UpdateProductoDto) {
-    return `This action updates a #${id} producto`;
+  async updateProducto(
+    id: number,
+    updateProductoDto: UpdateProductoDto,
+  ): Promise<Producto> {
+    const categoria = await this.categoriaService.findById(
+      updateProductoDto.categoriaId,
+    );
+    const producto = await this.productoRepository.findOneBy({ id });
+    producto.codigoBarras = updateProductoDto.codigoBarras;
+    producto.nombre = updateProductoDto.nombre;
+    producto.precioCosto = updateProductoDto.precioCosto;
+    producto.precioVenta = updateProductoDto.precioVenta;
+    producto.cantidad = updateProductoDto.cantidad;
+    producto.categoria = categoria;
+
+    return await this.productoRepository.save(producto);
   }
 
-  async delete(id: number): Promise<void> {
+  async deleteProducto(id: number): Promise<void> {
     await this.productoRepository.delete(id);
   }
 }
