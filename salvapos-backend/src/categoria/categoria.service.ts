@@ -9,10 +9,12 @@ import { Repository } from 'typeorm';
 export class CategoriaService {
   constructor(
     @InjectRepository(Categoria)
-    private categoriaRepository: Repository<Categoria>,
+    private readonly categoriaRepository: Repository<Categoria>,
   ) {}
 
-  async create(createCategoriaDto: CreateCategoriaDto): Promise<Categoria> {
+  async createCategory(
+    createCategoriaDto: CreateCategoriaDto,
+  ): Promise<Categoria> {
     const nuevaCategoria = new Categoria();
     nuevaCategoria.nombre = createCategoriaDto.nombre;
 
@@ -24,14 +26,36 @@ export class CategoriaService {
   }
 
   async findById(id: number): Promise<Categoria> {
-    return await this.categoriaRepository.findOneBy({ id });
+    return await this.categoriaRepository.findOne({
+      where: { id },
+      relations: ['productos'],
+    });
   }
 
-  update(id: number, updateCategoriaDto: UpdateCategoriaDto) {
-    return `This action updates a #${id} categoria`;
+  async updateCategory(
+    id: number,
+    updateCategoriaDto: UpdateCategoriaDto,
+  ): Promise<Categoria> {
+    const categoria = await this.categoriaRepository.findOneBy({ id });
+    categoria.nombre = updateCategoriaDto.nombre;
+
+    return await this.categoriaRepository.save(categoria);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} categoria`;
+  async removeCategory(id: number) {
+    const categoria = await this.categoriaRepository.findOne({
+      where: { id },
+      relations: ['productos'],
+    });
+
+    if (!categoria) {
+      throw new Error('La categoría no existe');
+    }
+
+    if (categoria.productos.length > 0) {
+      throw new Error('La categoría tiene productos asociados');
+    }
+
+    await this.categoriaRepository.remove(categoria);
   }
 }

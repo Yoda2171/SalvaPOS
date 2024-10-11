@@ -19,17 +19,17 @@ export class ProductoController {
 
   @Post()
   create(@Body() createProductoDto: CreateProductoDto) {
-    return this.productoService.create(createProductoDto);
+    return this.productoService.createProducto(createProductoDto);
   }
 
   @Get()
   findAll() {
-    return this.productoService.findAll();
+    return this.productoService.findAllProducts();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productoService.findOne(+id);
+    return this.productoService.findOneProduct(+id);
   }
 
   @Patch(':id')
@@ -37,11 +37,11 @@ export class ProductoController {
     @Param('id') id: string,
     @Body() updateProductoDto: UpdateProductoDto,
   ) {
-    return this.productoService.update(+id, updateProductoDto);
+    return this.productoService.updateProducto(+id, updateProductoDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.productoService.delete(+id);
+    return this.productoService.deleteProducto(+id);
   }
 }
