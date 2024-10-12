@@ -37,7 +37,7 @@ export const routes: Routes = [
         path: 'reportes',
         title: 'Reportes',
         loadComponent: () =>
-          import('./dashboard/pages/reportes/reportes.component'),
+          import('./dashboard/pages/reportes/pages/reporteVenta/reporteVenta.component'),
       },
       {
         path: '',
