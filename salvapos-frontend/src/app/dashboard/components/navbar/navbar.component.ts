@@ -15,11 +15,17 @@ export class NavbarComponent {
   public menuItems = routes
     .map((route) => route.children ?? [])
     .flat()
-    .filter((route) => route && route.path)
+    .filter((route) => route?.path)
     .filter((route) => !route.path?.includes(':'))
     .filter((route) => route.title);
 
   constructor() {
     console.log(this.menuItems);
+  }
+
+  isNavbarOpen = true;
+
+  toggleNavbar() {
+    this.isNavbarOpen = !this.isNavbarOpen; // Alterna entre abierto y cerrado
   }
 }

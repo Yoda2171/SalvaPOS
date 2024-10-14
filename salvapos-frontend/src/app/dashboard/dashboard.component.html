@@ -1,6 +1,13 @@
-<div class="container">
-  <app-navbar></app-navbar>
-  <div class="container-fluid">
-     <router-outlet></router-outlet>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-auto sidebar-container">
+      <app-navbar></app-navbar>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="col main-content container-fluid">
+      <router-outlet></router-outlet>
+    </div>
   </div>
 </div>
