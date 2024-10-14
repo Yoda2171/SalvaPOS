@@ -14,6 +14,10 @@ export class ProductoService {
     private readonly categoriaService: CategoriaService, // Servicio para buscar categoría
   ) {}
 
+  async count(): Promise<number> {
+    return this.productoRepository.count(); // Contar registros
+  }
+
   async createProducto(
     createProductoDto: CreateProductoDto,
   ): Promise<Producto> {
