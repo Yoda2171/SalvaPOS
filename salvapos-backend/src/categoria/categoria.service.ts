@@ -11,6 +11,9 @@ export class CategoriaService {
     @InjectRepository(Categoria)
     private readonly categoriaRepository: Repository<Categoria>,
   ) {}
+  async count(): Promise<number> {
+    return this.categoriaRepository.count(); // Contar registros
+  }
 
   async createCategory(
     createCategoriaDto: CreateCategoriaDto,
