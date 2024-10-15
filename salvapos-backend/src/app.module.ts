@@ -7,6 +7,9 @@ import { ProductoModule } from './producto/producto.module';
 import { CategoriaModule } from './categoria/categoria.module';
 import { DataCategoryService } from './data/data-category/data-category.service';
 import { DataProductService } from './data/data-product/data-product.service';
+import { VentaModule } from './venta/venta.module';
+import { DataMetodoPagoService } from './data/data-metodo-pago/data-metodo-pago.service';
+import { MetodoPagoModule } from './metodo-pago/metodo-pago.module';
 
 @Module({
   imports: [
@@ -23,8 +26,10 @@ import { DataProductService } from './data/data-product/data-product.service';
     UsersModule,
     ProductoModule,
     CategoriaModule,
+    VentaModule,
+    MetodoPagoModule,
   ],
   controllers: [AppController],
-  providers: [AppService, DataCategoryService, DataProductService],
+  providers: [AppService, DataCategoryService, DataProductService, DataMetodoPagoService],
 })
 export class AppModule {}

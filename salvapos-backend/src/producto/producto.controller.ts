@@ -29,7 +29,7 @@ export class ProductoController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productoService.findOneProduct(+id);
+    return this.productoService.findOneById(+id);
   }
 
   @Patch(':id')
