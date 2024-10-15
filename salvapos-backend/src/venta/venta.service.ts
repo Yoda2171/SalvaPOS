@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateVentaDto } from './dto/create-venta.dto';
 import { UpdateVentaDto } from './dto/update-venta.dto';
 import { DataSource, Repository } from 'typeorm';
@@ -19,7 +24,6 @@ export class VentaService {
     @InjectRepository(PagoVenta)
     private readonly pagoVentaRepository: Repository<PagoVenta>,
     private readonly productoService: ProductoService,
-
     private readonly dataSource: DataSource,
   ) {}
 
@@ -37,11 +41,13 @@ export class VentaService {
           where: { id: detalle.productoId },
         });
         if (!producto) {
-          throw new Error(`Producto no encontrado: ${detalle.productoId}`);
+          throw new NotFoundException(
+            `Producto no encontrado: ${detalle.productoId}`,
+          );
         }
 
         if (producto.cantidad < detalle.cantidad) {
-          throw new Error(
+          throw new BadRequestException(
             `Stock insuficiente para el producto: ${producto.nombre}`,
           );
         }
@@ -55,19 +61,19 @@ export class VentaService {
       let montoTotalPagado = 0;
       for (const pago of pagos) {
         if (!pago?.metodoPagoId) {
-          throw new Error('Pago o metodoPagoId no definido');
+          throw new BadRequestException('Método de pago no definido.');
         }
         montoTotalPagado += pago.monto;
       }
 
       // Verificar si el total coincide con la suma de los pagos
       if (montoTotalPagado !== total) {
-        throw new Error(
+        throw new BadRequestException(
           'El total de los pagos no coincide con el total de la venta.',
         );
       }
 
-      // Ahora que todo está correcto, se crea la venta y los detalles
+      // Crear la venta y los detalles
       const venta = this.ventaRepository.create({ total });
       await queryRunner.manager.save(venta);
 
@@ -93,13 +99,21 @@ export class VentaService {
         await queryRunner.manager.save(pagoVenta);
       }
 
-      // Si todo es correcto, confirmar la transacción
+      // Confirmar la transacción si es correcto
       await queryRunner.commitTransaction();
       return venta;
     } catch (error) {
-      // Si ocurre algún error, hacer rollback de la transacción
+      // Hacer rollback de la transacción en caso de error
       await queryRunner.rollbackTransaction();
-      throw error;
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error; // Lanza los errores específicos que se han definido
+      }
+      throw new InternalServerErrorException(
+        'Error interno del servidor, por favor intente nuevamente.',
+      );
     } finally {
       // Finalizar la transacción y liberar el query runner
       await queryRunner.release();
