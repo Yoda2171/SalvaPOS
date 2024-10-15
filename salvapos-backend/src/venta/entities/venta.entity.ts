@@ -13,6 +13,9 @@ export class Venta {
   @Column('datetime', { default: () => 'CURRENT_TIMESTAMP' })
   fecha: Date;
 
+  @Column({ default: 'completada' })
+  estado: string;
+
   @OneToMany(() => DetalleVenta, (detalle) => detalle.venta, { cascade: true })
   detalles: DetalleVenta[];
 
