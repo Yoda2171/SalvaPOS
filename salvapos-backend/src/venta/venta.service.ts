@@ -5,7 +5,6 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { CreateVentaDto } from './dto/create-venta.dto';
-import { UpdateVentaDto } from './dto/update-venta.dto';
 import { DataSource, Repository } from 'typeorm';
 import { Venta } from './entities/venta.entity';
 import { DetalleVenta } from './entities/detalleVenta.entity';
@@ -120,24 +119,63 @@ export class VentaService {
     }
   }
 
-  findAll() {
+  // Devolución completa de una venta
+  async devolverVenta(ventaId: number): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Buscar la venta con los detalles
+      const venta = await this.ventaRepository.findOne({
+        where: { id: ventaId, estado: 'completada' }, // Solo ventas completadas
+        relations: ['detalles', 'detalles.producto'],
+      });
+
+      if (!venta) {
+        throw new NotFoundException(
+          `Venta con ID ${ventaId} no encontrada o ya devuelta.`,
+        );
+      }
+
+      // Devolver los productos al inventario
+      for (const detalle of venta.detalles) {
+        const producto = detalle.producto;
+
+        // Actualizar la cantidad del producto (devolver al inventario)
+        producto.cantidad += detalle.cantidad;
+
+        // Guardar el cambio en el inventario dentro de la transacción
+        await queryRunner.manager.save(producto);
+      }
+
+      // Marcar la venta como "devuelta"
+      venta.estado = 'devuelta';
+      await queryRunner.manager.save(venta);
+
+      // Confirmar la transacción si all es correcto
+      await queryRunner.commitTransaction();
+    } catch {
+      // Hacer rollback de la transacción en caso de error
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(
+        'Error al realizar la devolución, intente nuevamente.',
+      );
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async findAll() {
     return this.ventaRepository.find({
       relations: ['detalles', 'pagos'],
     });
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return this.ventaRepository.findOne({
       where: { id },
       relations: ['detalles', 'pagos'],
     });
-  }
-
-  update(id: number, updateVentaDto: UpdateVentaDto) {
-    return `This action updates a #${id} venta`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} venta`;
   }
 }
