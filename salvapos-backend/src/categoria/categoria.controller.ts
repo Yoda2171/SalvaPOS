@@ -11,6 +11,7 @@ import { CategoriaService } from './categoria.service';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { CategoriaFilterParamDto } from './dto/categoria-filter-param.dto';
 
 @ApiTags('Categoria')
 @Controller('categoria')
@@ -43,5 +44,10 @@ export class CategoriaController {
   @Delete(':id')
   removeCategory(@Param('id') id: string) {
     return this.categoriaService.removeCategory(+id);
+  }
+
+  @Post('search')
+  search(@Body() filter: CategoriaFilterParamDto) {
+    return this.categoriaService.findByName(filter.nombre);
   }
 }
