@@ -3,7 +3,7 @@ import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { Categoria } from './entities/categoria.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class CategoriaService {
@@ -60,5 +60,11 @@ export class CategoriaService {
     }
 
     await this.categoriaRepository.remove(categoria);
+  }
+
+  async findByName(nombre: string): Promise<Categoria> {
+    return await this.categoriaRepository.findOne({
+      where: { nombre: ILike(`%${nombre}%`) },
+    });
   }
 }

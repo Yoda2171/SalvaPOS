@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Producto } from './entities/producto.entity';
 import { Repository } from 'typeorm';
 import { CategoriaService } from 'src/categoria/categoria.service';
+import { CreateProductFilterDto } from './dto/create-productfilter.dto';
 
 @Injectable()
 export class ProductoService {
@@ -76,5 +77,46 @@ export class ProductoService {
 
   async deleteProducto(id: number): Promise<void> {
     await this.productoRepository.delete(id);
+  }
+
+  async buscarProductos(filtros: CreateProductFilterDto): Promise<Producto[]> {
+    const { nombre, codigoBarras, nombreCategoria } = filtros;
+
+    const queryBuilder = this.productoRepository.createQueryBuilder('producto');
+
+    // Filtrar por nombre del producto
+    if (nombre) {
+      queryBuilder.andWhere('producto.nombre LIKE :nombre', {
+        nombre: `%${nombre}%`,
+      });
+    }
+
+    // Filtrar por código de barras
+    if (codigoBarras) {
+      queryBuilder.andWhere('producto.codigoBarras = :codigoBarras', {
+        codigoBarras,
+      });
+    }
+
+    // Filtrar por nombre de la categoría
+    if (nombreCategoria) {
+      queryBuilder
+        .leftJoinAndSelect('producto.categoria', 'categoria')
+        .andWhere('categoria.nombre LIKE :nombreCategoria', {
+          nombreCategoria: `%${nombreCategoria}%`,
+        });
+    } else {
+      queryBuilder.leftJoinAndSelect('producto.categoria', 'categoria');
+    }
+
+    const productos = await queryBuilder.getMany();
+
+    if (productos.length === 0) {
+      throw new NotFoundException(
+        'No se encontraron productos que coincidan con los criterios de búsqueda',
+      );
+    }
+
+    return productos;
   }
 }
