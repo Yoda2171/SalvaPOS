@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CategoriaService } from './categoria.service';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
@@ -23,7 +24,7 @@ export class CategoriaController {
     return this.categoriaService.createCategory(createCategoriaDto);
   }
 
-  @Get()
+  @Get('all')
   findAll() {
     return this.categoriaService.findAll();
   }
@@ -46,8 +47,13 @@ export class CategoriaController {
     return this.categoriaService.removeCategory(+id);
   }
 
-  @Post('search')
-  search(@Body() filter: CategoriaFilterParamDto) {
+  @Get()
+  search(@Query() filter: CategoriaFilterParamDto) {
     return this.categoriaService.findByName(filter.nombre);
   }
+
+  /* @Post('search')
+  search(@Body() filter: CategoriaFilterParamDto) {
+    return this.categoriaService.findByName(filter.nombre);
+  } */
 }
