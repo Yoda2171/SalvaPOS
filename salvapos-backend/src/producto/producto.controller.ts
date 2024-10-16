@@ -6,13 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ProductoService } from './producto.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateProductFilterDto } from './dto/create-productfilter.dto';
-import { Producto } from './entities/producto.entity';
+import { PaginationDto } from './dto/pagination.dto';
 
 @ApiTags('Producto')
 @Controller('producto')
@@ -24,7 +24,7 @@ export class ProductoController {
     return this.productoService.createProducto(createProductoDto);
   }
 
-  @Get()
+  @Get('all')
   findAll() {
     return this.productoService.findAllProducts();
   }
@@ -47,11 +47,8 @@ export class ProductoController {
     return this.productoService.deleteProducto(+id);
   }
 
-  // Endpoint para buscar productos con filtros
-  @Post('buscar')
-  async buscarProducto(
-    @Body() filter: CreateProductFilterDto,
-  ): Promise<Producto[]> {
-    return this.productoService.buscarProductos(filter);
+  @Get()
+  async buscarProducto(@Query() pagination: PaginationDto) {
+    return this.productoService.buscarProductos(pagination);
   }
 }

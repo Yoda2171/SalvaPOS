@@ -3,9 +3,9 @@ import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Producto } from './entities/producto.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { CategoriaService } from 'src/categoria/categoria.service';
-import { CreateProductFilterDto } from './dto/create-productfilter.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class ProductoService {
@@ -79,37 +79,31 @@ export class ProductoService {
     await this.productoRepository.delete(id);
   }
 
-  async buscarProductos(filtros: CreateProductFilterDto): Promise<Producto[]> {
-    const { nombre, codigoBarras, nombreCategoria } = filtros;
+  async buscarProductos(paginationDto: PaginationDto) {
+    const { limit = 8, page = 1, search } = paginationDto; // Valores por defecto: limit 10, page 1
 
-    const queryBuilder = this.productoRepository.createQueryBuilder('producto');
+    // Calcular el offset basado en la página y el límite
+    const offset = (page - 1) * limit;
 
-    // Filtrar por nombre del producto
-    if (nombre) {
-      queryBuilder.andWhere('producto.nombre LIKE :nombre', {
-        nombre: `%${nombre}%`,
-      });
+    const findOptions: any = {
+      where: {},
+      take: limit,
+      skip: offset,
+      relations: ['categoria'], // Incluye la relación con la categoría
+    };
+
+    // Búsqueda global en varios campos
+    if (search) {
+      findOptions.where = [
+        { nombre: Like(`%${search}%`) },
+        { codigoBarras: Like(`%${search}%`) },
+        { categoria: { nombre: Like(`%${search}%`) } },
+      ];
     }
 
-    // Filtrar por código de barras
-    if (codigoBarras) {
-      queryBuilder.andWhere('producto.codigoBarras = :codigoBarras', {
-        codigoBarras,
-      });
-    }
-
-    // Filtrar por nombre de la categoría
-    if (nombreCategoria) {
-      queryBuilder
-        .leftJoinAndSelect('producto.categoria', 'categoria')
-        .andWhere('categoria.nombre LIKE :nombreCategoria', {
-          nombreCategoria: `%${nombreCategoria}%`,
-        });
-    } else {
-      queryBuilder.leftJoinAndSelect('producto.categoria', 'categoria');
-    }
-
-    const productos = await queryBuilder.getMany();
+    // Obtener productos paginados
+    const [productos, totalItems] =
+      await this.productoRepository.findAndCount(findOptions);
 
     if (productos.length === 0) {
       throw new NotFoundException(
@@ -117,6 +111,15 @@ export class ProductoService {
       );
     }
 
-    return productos;
+    // Calcular total de páginas
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      totalItems, // Total de productos
+      totalPages, // Total de páginas
+      currentPage: page, // Página actual
+      limit, // Items por página
+      data: { productos }, // Productos de la página actual
+    };
   }
 }
