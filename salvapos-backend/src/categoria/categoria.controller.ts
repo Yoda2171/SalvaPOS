@@ -51,9 +51,4 @@ export class CategoriaController {
   search(@Query() filter: CategoriaFilterParamDto) {
     return this.categoriaService.findByName(filter.nombre);
   }
-
-  /* @Post('search')
-  search(@Body() filter: CategoriaFilterParamDto) {
-    return this.categoriaService.findByName(filter.nombre);
-  } */
 }
