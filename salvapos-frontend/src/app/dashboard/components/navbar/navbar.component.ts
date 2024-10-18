@@ -19,9 +19,7 @@ export class NavbarComponent {
     .filter((route) => !route.path?.includes(':'))
     .filter((route) => route.title);
 
-  constructor() {
-    console.log(this.menuItems);
-  }
+  constructor() {}
 
   isNavbarOpen = true;
 

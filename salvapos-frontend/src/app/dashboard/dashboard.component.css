@@ -1,10 +1,8 @@
-:host {
-  display: block;
-}
+
 
 .main-content {
-  margin-left: 250px; /* Ajustar según el ancho del sidebar */
-  padding-top: 20px;
+  margin-left: 214px; /* Ajustar según el ancho del sidebar */
+ 
   transition: margin-left 0.3s ease;
 }
 
