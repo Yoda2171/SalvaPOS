@@ -17,6 +17,7 @@ export class NavbarComponent {
     .flat()
     .filter((route) => route?.path)
     .filter((route) => !route.path?.includes(':'))
+    .filter((route) => !route.path?.includes('addproduct'))
     .filter((route) => route.title);
 
   constructor() {}
