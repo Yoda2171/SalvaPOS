@@ -1,23 +1,15 @@
-<div *ngIf="!isAddOrEditProductRoute">
-  <h1 class="mb-3">Inventario</h1>
-  <!-- Botón para agregar un nuevo producto -->
-  <div class="mb-3">
-    <a class="text-decoration-none" [routerLink]="['/dashboard/addproduct']">
-      <button class="btn btn-primary">Agregar Producto</button>
-    </a>
-  </div>
+<h1 class="mb-3">Inventario</h1>
+<!-- Botón para agregar un nuevo producto -->
+<div class="mb-3">
+  <a class="text-decoration-none" [routerLink]="['/dashboard/addproduct']">
+    <button class="btn btn-primary">Agregar Producto</button>
+  </a>
+</div>
 
-  <div class="mb-3">
-    <a
-      class="text-decoration-none"
-      [routerLink]="['/dashboard/editproduct', 1]"
-    >
-      <button class="btn btn-primary">Editar Producto</button>
-    </a>
-  </div>
+<div class="mb-3">
+  <a class="text-decoration-none" [routerLink]="['/dashboard/editproduct', 1]">
+    <button class="btn btn-primary">Editar Producto</button>
+  </a>
 </div>
 
 <!-- Aquí se cargarán los componentes de las rutas hijas (addproduct y editproduct) -->
-<div *ngIf="isAddOrEditProductRoute">
-  <router-outlet></router-outlet>
-</div>

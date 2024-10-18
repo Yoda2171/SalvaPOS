@@ -10,6 +10,4 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./inventario.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class InventarioComponent {
-  // Método para verificar si la ruta actual es addproduct o editproduct
-}
+export default class InventarioComponent {}
