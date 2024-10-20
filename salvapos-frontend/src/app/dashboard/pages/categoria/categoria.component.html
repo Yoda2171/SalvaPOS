@@ -75,7 +75,8 @@
         <tr *ngFor="let categoria of filteredCategorias; let i = index">
           <th scope="row">{{ (currentPage - 1) * limit + i + 1 }}</th>
           <td>{{ categoria.nombre }}</td>
-          <td>{{ categoria.productos.length }}</td>
+          <td>{{ categoria.productos ? categoria.productos.length : 0 }}</td>
+
           <td>
             <!-- Icono de editar categoría -->
             <i

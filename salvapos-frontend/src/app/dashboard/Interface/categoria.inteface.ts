@@ -1,5 +1,22 @@
+export interface Pagination {
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  limit: number;
+  data: Categoria[];
+}
+
 export interface Categoria {
-  id: number;
+  id?: number;
   nombre: string;
-  productos: any[]; // Este tipo puede ser ajustado según tu modelo de productos
+  productos?: Producto[];
+}
+
+export interface Producto {
+  id: number;
+  codigoBarras: string;
+  nombre: string;
+  precioCosto: number;
+  precioVenta: number;
+  cantidad: number;
 }

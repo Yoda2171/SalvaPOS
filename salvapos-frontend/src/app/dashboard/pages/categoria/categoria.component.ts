@@ -13,8 +13,10 @@ import {
   ChangeDetectorRef,
   OnInit,
 } from '@angular/core';
+
 import { Categoria } from '../../Interface/categoria.inteface';
 import { NavbarInventarioComponent } from '../../components/navbarInventario/navbarInventario.component';
+import { CategoriaService } from '../../../services/categoria.service';
 declare let window: any;
 
 @Component({
@@ -54,7 +56,8 @@ export default class CategoriaComponent implements OnInit {
 
   constructor(
     private readonly fb: FormBuilder,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly categoriaService: CategoriaService // Inyectar el servicio
   ) {}
 
   ngOnInit(): void {
@@ -62,25 +65,7 @@ export default class CategoriaComponent implements OnInit {
       nombre: ['', Validators.required],
     });
 
-    // Simulación de categorías
-    this.categorias = [
-      { id: 1, nombre: 'Kids', productos: [] },
-      { id: 2, nombre: 'Home', productos: [{ id: 1 }] },
-      { id: 3, nombre: 'Electronics', productos: [] },
-      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
-      { id: 3, nombre: 'Electronics', productos: [] },
-      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
-      { id: 3, nombre: 'Electronics', productos: [] },
-      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
-      { id: 5, nombre: 'Health', productos: [] },
-    ];
-
-    this.totalItems = this.categorias.length;
-    this.totalPages = Math.ceil(this.totalItems / this.limit);
-
-    // Inicializa `filteredCategorias` con todas las categorías al cargar la página
-    this.filteredCategorias = [...this.categorias];
-    this.cargarCategorias(this.currentPage);
+    this.cargarCategorias(this.currentPage); // Cargar las categorías al iniciar
 
     // Inicializar el modal y toast de Bootstrap
     this.modalInstance = new window.bootstrap.Modal(
@@ -94,12 +79,30 @@ export default class CategoriaComponent implements OnInit {
     );
   }
 
+  cargarCategorias(page: number): void {
+    this.categoriaService
+      .getCategorias(this.searchTerm, page, this.limit)
+      .subscribe(
+        (response) => {
+          this.categorias = response.data;
+          this.filteredCategorias = [...this.categorias]; // Llenar la tabla con las categorías
+          this.totalItems = response.totalItems;
+          this.totalPages = response.totalPages;
+          this.currentPage = response.currentPage;
+          this.cdr.detectChanges();
+        },
+        (error) => {
+          console.error('Error al cargar las categorías:', error);
+        }
+      );
+  }
+
   openModal(mode: 'add' | 'edit', categoria?: Categoria) {
     this.isEditMode = mode === 'edit';
     this.mensajeError = null;
 
     if (this.isEditMode && categoria) {
-      this.currentCategoriaId = categoria.id;
+      this.currentCategoriaId = categoria.id ?? null;
       this.categoriaForm.patchValue({
         nombre: categoria.nombre,
       });
@@ -116,33 +119,29 @@ export default class CategoriaComponent implements OnInit {
       return;
     }
 
-    // Generar nuevo ID único basado en el máximo ID existente
-    const maxId = this.categorias.reduce(
-      (max, cat) => (cat.id > max ? cat.id : max),
-      0
-    );
     const nuevaCategoria = {
-      id: this.currentCategoriaId ? this.currentCategoriaId : maxId + 1,
-      nombre: this.categoriaForm.value.nombre,
-      productos: [],
+      nombre: this.categoriaForm.value.nombre, // Solo enviar el nombre
     };
 
     if (this.isEditMode) {
-      const index = this.categorias.findIndex(
-        (cat) => cat.id === this.currentCategoriaId
-      );
-      if (index !== -1) {
-        this.categorias[index] = nuevaCategoria;
-        this.mensajeExito = 'Categoría editada con éxito';
-      }
+      // Editar categoría existente
+      this.categoriaService
+        .updateCategoria(this.currentCategoriaId!, nuevaCategoria)
+        .subscribe(() => {
+          this.mensajeExito = 'Categoría editada con éxito';
+          this.cargarCategorias(this.currentPage);
+          this.modalInstance.hide();
+          this.toastInstance.show();
+        });
     } else {
-      this.categorias.push(nuevaCategoria);
-      this.mensajeExito = 'Categoría agregada con éxito';
+      // Crear nueva categoría
+      this.categoriaService.createCategoria(nuevaCategoria).subscribe(() => {
+        this.mensajeExito = 'Categoría agregada con éxito';
+        this.cargarCategorias(this.currentPage);
+        this.modalInstance.hide();
+        this.toastInstance.show();
+      });
     }
-
-    this.modalInstance.hide();
-    this.toastInstance.show();
-    this.onSearch(); // Actualiza la búsqueda
   }
 
   confirmarEliminacion(categoria: Categoria) {
@@ -153,21 +152,31 @@ export default class CategoriaComponent implements OnInit {
   eliminarCategoria(categoria: Categoria | null) {
     if (!categoria) return;
 
-    if (categoria.productos.length > 0) {
+    if (categoria.productos && categoria.productos.length > 0) {
       this.mensajeError = `No se puede eliminar la categoría "${categoria.nombre}" porque tiene productos asociados.`;
       this.confirmModalInstance.hide();
       setTimeout(() => {
         this.cerrarMensajeError();
       }, 3000);
     } else {
-      this.categorias = this.categorias.filter(
-        (cat) => cat.id !== categoria.id
-      );
-      this.mensajeError = null;
-      this.mensajeExito = 'Categoría eliminada con éxito';
-      this.toastInstance.show();
-      this.confirmModalInstance.hide();
-      this.onSearch();
+      if (categoria.id !== undefined) {
+        this.categoriaService.deleteCategoria(categoria.id).subscribe(() => {
+          this.mensajeExito = 'Categoría eliminada con éxito';
+
+          // Calcular cuántos elementos hay en la página actual después de eliminar
+          const itemsEnPagina = this.filteredCategorias.length - 1; // Restar uno porque acabas de eliminar una categoría
+          const maxPages = Math.ceil(this.totalItems / this.limit);
+
+          // Si no quedan elementos en la página actual y no estamos en la primera página, retrocedemos una página
+          if (itemsEnPagina === 0 && this.currentPage > 1) {
+            this.currentPage--;
+          }
+
+          this.cargarCategorias(this.currentPage); // Recargar las categorías para la nueva página
+          this.confirmModalInstance.hide();
+          this.toastInstance.show();
+        });
+      }
     }
   }
 
@@ -176,33 +185,15 @@ export default class CategoriaComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  // Corrección en la búsqueda
   onSearch() {
-    const term = this.searchTerm.trim().toLowerCase();
-    if (term !== '') {
-      this.filteredCategorias = this.categorias.filter((categoria) =>
-        categoria.nombre.toLowerCase().includes(term)
-      );
-    } else {
-      this.filteredCategorias = [...this.categorias]; // Mostrar todas las categorías si no hay término de búsqueda
-    }
-
-    // Actualización de la paginación después de la búsqueda
-    this.totalItems = this.filteredCategorias.length;
-    this.totalPages = Math.ceil(this.totalItems / this.limit);
-    this.cargarCategorias(1); // Reiniciar a la primera página después de la búsqueda
-    this.cdr.detectChanges();
-  }
-
-  cargarCategorias(page: number) {
-    const start = (page - 1) * this.limit;
-    const end = start + this.limit;
-    this.filteredCategorias = this.filteredCategorias.slice(start, end);
-    this.currentPage = page;
-    this.cdr.detectChanges();
+    this.cargarCategorias(1); // Reiniciar la paginación al buscar
   }
 
   onPageChange(page: number) {
+    if (page < 1 || page > this.totalPages) {
+      return; // No hacemos nada si intentamos acceder a una página inválida
+    }
+    this.currentPage = page;
     this.cargarCategorias(page);
   }
 }

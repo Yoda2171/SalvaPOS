@@ -1,3 +1,11 @@
+export interface Pagination {
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  limit: number;
+  data: Producto[];
+}
+
 export interface Producto {
   id: number;
   codigoBarras: string;
@@ -5,8 +13,10 @@ export interface Producto {
   precioCosto: number;
   precioVenta: number;
   cantidad: number;
-  categoria: {
-    id: number;
-    nombre: string;
-  };
+  categoria: Categoria;
+}
+
+export interface Categoria {
+  id: number;
+  nombre: string;
 }
