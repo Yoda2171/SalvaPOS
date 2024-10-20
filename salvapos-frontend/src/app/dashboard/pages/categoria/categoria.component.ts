@@ -43,6 +43,12 @@ export default class CategoriaComponent implements OnInit {
   mensajeExito: string | null = null; // Para mostrar mensaje de éxito
   searchTerm: string = ''; // Término de búsqueda
 
+  // Paginación
+  currentPage: number = 1; // Página actual
+  limit: number = 5; // Categorías por página
+  totalItems: number = 0; // Total de categorías
+  totalPages: number = 0; // Total de páginas
+
   private modalInstance: any; // Modal de Bootstrap
   private toastInstance: any; // Toast de Bootstrap
   private confirmModalInstance: any; // Modal de confirmación de eliminación
@@ -62,9 +68,22 @@ export default class CategoriaComponent implements OnInit {
     this.categorias = [
       { id: 1, nombre: 'Kids', productos: [] },
       { id: 2, nombre: 'Home', productos: [{ id: 1 }] },
+      { id: 3, nombre: 'Electronics', productos: [] },
+      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
+      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
+      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
+      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
+      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
+      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
+
+      { id: 5, nombre: 'Health', productos: [] },
+      // Añadir más categorías simuladas si lo deseas...
     ];
 
-    this.filteredCategorias = this.categorias;
+    // Cargar categorías iniciales con paginación
+    this.totalItems = this.categorias.length;
+    this.totalPages = Math.ceil(this.totalItems / this.limit);
+    this.cargarCategorias(this.currentPage);
 
     // Inicializar modal y toast de Bootstrap
     this.modalInstance = new window.bootstrap.Modal(
@@ -175,13 +194,31 @@ export default class CategoriaComponent implements OnInit {
 
   // Método para filtrar las categorías
   onSearch() {
-    if (this.searchTerm.trim() !== '') {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (term !== '') {
       this.filteredCategorias = this.categorias.filter((categoria) =>
-        categoria.nombre.toLowerCase().includes(this.searchTerm.toLowerCase())
+        categoria.nombre.toLowerCase().includes(term)
       );
     } else {
       this.filteredCategorias = this.categorias;
     }
+    this.totalItems = this.filteredCategorias.length;
+    this.totalPages = Math.ceil(this.totalItems / this.limit);
+    this.cargarCategorias(1); // Reiniciar a la primera página después de la búsqueda
     this.cdr.detectChanges(); // Forzar la actualización de la lista filtrada
+  }
+
+  // Método para cargar las categorías en función de la página actual
+  cargarCategorias(page: number) {
+    const start = (page - 1) * this.limit;
+    const end = start + this.limit;
+    this.filteredCategorias = this.categorias.slice(start, end);
+    this.currentPage = page;
+    this.cdr.detectChanges(); // Forzar la actualización de la lista
+  }
+
+  // Cambiar página
+  onPageChange(page: number) {
+    this.cargarCategorias(page);
   }
 }
