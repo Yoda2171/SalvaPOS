@@ -6,8 +6,7 @@ import {
   ReactiveFormsModule,
   FormsModule,
 } from '@angular/forms';
-import { RouterModule } from '@angular/router'; // Import RouterModule
-
+import { RouterModule } from '@angular/router';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -56,36 +55,34 @@ export default class CategoriaComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly cdr: ChangeDetectorRef
-  ) {} // Añadir ChangeDetectorRef al constructor
+  ) {}
 
   ngOnInit(): void {
-    // Inicializar el formulario
     this.categoriaForm = this.fb.group({
       nombre: ['', Validators.required],
     });
 
-    // Cargar categorías (simulación)
+    // Simulación de categorías
     this.categorias = [
       { id: 1, nombre: 'Kids', productos: [] },
       { id: 2, nombre: 'Home', productos: [{ id: 1 }] },
       { id: 3, nombre: 'Electronics', productos: [] },
       { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
+      { id: 3, nombre: 'Electronics', productos: [] },
       { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
+      { id: 3, nombre: 'Electronics', productos: [] },
       { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
-      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
-      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
-      { id: 4, nombre: 'Fashion', productos: [{ id: 2 }, { id: 3 }] },
-
       { id: 5, nombre: 'Health', productos: [] },
-      // Añadir más categorías simuladas si lo deseas...
     ];
 
-    // Cargar categorías iniciales con paginación
     this.totalItems = this.categorias.length;
     this.totalPages = Math.ceil(this.totalItems / this.limit);
+
+    // Inicializa `filteredCategorias` con todas las categorías al cargar la página
+    this.filteredCategorias = [...this.categorias];
     this.cargarCategorias(this.currentPage);
 
-    // Inicializar modal y toast de Bootstrap
+    // Inicializar el modal y toast de Bootstrap
     this.modalInstance = new window.bootstrap.Modal(
       document.getElementById('categoriaModal')
     );
@@ -102,18 +99,15 @@ export default class CategoriaComponent implements OnInit {
     this.mensajeError = null;
 
     if (this.isEditMode && categoria) {
-      // Modo edición: cargar datos de la categoría
       this.currentCategoriaId = categoria.id;
       this.categoriaForm.patchValue({
         nombre: categoria.nombre,
       });
     } else {
-      // Modo agregar: reiniciar formulario
       this.categoriaForm.reset();
       this.currentCategoriaId = null;
     }
 
-    // Mostrar el modal
     this.modalInstance.show();
   }
 
@@ -122,16 +116,18 @@ export default class CategoriaComponent implements OnInit {
       return;
     }
 
+    // Generar nuevo ID único basado en el máximo ID existente
+    const maxId = this.categorias.reduce(
+      (max, cat) => (cat.id > max ? cat.id : max),
+      0
+    );
     const nuevaCategoria = {
-      id: this.currentCategoriaId
-        ? this.currentCategoriaId
-        : this.categorias.length + 1,
+      id: this.currentCategoriaId ? this.currentCategoriaId : maxId + 1,
       nombre: this.categoriaForm.value.nombre,
       productos: [],
     };
 
     if (this.isEditMode) {
-      // Editar categoría existente
       const index = this.categorias.findIndex(
         (cat) => cat.id === this.currentCategoriaId
       );
@@ -140,17 +136,13 @@ export default class CategoriaComponent implements OnInit {
         this.mensajeExito = 'Categoría editada con éxito';
       }
     } else {
-      // Agregar nueva categoría
       this.categorias.push(nuevaCategoria);
       this.mensajeExito = 'Categoría agregada con éxito';
     }
 
-    // Cerrar el modal
     this.modalInstance.hide();
-
-    // Mostrar el toast de éxito
     this.toastInstance.show();
-    this.onSearch(); // Filtrar las categorías nuevamente
+    this.onSearch(); // Actualiza la búsqueda
   }
 
   confirmarEliminacion(categoria: Categoria) {
@@ -159,23 +151,15 @@ export default class CategoriaComponent implements OnInit {
   }
 
   eliminarCategoria(categoria: Categoria | null) {
-    if (!categoria) {
-      return; // No hacer nada si la categoría es null
-    }
+    if (!categoria) return;
 
     if (categoria.productos.length > 0) {
-      // No se puede eliminar si tiene productos
       this.mensajeError = `No se puede eliminar la categoría "${categoria.nombre}" porque tiene productos asociados.`;
-
-      // Cerrar el modal de confirmación
       this.confirmModalInstance.hide();
-
-      // Mostrar el mensaje automáticamente y ocultarlo después de 3 segundos
       setTimeout(() => {
         this.cerrarMensajeError();
-      }, 3000); // 3000 milisegundos = 3 segundos
+      }, 3000);
     } else {
-      // Eliminar categoría
       this.categorias = this.categorias.filter(
         (cat) => cat.id !== categoria.id
       );
@@ -183,16 +167,16 @@ export default class CategoriaComponent implements OnInit {
       this.mensajeExito = 'Categoría eliminada con éxito';
       this.toastInstance.show();
       this.confirmModalInstance.hide();
-      this.onSearch(); // Actualizar la lista filtrada
+      this.onSearch();
     }
   }
 
   cerrarMensajeError() {
-    this.mensajeError = null; // Cerrar el mensaje de error
-    this.cdr.detectChanges(); // Forzar la detección de cambios
+    this.mensajeError = null;
+    this.cdr.detectChanges();
   }
 
-  // Método para filtrar las categorías
+  // Corrección en la búsqueda
   onSearch() {
     const term = this.searchTerm.trim().toLowerCase();
     if (term !== '') {
@@ -200,24 +184,24 @@ export default class CategoriaComponent implements OnInit {
         categoria.nombre.toLowerCase().includes(term)
       );
     } else {
-      this.filteredCategorias = this.categorias;
+      this.filteredCategorias = [...this.categorias]; // Mostrar todas las categorías si no hay término de búsqueda
     }
+
+    // Actualización de la paginación después de la búsqueda
     this.totalItems = this.filteredCategorias.length;
     this.totalPages = Math.ceil(this.totalItems / this.limit);
     this.cargarCategorias(1); // Reiniciar a la primera página después de la búsqueda
-    this.cdr.detectChanges(); // Forzar la actualización de la lista filtrada
+    this.cdr.detectChanges();
   }
 
-  // Método para cargar las categorías en función de la página actual
   cargarCategorias(page: number) {
     const start = (page - 1) * this.limit;
     const end = start + this.limit;
-    this.filteredCategorias = this.categorias.slice(start, end);
+    this.filteredCategorias = this.filteredCategorias.slice(start, end);
     this.currentPage = page;
-    this.cdr.detectChanges(); // Forzar la actualización de la lista
+    this.cdr.detectChanges();
   }
 
-  // Cambiar página
   onPageChange(page: number) {
     this.cargarCategorias(page);
   }
