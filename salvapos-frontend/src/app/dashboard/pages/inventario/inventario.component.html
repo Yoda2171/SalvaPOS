@@ -1,15 +1,89 @@
-<h1 class="mb-3">Inventario</h1>
-<!-- Botón para agregar un nuevo producto -->
-<div class="mb-3">
-  <a class="text-decoration-none" [routerLink]="['/dashboard/addproduct']">
-    <button class="btn btn-primary">Agregar Producto</button>
-  </a>
-</div>
+<div class="container mt-4">
+  <!-- Barra de navegación -->
+  <app-navbar-inventario></app-navbar-inventario>
 
-<div class="mb-3">
-  <a class="text-decoration-none" [routerLink]="['/dashboard/editproduct', 1]">
-    <button class="btn btn-primary">Editar Producto</button>
-  </a>
-</div>
+  <!-- Botón para agregar un nuevo producto -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Lista de Productos</h2>
+    <!-- Botón para agregar producto -->
+    <a [routerLink]="['/dashboard/addproduct']">
+      <button class="btn btn-primary">
+        <i class="fas fa-plus"></i> Agregar Producto
+      </button>
+    </a>
+  </div>
 
-<!-- Aquí se cargarán los componentes de las rutas hijas (addproduct y editproduct) -->
+  <!-- Barra de búsqueda -->
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar productos por nombre o código de barras..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()"
+    />
+  </div>
+
+  <!-- Tabla de productos -->
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead class="table-primary">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Código de Barras</th>
+          <th scope="col">Nombre</th>
+          <th scope="col">Precio Costo</th>
+          <th scope="col">Precio Venta</th>
+          <th scope="col">Cantidad</th>
+          <th scope="col">Categoría</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let producto of filteredProductos">
+          <th>{{ producto.id }}</th>
+          <td>{{ producto.codigoBarras }}</td>
+          <td>{{ producto.nombre }}</td>
+          <td>{{ producto.precioCosto | currency }}</td>
+          <td>{{ producto.precioVenta | currency }}</td>
+          <td>{{ producto.cantidad }}</td>
+          <td>{{ producto.categoria.nombre }}</td>
+          <td>
+            <a
+              [routerLink]="['/dashboard/editproduct', producto.id]"
+              class="btn btn-primary btn-sm"
+              >Editar</a
+            >
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginación -->
+  <nav *ngIf="totalPages > 1" aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <button
+          class="page-link"
+          (click)="previousPage()"
+          aria-label="Previous"
+        >
+          <span aria-hidden="true">&laquo;</span>
+        </button>
+      </li>
+      <li
+        *ngFor="let page of pages"
+        class="page-item"
+        [class.active]="page === currentPage"
+      >
+        <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <button class="page-link" (click)="nextPage()" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</div>
