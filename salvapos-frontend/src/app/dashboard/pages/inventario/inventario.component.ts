@@ -7,7 +7,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './inventario.component.html',
-  styleUrl: './inventario.component.css',
+  styleUrls: ['./inventario.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class InventarioComponent {}

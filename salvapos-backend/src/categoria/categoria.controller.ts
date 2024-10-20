@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CategoriaService } from './categoria.service';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { CategoriaFilterParamDto } from './dto/categoria-filter-param.dto';
 
 @ApiTags('Categoria')
 @Controller('categoria')
@@ -22,7 +24,7 @@ export class CategoriaController {
     return this.categoriaService.createCategory(createCategoriaDto);
   }
 
-  @Get()
+  @Get('all')
   findAll() {
     return this.categoriaService.findAll();
   }
@@ -43,5 +45,10 @@ export class CategoriaController {
   @Delete(':id')
   removeCategory(@Param('id') id: string) {
     return this.categoriaService.removeCategory(+id);
+  }
+
+  @Get()
+  search(@Query() filter: CategoriaFilterParamDto) {
+    return this.categoriaService.findByName(filter.nombre);
   }
 }

@@ -2,50 +2,83 @@
   display: block;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-#Sidebar {
+.sidebar {
+  width: 250px;
+  height: 100vh;
   background-color: #264ECA;
-  width: 250px; /* Ancho fijo para el sidebar */
-  height: 100vh; /* Altura completa de la ventana */
-  display: flex;
-  flex-direction: column;
-  position: fixed; /* Fija el sidebar en su posición */
+  padding: 15px;
+  position: fixed;
   top: 0;
   left: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.3s ease, left 0.3s ease;
+  z-index: 1030;
+  font-weight: 300;
+  animation: sidebar-slide-right 0.8s;
 }
 
-.SidebarOptions a {
-  display: block;
-  text-decoration: none;
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar .hamburger-btn {
+  background: none;
+  border: none;
   color: white;
-  padding: 15px;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-.SidebarOptions a:hover {
-  background-color: #1A3B8E; /* Cambia el color cuando se pasa el ratón por encima */
+.sidebar-options .nav-link {
+  color: white;
+  padding: 10px;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  font-size: 0.9rem;
 }
 
-.SidebarOptions {
-  margin-top: 10px;
+.sidebar-options .nav-link:hover {
+  background-color: #1A3B8E;
+  border-radius: 5px;
 }
 
-.container {
-  display: flex;
-  height: 100vh; /* Asegura que ocupe toda la altura */
-  margin-left: 250px; /* Añade un margen para que no se superponga el contenido con el sidebar */
+
+/* Logo del sidebar */
+.side-bar-logo {
+  height: auto; /* Asegura que el contenedor se ajuste automáticamente */
+  display: flex; /* Centra la imagen verticalmente */
+  justify-content: center; /* Centra la imagen horizontalmente */
+  align-items: center; /* Centra la imagen verticalmente */
+  padding: 8px;
 }
 
-.content {
-  flex: 1;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.side-bar-logo a img.sidebar-logo-img {
+  width: 100%; /* Hace que la imagen ocupe todo el ancho disponible */
+  height: auto; /* Asegura que la imagen mantenga sus proporciones */
+  max-height: 128px; /* Cambia este valor según el tamaño que desees */
+  object-fit: contain; /* Ajusta la imagen dentro del contenedor */
 }
+.sidebar.collapsed + .main-content {
+  margin-left: 80px;
+}
+
+@keyframes sidebar-slide-right {
+  0% {
+    left: -10%;
+  }
+  100% {
+    left: 0;
+  }
+}
+
+@media (max-width: 991px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+
+
+

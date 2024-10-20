@@ -1,19 +1,45 @@
-<div id="Sidebar">
-  <div class="SidebarOptions">
-    @for (item of menuItems; track $index) {
-    <a [routerLink]="item.path">{{ item.title }}</a>
+<nav class="sidebar" [class.collapsed]="!isNavbarOpen">
+  <button
+    class="navbar-toggler hamburger-btn"
+    type="button"
+    (click)="toggleNavbar()"
+    aria-controls="sidebarCollapse"
+    [attr.aria-expanded]="isNavbarOpen"
+    aria-label="Toggle navigation"
+  >
+    <i class="fa-solid fa-bars"></i>
+  </button>
 
-    }
+  <div
+    id="sidebarCollapse"
+    [ngClass]="{ show: isNavbarOpen }"
+    class="collapse navbar-collapse"
+  >
+    <ul class="sidebar-options navbar-nav">
+      <!-- Logo del sidebar -->
+      <li class="nav-item side-bar-logo">
+        <a [routerLink]="['home']" class="nav-link">
+          <img
+            src="assets/img/logo_salvapos.png"
+            alt="Logo"
+            class="sidebar-logo-img"
+          />
+        </a>
+      </li>
 
-    <!-- <a [routerLink]="['reportes']">Reportes</a>
-
-    <a [routerLink]="['venta']">Venta</a>
-
-    <a [routerLink]="['inventario']">Inventario</a>
-    <a [routerLink]="['reportes']">Reportes</a>
- -->
-    <a [routerLink]="['/login']">Login</a>
-    <a [routerLink]="['/register']">Register</a>
-    <a href="">Logout</a>
+      <!-- Enlaces del menú -->
+      <li class="nav-item" *ngFor="let item of menuItems">
+        <a class="nav-link" [routerLink]="[item.path]">{{ item.title }}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['/login']">Login</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['/register']">Register</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="">Logout</a>
+      </li>
+    </ul>
   </div>
-</div>
+</nav>

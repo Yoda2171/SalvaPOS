@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ProductoService } from './producto.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { PaginationDto } from './dto/pagination.dto';
 
 @ApiTags('Producto')
 @Controller('producto')
@@ -22,14 +24,14 @@ export class ProductoController {
     return this.productoService.createProducto(createProductoDto);
   }
 
-  @Get()
+  @Get('all')
   findAll() {
     return this.productoService.findAllProducts();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productoService.findOneProduct(+id);
+    return this.productoService.findOneById(+id);
   }
 
   @Patch(':id')
@@ -43,5 +45,10 @@ export class ProductoController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productoService.deleteProducto(+id);
+  }
+
+  @Get()
+  async buscarProducto(@Query() pagination: PaginationDto) {
+    return this.productoService.buscarProductos(pagination);
   }
 }
