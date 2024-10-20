@@ -18,6 +18,14 @@ export const routes: Routes = [
           import('./dashboard/pages/inventario/inventario.component'),
       },
       {
+        path: 'categoria',
+        title: 'Categoria',
+        loadComponent: () =>
+          import(
+            './dashboard/pages/categoria/categoria.component'
+          ),
+      },
+      {
         path: 'addproduct',
         title: 'Addproduct',
         loadComponent: () =>
@@ -33,6 +41,9 @@ export const routes: Routes = [
             './dashboard/pages/inventario/pages/editProducto/editProducto.component'
           ),
       },
+      
+      
+
       {
         path: 'venta',
         title: 'Venta',

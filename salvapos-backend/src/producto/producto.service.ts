@@ -119,7 +119,7 @@ export class ProductoService {
       totalPages, // Total de páginas
       currentPage: page, // Página actual
       limit, // Items por página
-      data: { productos }, // Productos de la página actual
+      data: productos, // Productos de la página actual
     };
   }
 }
