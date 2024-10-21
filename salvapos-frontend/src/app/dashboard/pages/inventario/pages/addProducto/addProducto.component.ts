@@ -12,6 +12,7 @@ import { CategoriaService } from '../../../../../services/categoria.service';
 import { Router, RouterModule } from '@angular/router';
 import { Categoria } from '../../../../Interface/categoria.inteface';
 import { ProductoService } from '../../../../../services/producto.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-add-producto',
@@ -24,46 +25,42 @@ import { ProductoService } from '../../../../../services/producto.service';
     FormsModule,
   ],
   templateUrl: './addProducto.component.html',
-  styleUrl: './addProducto.component.css',
+  styleUrls: ['./addProducto.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class AddProductoComponent implements OnInit {
   productoForm!: FormGroup;
-  categorias: Categoria[] = []; // Lista de categorías que se llenará desde un servicio
+  categorias$: Observable<Categoria[]> | null = null;
+  loading$: Observable<boolean> | null = null;
 
   constructor(
-    private fb: FormBuilder,
-    private categoriaService: CategoriaService,
-    private productoService: ProductoService,
-    private router: Router
+    private readonly fb: FormBuilder,
+    private readonly categoriaService: CategoriaService,
+    private readonly productoService: ProductoService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
-    // Cargar las categorías antes de inicializar el formulario
-    this.cargarCategorias();
-  }
+    // Initialize the form with default values
+    this.productoForm = this.fb.group({
+      nombre: ['', Validators.required],
+      codigoBarras: ['', Validators.required],
+      categoriaId: [0, [Validators.required, Validators.min(1)]], // Initialize with 0 and treat as a number
+      cantidad: [0, [Validators.required, Validators.min(1)]],
+      precioCosto: [0, [Validators.required, Validators.min(0.01)]],
+      precioVenta: [0, [Validators.required, Validators.min(0.01)]],
+    });
 
-  cargarCategorias(): void {
-    this.categoriaService.getCategoriasAll().subscribe((data) => {
-      this.categorias = data; // Aquí llenamos el dropdown de categorías
+    // Load categories
+    this.loading$ = this.categoriaService.loading$;
+    this.categorias$ = this.categoriaService.getCategoriasAll();
 
-      // Inicializar el formulario una vez que las categorías han sido cargadas
-      this.productoForm = this.fb.group({
-        nombre: ['', Validators.required],
-        codigoBarras: ['', Validators.required],
-        categoriaId: [0, [Validators.required, Validators.min(1)]], // Aquí inicializamos con 0 y lo tratamos como un número
-        cantidad: [0, [Validators.required, Validators.min(1)]],
-        precioCosto: [0, [Validators.required, Validators.min(0.01)]],
-        precioVenta: [0, [Validators.required, Validators.min(0.01)]],
-      });
-
-      // Escuchar cambios y convertir el valor de categoriaId a número
-      this.productoForm.get('categoriaId')?.valueChanges.subscribe((value) => {
-        this.productoForm.patchValue(
-          { categoriaId: Number(value) },
-          { emitEvent: false }
-        );
-      });
+    // Listen for changes and convert the value of categoriaId to a number
+    this.productoForm.get('categoriaId')?.valueChanges.subscribe((value) => {
+      this.productoForm.patchValue(
+        { categoriaId: Number(value) },
+        { emitEvent: false }
+      );
     });
   }
 
@@ -74,8 +71,8 @@ export default class AddProductoComponent implements OnInit {
 
     this.productoService.createProducto(this.productoForm.value).subscribe({
       next: () => {
-        // Redirigir al inventario y pasar un estado con el mensaje de éxito
-        console.log('Redirigiendo al inventario con mensaje de éxito'); // Depuración
+        // Redirect to inventory and pass a state with the success message
+        console.log('Redirecting to inventory with success message'); // Debugging
         this.router.navigate(['/dashboard/inventario'], {
           state: { mensajeExito: 'Producto agregado correctamente' },
         });

@@ -63,20 +63,23 @@ export default class InventarioComponent implements OnInit {
       cantidadAjuste: [0, [Validators.required]],
     });
 
-    // Inicializar el modal y toast de Bootstrap
-    this.modalInstance = new window.bootstrap.Modal(
-      document.getElementById('stockModal')
-    );
-    this.toastInstance = new window.bootstrap.Toast(
-      document.getElementById('successToast')
-    );
+    // Check if window is defined before using it
+    if (typeof window !== 'undefined') {
+      // Inicializar el modal y toast de Bootstrap
+      this.modalInstance = new window.bootstrap.Modal(
+        document.getElementById('stockModal')
+      );
+      this.toastInstance = new window.bootstrap.Toast(
+        document.getElementById('successToast')
+      );
 
-    // Usar history.state para obtener el estado de la navegación
-    const navigationState = history.state;
-    console.log('Estado de la navegación:', navigationState); // Depuración
-    if (navigationState?.mensajeExito) {
-      this.mensajeExito = navigationState.mensajeExito;
-      this.showToast(); // Mostrar el toast si hay un mensaje de éxito
+      // Usar history.state para obtener el estado de la navegación
+      const navigationState = window.history.state;
+      console.log('Estado de la navegación:', navigationState); // Depuración
+      if (navigationState?.mensajeExito) {
+        this.mensajeExito = navigationState.mensajeExito;
+        this.showToast(); // Mostrar el toast si hay un mensaje de éxito
+      }
     }
   }
 

@@ -13,6 +13,7 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Categoria } from '../../../../Interface/categoria.inteface';
 import { ProductoService } from '../../../../../services/producto.service';
 import { Producto } from '../../../../Interface/producto.interface';
+import { forkJoin, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-edit-producto',
@@ -30,7 +31,8 @@ import { Producto } from '../../../../Interface/producto.interface';
 })
 export default class EditProductoComponent implements OnInit {
   productoForm!: FormGroup;
-  categorias: Categoria[] = []; // Lista de categorías
+  categorias$: Observable<Categoria[]> | null = null;
+  loading$: Observable<boolean> | null = null;
   productoId!: number; // ID del producto a editar
 
   constructor(
@@ -42,35 +44,29 @@ export default class EditProductoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cargarCategorias();
-    // Inicializar el formulario vacío
+    // Initialize the form with default values
+    this.productoForm = this.fb.group({
+      nombre: ['', Validators.required],
+      codigoBarras: ['', Validators.required],
+      categoriaId: [0, [Validators.required, Validators.min(1)]], // Initialize with 0 and treat as a number
+      cantidad: [0, [Validators.required, Validators.min(1)]],
+      precioCosto: [0, [Validators.required, Validators.min(0.01)]],
+      precioVenta: [0, [Validators.required, Validators.min(0.01)]],
+    });
 
     // Obtener el ID del producto de la ruta
     this.productoId = +this.route.snapshot.paramMap.get('id')!;
 
-    // Cargar las categorías y el producto
+    // Load categories and product data
+    this.loading$ = this.categoriaService.loading$;
+    this.categorias$ = this.categoriaService.getCategoriasAll();
 
     this.cargarProducto();
   }
 
-  cargarCategorias(): void {
-    this.categoriaService.getCategoriasAll().subscribe((data) => {
-      this.categorias = data;
-
-      this.productoForm = this.fb.group({
-        nombre: ['', Validators.required],
-        codigoBarras: ['', Validators.required],
-        categoriaId: [0, [Validators.required, Validators.min(1)]], // Aquí inicializamos con 0 y lo tratamos como un número
-        cantidad: [0, [Validators.required, Validators.min(1)]],
-        precioCosto: [0, [Validators.required, Validators.min(0.01)]],
-        precioVenta: [0, [Validators.required, Validators.min(0.01)]],
-      });
-    });
-  }
-
   cargarProducto(): void {
     this.productoService.getProductoById(this.productoId).subscribe({
-      next: (producto: Producto) => {
+      next: (producto) => {
         if (producto) {
           // Actualizar los valores del formulario cuando se carguen los datos del producto
           this.productoForm.patchValue({
@@ -85,7 +81,7 @@ export default class EditProductoComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error al cargar el producto', error);
+        console.error('Error al cargar los datos del producto', error);
       },
     });
   }
