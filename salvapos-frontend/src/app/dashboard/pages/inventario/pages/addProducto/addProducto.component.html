@@ -1,95 +1,112 @@
 <div class="container-fluid vh-100">
-  <!-- Barra superior -->
-  <div
-    class="row bg-primary text-white py-2 d-flex justify-content-between align-items-center"
-  >
-    <div class="col-auto">
-      <button class="btn btn-primary" id="menuButton">
-        <i class="bi bi-list" style="font-size: 24px"></i>
-        <!-- Icono de menú -->
-      </button>
-    </div>
-    <div class="col-auto">
-      <span class="fs-5">Inventario 2</span>
-    </div>
-    <div class="col-auto">
-      <button class="btn btn-primary">
-        <i class="bi bi-box-arrow-right" style="font-size: 24px"></i>
-        <!-- Icono de logout -->
-      </button>
-    </div>
-  </div>
-
-  <!-- Formulario de agregar medicamento -->
+  <!-- Formulario de agregar producto -->
   <div class="container mt-5">
     <div class="card shadow-sm p-4">
       <h3 class="mb-3">Añadir Nuevo Producto</h3>
       <p class="text-muted">
-        *All fields are mandatory, except mentioned as (optional).
+        *Todos los campos son obligatorios, excepto los mencionados como
+        (opcional).
       </p>
 
-      <form>
-        <!-- Fila para nombre e ID del medicamento -->
+      <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+        <!-- Indicador de carga -->
+        <div *ngIf="loading$ | async" class="text-center">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Fila para nombre y código de barra -->
         <div class="row mb-3">
           <div class="col-md-6">
-            <label for="medicineName" class="form-label">Nombre</label>
+            <label for="nombre" class="form-label">Nombre</label>
             <input
               type="text"
-              id="medicineName"
+              id="nombre"
+              formControlName="nombre"
               class="form-control"
-              placeholder="Enter Medicine Name"
+              placeholder="Ingresa el nombre del producto"
               required
             />
           </div>
           <div class="col-md-6">
-            <label for="medicineId" class="form-label">Código de barra</label>
+            <label for="codigoBarras" class="form-label">Código de barra</label>
             <input
               type="text"
-              id="medicineId"
+              id="codigoBarras"
+              formControlName="codigoBarras"
               class="form-control"
-              placeholder="Enter Medicine ID"
+              placeholder="Ingresa el código de barra"
               required
             />
           </div>
         </div>
 
-        <!-- Fila para grupo del medicamento y cantidad -->
+        <!-- Fila para categorias y cantidad -->
         <div class="row mb-3">
           <div class="col-md-6">
-            <label for="medicineGroup" class="form-label">Categorias</label>
-            <select id="medicineGroup" class="form-select" required>
-              <option value="">- Select Group -</option>
-              <option value="group1">Group 1</option>
-              <option value="group2">Group 2</option>
+            <label for="categoriaId" class="form-label">Categorías</label>
+            <select
+              id="categoriaId"
+              formControlName="categoriaId"
+              class="form-select"
+              required
+            >
+              <option value="0">- Selecciona una categoría -</option>
+              <option
+                *ngFor="let categoria of categorias$ | async"
+                [value]="categoria.id"
+              >
+                {{ categoria.nombre }}
+              </option>
             </select>
           </div>
           <div class="col-md-6">
-            <label for="quantity" class="form-label">Cantidad</label>
+            <label for="cantidad" class="form-label">Cantidad</label>
             <input
               type="number"
-              id="quantity"
+              id="cantidad"
+              formControlName="cantidad"
               class="form-control"
-              placeholder="Enter Quantity"
+              placeholder="Ingresa la cantidad"
               required
             />
           </div>
         </div>
 
-        <!-- Fila para cómo usar el medicamento -->
-        <div class="mb-3">
-          <label for="howToUse" class="form-label">Descripcion</label>
-          <textarea
-            id="howToUse"
-            class="form-control"
-            rows="3"
-            placeholder="Enter instructions"
-            required
-          ></textarea>
+        <!-- Fila para precio costo y precio venta -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="precioCosto" class="form-label">Precio Costo</label>
+            <input
+              type="number"
+              id="precioCosto"
+              formControlName="precioCosto"
+              class="form-control"
+              placeholder="Ingresa el precio costo"
+              required
+            />
+          </div>
+          <div class="col-md-6">
+            <label for="precioVenta" class="form-label">Precio Venta</label>
+            <input
+              type="number"
+              id="precioVenta"
+              formControlName="precioVenta"
+              class="form-control"
+              placeholder="Ingresa el precio venta"
+              required
+            />
+          </div>
         </div>
 
         <!-- Botón para guardar detalles -->
         <div class="d-grid">
-          <button type="submit" class="btn btn-primary">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="productoForm.invalid"
+          >
             Guardar Producto
           </button>
         </div>

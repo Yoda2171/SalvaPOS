@@ -1,0 +1,234 @@
+<div class="container mt-4">
+  <!-- Barra de navegación -->
+  <app-navbar-inventario></app-navbar-inventario>
+
+  <!-- Mensaje de advertencia onTop si se intenta eliminar una categoría con productos -->
+  <div
+    *ngIf="mensajeError"
+    class="alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x w-30"
+    role="alert"
+    style="z-index: 1060"
+  >
+    {{ mensajeError }}
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="cerrarMensajeError()"
+    ></button>
+  </div>
+
+  <!-- Mensaje de éxito -->
+  <div
+    class="toast position-fixed top-0 end-0 m-3"
+    id="successToast"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    data-bs-delay="1500"
+  >
+    <div class="toast-header bg-secondary text-light">
+      <strong class="me-auto">Notificación</strong>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="toast-body">
+      {{ mensajeExito }}
+    </div>
+  </div>
+
+  <!-- Título y botón de agregar categoría -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Lista de Categorías</h2>
+    <button class="btn btn-primary" (click)="openModal('add')">
+      <i class="fas fa-plus"></i> Agregar Categoría
+    </button>
+  </div>
+
+  <!-- Barra de búsqueda -->
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar categoría..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()"
+    />
+  </div>
+
+  <!-- Tabla de categorías -->
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead class="table-primary">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Categoría</th>
+          <th scope="col">Número de productos</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let categoria of filteredCategorias; let i = index">
+          <th scope="row">{{ (currentPage - 1) * limit + i + 1 }}</th>
+          <td>{{ categoria.nombre }}</td>
+          <td>{{ categoria.productos ? categoria.productos.length : 0 }}</td>
+
+          <td>
+            <!-- Icono de editar categoría -->
+            <i
+              class="fas fa-edit text-warning mx-2"
+              (click)="openModal('edit', categoria)"
+              title="Editar"
+              style="cursor: pointer"
+            ></i>
+
+            <!-- Icono de eliminar categoría -->
+            <i
+              class="fas fa-trash-alt text-danger mx-2"
+              (click)="confirmarEliminacion(categoria)"
+              title="Eliminar"
+              style="cursor: pointer"
+            ></i>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Si no hay categorías, mostrar mensaje -->
+  <div *ngIf="filteredCategorias.length === 0" class="alert alert-info">
+    No hay categorías disponibles.
+  </div>
+
+  <!-- Paginación -->
+  <nav *ngIf="totalPages > 1">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a
+          class="page-link"
+          (click)="onPageChange(currentPage - 1)"
+          aria-label="Previous"
+          >&laquo;</a
+        >
+      </li>
+      <li
+        class="page-item"
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        [class.active]="currentPage === i + 1"
+      >
+        <a class="page-link" (click)="onPageChange(i + 1)">{{ i + 1 }}</a>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a
+          class="page-link"
+          (click)="onPageChange(currentPage + 1)"
+          aria-label="Next"
+          >&raquo;</a
+        >
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Modal para agregar/editar categoría -->
+  <div
+    class="modal fade"
+    id="categoriaModal"
+    tabindex="-1"
+    aria-labelledby="categoriaModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="categoriaModalLabel">
+            {{ isEditMode ? "Editar Categoría" : "Agregar Categoría" }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <!-- Formulario de categoría -->
+          <form [formGroup]="categoriaForm">
+            <div class="mb-3">
+              <label for="nombre" class="form-label"
+                >Nombre de la Categoría</label
+              >
+              <input
+                type="text"
+                id="nombre"
+                class="form-control"
+                formControlName="nombre"
+              />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-primary" (click)="onSubmit()">
+            {{ isEditMode ? "Guardar Cambios" : "Agregar Categoría" }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación de eliminación -->
+  <div
+    class="modal fade"
+    id="confirmarEliminacionModal"
+    tabindex="-1"
+    aria-labelledby="confirmarEliminacionLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmarEliminacionLabel">
+            Confirmar Eliminación
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          ¿Estás seguro que deseas eliminar la categoría "{{
+            categoriaSeleccionada?.nombre
+          }}"?
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="eliminarCategoria(categoriaSeleccionada)"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

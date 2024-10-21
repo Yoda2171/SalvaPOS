@@ -12,7 +12,8 @@ import { CategoriaService } from './categoria.service';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { CategoriaFilterParamDto } from './dto/categoria-filter-param.dto';
+
+import { PaginationDto } from './dto/pagination.dto';
 
 @ApiTags('Categoria')
 @Controller('categoria')
@@ -48,7 +49,7 @@ export class CategoriaController {
   }
 
   @Get()
-  search(@Query() filter: CategoriaFilterParamDto) {
-    return this.categoriaService.findByName(filter.nombre);
+  async buscarProducto(@Query() pagination: PaginationDto) {
+    return this.categoriaService.buscarCategorias(pagination);
   }
 }

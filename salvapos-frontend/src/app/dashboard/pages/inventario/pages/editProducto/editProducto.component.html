@@ -1,1 +1,118 @@
-<p>editProducto works!</p>
+<div class="container-fluid vh-100">
+  <!-- Formulario de editar producto -->
+  <div class="container mt-5">
+    <div class="card shadow-sm p-4">
+      <h3 class="mb-3">Editar Producto</h3>
+      <p class="text-muted">
+        *Todos los campos son obligatorios, excepto los mencionados como
+        (opcional).
+      </p>
+
+      <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+        <!-- Indicador de carga -->
+        <div *ngIf="loading$ | async" class="text-center">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Fila para nombre y código de barra -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input
+              type="text"
+              id="nombre"
+              formControlName="nombre"
+              class="form-control"
+              placeholder="Ingresa el nombre del producto"
+              required
+            />
+          </div>
+          <div class="col-md-6">
+            <label for="codigoBarras" class="form-label">Código de barra</label>
+            <input
+              type="text"
+              id="codigoBarras"
+              formControlName="codigoBarras"
+              class="form-control"
+              placeholder="Ingresa el código de barra"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Fila para categorias y cantidad -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="categoriaId" class="form-label">Categorías</label>
+            <select
+              id="categoriaId"
+              formControlName="categoriaId"
+              class="form-select"
+              required
+            >
+              <option value="0">- Selecciona una categoría -</option>
+              <option
+                *ngFor="let categoria of categorias$ | async"
+                [value]="categoria.id"
+              >
+                {{ categoria.nombre }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="cantidad" class="form-label">Cantidad</label>
+            <input
+              type="number"
+              id="cantidad"
+              formControlName="cantidad"
+              class="form-control"
+              placeholder="Ingresa la cantidad"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Fila para precio costo y precio venta -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="precioCosto" class="form-label">Precio Costo</label>
+            <input
+              type="number"
+              id="precioCosto"
+              formControlName="precioCosto"
+              class="form-control"
+              placeholder="Ingresa el precio costo"
+              required
+            />
+          </div>
+          <div class="col-md-6">
+            <label for="precioVenta" class="form-label">Precio Venta</label>
+            <input
+              type="number"
+              id="precioVenta"
+              formControlName="precioVenta"
+              class="form-control"
+              placeholder="Ingresa el precio venta"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Fila para descripción del producto -->
+
+        <!-- Botón para guardar cambios -->
+        <div class="d-grid">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="productoForm.invalid"
+          >
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

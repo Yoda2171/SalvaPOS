@@ -1,15 +1,180 @@
-<h1 class="mb-3">Inventario</h1>
-<!-- Botón para agregar un nuevo producto -->
-<div class="mb-3">
-  <a class="text-decoration-none" [routerLink]="['/dashboard/addproduct']">
-    <button class="btn btn-primary">Agregar Producto</button>
-  </a>
-</div>
+<div class="container mt-4">
+  <!-- Barra de navegación -->
+  <app-navbar-inventario></app-navbar-inventario>
 
-<div class="mb-3">
-  <a class="text-decoration-none" [routerLink]="['/dashboard/editproduct', 1]">
-    <button class="btn btn-primary">Editar Producto</button>
-  </a>
-</div>
+  <!-- Botón para agregar un nuevo producto -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Lista de Productos</h2>
+    <!-- Botón para agregar producto -->
+    <a [routerLink]="['/dashboard/addproduct']">
+      <button class="btn btn-primary">
+        <i class="fas fa-plus"></i> Agregar Producto
+      </button>
+    </a>
+  </div>
 
-<!-- Aquí se cargarán los componentes de las rutas hijas (addproduct y editproduct) -->
+  <!-- Barra de búsqueda -->
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar productos por nombre o código de barras..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()"
+    />
+  </div>
+
+  <!-- Tabla de productos -->
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead class="table-primary">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Código de Barras</th>
+          <th scope="col">Nombre</th>
+          <th scope="col">Precio Costo</th>
+          <th scope="col">Precio Venta</th>
+          <th scope="col">Cantidad</th>
+          <th scope="col">Categoría</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let producto of productos; let i = index">
+          <th scope="row">{{ (currentPage - 1) * limit + i + 1 }}</th>
+          <td>{{ producto.codigoBarras }}</td>
+          <td>{{ producto.nombre }}</td>
+          <td>{{ producto.precioCosto }}</td>
+          <td>{{ producto.precioVenta }}</td>
+          <td>{{ producto.cantidad }}</td>
+          <td>{{ producto.categoria.nombre }}</td>
+          <td>
+            <a
+              [routerLink]="['/dashboard/editproduct', producto.id]"
+              class="btn btn-primary btn-sm mx-2"
+              >Editar</a
+            >
+            <button
+              class="btn btn-sm btn-info"
+              (click)="openStockModal(producto)"
+            >
+              Ajustar Stock
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Si no hay categorías, mostrar mensaje -->
+  <div *ngIf="productos.length === 0" class="alert alert-info">
+    No hay productos disponibles.
+  </div>
+
+  <!-- Paginación -->
+  <nav *ngIf="totalPages > 1">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a
+          class="page-link"
+          (click)="onPageChange(currentPage - 1)"
+          aria-label="Previous"
+          >&laquo;</a
+        >
+      </li>
+      <li
+        class="page-item"
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        [class.active]="currentPage === i + 1"
+      >
+        <a class="page-link" (click)="onPageChange(i + 1)">{{ i + 1 }}</a>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a
+          class="page-link"
+          (click)="onPageChange(currentPage + 1)"
+          aria-label="Next"
+          >&raquo;</a
+        >
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Modal para ajustar stock -->
+  <div
+    class="modal fade"
+    id="stockModal"
+    tabindex="-1"
+    aria-labelledby="stockModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="stockModalLabel">Ajustar Stock</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="stockForm">
+            <div class="mb-3">
+              <label for="cantidadAjuste" class="form-label"
+                >Nueva Cantidad</label
+              >
+              <input
+                type="number"
+                id="cantidadAjuste"
+                class="form-control"
+                formControlName="cantidadAjuste"
+              />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="ajustarStock()"
+          >
+            Guardar Cambios
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de éxito -->
+  <div
+    class="toast position-fixed top-0 end-0 m-3"
+    id="successToast"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    data-bs-delay="3000"
+    data-bs-autohide="true"
+  >
+    <div class="toast-header bg-success text-light">
+      <strong class="me-auto">Notificación</strong>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="toast-body">
+      {{ mensajeExito }}
+    </div>
+  </div>
+</div>
