@@ -13,6 +13,8 @@ import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from './dto/pagination.dto';
+import { Producto } from './entities/producto.entity';
+import { AjustarInventarioDto } from './dto/ajusteInventario.dto';
 
 @ApiTags('Producto')
 @Controller('producto')
@@ -50,5 +52,16 @@ export class ProductoController {
   @Get()
   async buscarProducto(@Query() pagination: PaginationDto) {
     return this.productoService.buscarProductos(pagination);
+  }
+
+  @Patch('ajustarinventario/:id')
+  async ajustarInventario(
+    @Param('id') id: string,
+    @Body() ajustarInventarioDto: AjustarInventarioDto,
+  ): Promise<Producto> {
+    return this.productoService.ajustarInventario(
+      +id,
+      ajustarInventarioDto.cantidadAjuste,
+    );
   }
 }

@@ -46,7 +46,7 @@ export default class CategoriaComponent implements OnInit {
 
   // Paginación
   currentPage: number = 1; // Página actual
-  limit: number = 5; // Categorías por página
+  limit: number = 15; // Categorías por página
   totalItems: number = 0; // Total de categorías
   totalPages: number = 0; // Total de páginas
 

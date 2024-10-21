@@ -21,9 +21,7 @@ export const routes: Routes = [
         path: 'categoria',
         title: 'Categoria',
         loadComponent: () =>
-          import(
-            './dashboard/pages/categoria/categoria.component'
-          ),
+          import('./dashboard/pages/categoria/categoria.component'),
       },
       {
         path: 'addproduct',
@@ -41,8 +39,6 @@ export const routes: Routes = [
             './dashboard/pages/inventario/pages/editProducto/editProducto.component'
           ),
       },
-      
-      
 
       {
         path: 'venta',
