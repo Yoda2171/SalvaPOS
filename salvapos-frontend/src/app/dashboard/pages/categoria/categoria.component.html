@@ -108,8 +108,11 @@
   <nav *ngIf="totalPages > 1">
     <ul class="pagination justify-content-center">
       <li class="page-item" [class.disabled]="currentPage === 1">
-        <a class="page-link" (click)="onPageChange(currentPage - 1)"
-          >Anterior</a
+        <a
+          class="page-link"
+          (click)="onPageChange(currentPage - 1)"
+          aria-label="Previous"
+          >&laquo;</a
         >
       </li>
       <li
@@ -120,8 +123,11 @@
         <a class="page-link" (click)="onPageChange(i + 1)">{{ i + 1 }}</a>
       </li>
       <li class="page-item" [class.disabled]="currentPage === totalPages">
-        <a class="page-link" (click)="onPageChange(currentPage + 1)"
-          >Siguiente</a
+        <a
+          class="page-link"
+          (click)="onPageChange(currentPage + 1)"
+          aria-label="Next"
+          >&raquo;</a
         >
       </li>
     </ul>

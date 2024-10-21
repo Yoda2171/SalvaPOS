@@ -50,4 +50,8 @@ export class CategoriaService {
     const url = `${this.apiUrl}/${id}`;
     return this.http.delete<void>(url);
   }
+
+  getCategoriasAll(): Observable<Categoria[]> {
+    return this.http.get<Categoria[]>(this.apiUrl + '/all');
+  }
 }

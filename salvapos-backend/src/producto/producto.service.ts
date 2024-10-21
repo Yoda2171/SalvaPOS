@@ -122,4 +122,36 @@ export class ProductoService {
       data: productos, // Productos de la página actual
     };
   }
+
+  // Método para ajustar el inventario por código de barras o nombre
+  async ajustarInventario(
+    id: number, // Puede ser nombre o código de barras
+    cantidadAjuste: number, // Cantidad a ajustar (positiva o negativa)
+  ): Promise<Producto> {
+    // Buscar por código de barras o nombre
+    const producto = await this.productoRepository.findOne({
+      where: { id },
+    });
+
+    // Verificar si el producto existe
+    if (!producto) {
+      throw new NotFoundException(
+        'Producto no encontrado con el código de barras o nombre proporcionado',
+      );
+    }
+
+    // Ajustar la cantidad
+    const nuevaCantidad = producto.cantidad + cantidadAjuste;
+
+    // Validar que la nueva cantidad no sea negativa
+    if (nuevaCantidad < 0) {
+      throw new Error(
+        `La cantidad ajustada (${nuevaCantidad}) no puede ser negativa`,
+      );
+    }
+
+    // Actualizar la cantidad del producto
+    producto.cantidad = nuevaCantidad;
+    return await this.productoRepository.save(producto);
+  }
 }

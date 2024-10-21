@@ -40,20 +40,26 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let producto of filteredProductos">
-          <th>{{ producto.id }}</th>
+        <tr *ngFor="let producto of productos; let i = index">
+          <th scope="row">{{ (currentPage - 1) * limit + i + 1 }}</th>
           <td>{{ producto.codigoBarras }}</td>
           <td>{{ producto.nombre }}</td>
-          <td>{{ producto.precioCosto | currency }}</td>
-          <td>{{ producto.precioVenta | currency }}</td>
+          <td>{{ producto.precioCosto }}</td>
+          <td>{{ producto.precioVenta }}</td>
           <td>{{ producto.cantidad }}</td>
           <td>{{ producto.categoria.nombre }}</td>
           <td>
             <a
               [routerLink]="['/dashboard/editproduct', producto.id]"
-              class="btn btn-primary btn-sm"
+              class="btn btn-primary btn-sm mx-2"
               >Editar</a
             >
+            <button
+              class="btn btn-sm btn-info"
+              (click)="openStockModal(producto)"
+            >
+              Ajustar Stock
+            </button>
           </td>
         </tr>
       </tbody>
@@ -61,29 +67,109 @@
   </div>
 
   <!-- Paginación -->
-  <nav *ngIf="totalPages > 1" aria-label="Page navigation">
+  <nav *ngIf="totalPages > 1">
     <ul class="pagination justify-content-center">
       <li class="page-item" [class.disabled]="currentPage === 1">
-        <button
+        <a
           class="page-link"
-          (click)="previousPage()"
+          (click)="onPageChange(currentPage - 1)"
           aria-label="Previous"
+          >&laquo;</a
         >
-          <span aria-hidden="true">&laquo;</span>
-        </button>
       </li>
       <li
-        *ngFor="let page of pages"
         class="page-item"
-        [class.active]="page === currentPage"
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        [class.active]="currentPage === i + 1"
       >
-        <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+        <a class="page-link" (click)="onPageChange(i + 1)">{{ i + 1 }}</a>
       </li>
       <li class="page-item" [class.disabled]="currentPage === totalPages">
-        <button class="page-link" (click)="nextPage()" aria-label="Next">
-          <span aria-hidden="true">&raquo;</span>
-        </button>
+        <a
+          class="page-link"
+          (click)="onPageChange(currentPage + 1)"
+          aria-label="Next"
+          >&raquo;</a
+        >
       </li>
     </ul>
   </nav>
+
+  <!-- Modal para ajustar stock -->
+  <div
+    class="modal fade"
+    id="stockModal"
+    tabindex="-1"
+    aria-labelledby="stockModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="stockModalLabel">Ajustar Stock</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="stockForm">
+            <div class="mb-3">
+              <label for="cantidadAjuste" class="form-label"
+                >Nueva Cantidad</label
+              >
+              <input
+                type="number"
+                id="cantidadAjuste"
+                class="form-control"
+                formControlName="cantidadAjuste"
+              />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="ajustarStock()"
+          >
+            Guardar Cambios
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de éxito -->
+  <div
+    class="toast position-fixed top-0 end-0 m-3"
+    id="successToast"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    data-bs-delay="3000"
+    data-bs-autohide="true"
+  >
+    <div class="toast-header bg-success text-light">
+      <strong class="me-auto">Notificación</strong>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="toast-body">
+      {{ mensajeExito }}
+    </div>
+  </div>
 </div>

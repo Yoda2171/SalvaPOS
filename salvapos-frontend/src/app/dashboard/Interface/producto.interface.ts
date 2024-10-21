@@ -7,7 +7,7 @@ export interface Pagination {
 }
 
 export interface Producto {
-  id: number;
+  id?: number;
   codigoBarras: string;
   nombre: string;
   precioCosto: number;
