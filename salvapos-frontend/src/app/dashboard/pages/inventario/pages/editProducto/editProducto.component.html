@@ -9,6 +9,13 @@
       </p>
 
       <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+        <!-- Indicador de carga -->
+        <div *ngIf="loading$ | async" class="text-center">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
         <!-- Fila para nombre y código de barra -->
         <div class="row mb-3">
           <div class="col-md-6">
@@ -47,7 +54,7 @@
             >
               <option value="0">- Selecciona una categoría -</option>
               <option
-                *ngFor="let categoria of categorias"
+                *ngFor="let categoria of categorias$ | async"
                 [value]="categoria.id"
               >
                 {{ categoria.nombre }}
@@ -94,17 +101,6 @@
         </div>
 
         <!-- Fila para descripción del producto -->
-        <div class="mb-3">
-          <label for="descripcion" class="form-label">Descripción</label>
-          <textarea
-            id="descripcion"
-            formControlName="descripcion"
-            class="form-control"
-            rows="3"
-            placeholder="Ingresa la descripción del producto"
-            required
-          ></textarea>
-        </div>
 
         <!-- Botón para guardar cambios -->
         <div class="d-grid">

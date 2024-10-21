@@ -67,16 +67,19 @@ export default class CategoriaComponent implements OnInit {
 
     this.cargarCategorias(this.currentPage); // Cargar las categorías al iniciar
 
-    // Inicializar el modal y toast de Bootstrap
-    this.modalInstance = new window.bootstrap.Modal(
-      document.getElementById('categoriaModal')
-    );
-    this.toastInstance = new window.bootstrap.Toast(
-      document.getElementById('successToast')
-    );
-    this.confirmModalInstance = new window.bootstrap.Modal(
-      document.getElementById('confirmarEliminacionModal')
-    );
+    // Check if window is defined before using it
+    if (typeof window !== 'undefined') {
+      // Inicializar el modal y toast de Bootstrap
+      this.modalInstance = new window.bootstrap.Modal(
+        document.getElementById('categoriaModal')
+      );
+      this.toastInstance = new window.bootstrap.Toast(
+        document.getElementById('successToast')
+      );
+      this.confirmModalInstance = new window.bootstrap.Modal(
+        document.getElementById('confirmarEliminacionModal')
+      );
+    }
   }
 
   cargarCategorias(page: number): void {

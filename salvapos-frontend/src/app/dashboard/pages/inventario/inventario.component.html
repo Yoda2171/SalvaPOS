@@ -66,6 +66,11 @@
     </table>
   </div>
 
+  <!-- Si no hay categorías, mostrar mensaje -->
+  <div *ngIf="productos.length === 0" class="alert alert-info">
+    No hay productos disponibles.
+  </div>
+
   <!-- Paginación -->
   <nav *ngIf="totalPages > 1">
     <ul class="pagination justify-content-center">
