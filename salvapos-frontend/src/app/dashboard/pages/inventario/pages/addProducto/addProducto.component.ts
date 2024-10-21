@@ -49,7 +49,6 @@ export default class AddProductoComponent implements OnInit {
       cantidad: [0, [Validators.required, Validators.min(1)]],
       precioCosto: [0, [Validators.required, Validators.min(0.01)]],
       precioVenta: [0, [Validators.required, Validators.min(0.01)]],
-      descripcion: ['', Validators.required],
     });
 
     // Load categories
