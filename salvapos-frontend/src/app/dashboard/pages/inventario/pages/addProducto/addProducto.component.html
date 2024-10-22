@@ -17,7 +17,7 @@
         </div>
 
         <!-- Fila para nombre y código de barra -->
-        <div class="row mb-3">
+        <div class="row mb-3" *ngIf="!(loading$ | async)">
           <div class="col-md-6">
             <label for="nombre" class="form-label">Nombre</label>
             <input
@@ -43,7 +43,7 @@
         </div>
 
         <!-- Fila para categorias y cantidad -->
-        <div class="row mb-3">
+        <div class="row mb-3" *ngIf="!(loading$ | async)">
           <div class="col-md-6">
             <label for="categoriaId" class="form-label">Categorías</label>
             <select
@@ -75,7 +75,7 @@
         </div>
 
         <!-- Fila para precio costo y precio venta -->
-        <div class="row mb-3">
+        <div class="row mb-3" *ngIf="!(loading$ | async)">
           <div class="col-md-6">
             <label for="precioCosto" class="form-label">Precio Costo</label>
             <input
@@ -101,7 +101,7 @@
         </div>
 
         <!-- Botón para guardar detalles -->
-        <div class="d-grid">
+        <div class="d-grid" *ngIf="!(loading$ | async)">
           <button
             type="submit"
             class="btn btn-primary"

@@ -45,10 +45,10 @@ export default class AddProductoComponent implements OnInit {
     this.productoForm = this.fb.group({
       nombre: ['', Validators.required],
       codigoBarras: ['', Validators.required],
-      categoriaId: [0, [Validators.required, Validators.min(1)]], // Initialize with 0 and treat as a number
-      cantidad: [0, [Validators.required, Validators.min(1)]],
-      precioCosto: [0, [Validators.required, Validators.min(0.01)]],
-      precioVenta: [0, [Validators.required, Validators.min(0.01)]],
+      categoriaId: [[Validators.required, Validators.min(1)]], // Initialize with 0 and treat as a number
+      cantidad: [[Validators.required, Validators.min(1)]],
+      precioCosto: [[Validators.required, Validators.min(0.01)]],
+      precioVenta: [[Validators.required, Validators.min(0.01)]],
     });
 
     // Load categories
@@ -61,6 +61,16 @@ export default class AddProductoComponent implements OnInit {
         { categoriaId: Number(value) },
         { emitEvent: false }
       );
+    });
+
+    // Suscribirse a las categorías para manejar el estado de carga
+    this.categorias$.subscribe({
+      next: () => {
+        // No es necesario manejar el estado de carga aquí, ya que se maneja en el servicio
+      },
+      error: (error) => {
+        console.error('Error al cargar las categorías', error);
+      },
     });
   }
 
