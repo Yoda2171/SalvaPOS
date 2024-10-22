@@ -1,1 +1,62 @@
-<p>venta works!</p>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+        <h4>Carrito de Compras</h4>
+        <div *ngFor="let item of carrito">
+            <div class="row border-bottom py-3">
+            <div class="col-2">
+                <img [src]="item.image" alt="producto" class="img-fluid">
+            </div>
+            <div class="col-4">
+                <p>{{ item.nombre }}</p>
+                <p class="text-success">En stock</p>
+            </div>
+            <div class="col-2">
+                <p>{{ item.precio }} p.</p>
+            </div>
+            <div class="col-4">
+                <div class="d-flex align-items-center">
+                <button class="btn btn-outline-primary" (click)="disminuirCantidad(item)">-</button>
+                <input type="text" [(ngModel)]="item.cantidad" class="form-control w-25 mx-2 text-center" />
+                <button class="btn btn-outline-primary" (click)="aumentarCantidad(item)">+</button>
+                <button class="btn btn-outline-secondary ms-2" (click)="eliminarItem(item)">🗑️</button>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col text-end">
+            <p><strong>Total:</strong> {{ calcularTotal() }} p.</p>
+            </div>
+        </div>
+    </div>
+
+        <div class="col-md-4">
+        <h4>Método de Pago</h4>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" id="transferencia" value="transferencia" [(ngModel)]="metodoPago">
+            <label class="form-check-label" for="transferencia">Transferencia</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" id="efectivo" value="efectivo" [(ngModel)]="metodoPago">
+            <label class="form-check-label" for="efectivo">Efectivo</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" id="mixto" value="mixto" [(ngModel)]="metodoPago">
+            <label class="form-check-label" for="mixto">Pago Mixto (Tarjeta + Efectivo)</label>
+        </div>
+
+        <div *ngIf="metodoPago === 'mixto'" class="mt-3">
+        <div class="mb-2">
+            <label for="pagoTarjeta">Monto a pagar con tarjeta:</label>
+            <input type="number" class="form-control" id="pagoTarjeta" [(ngModel)]="montoTarjeta">
+            </div>
+            <div class="mb-2">
+            <label for="pagoEfectivo">Monto a pagar en efectivo:</label>
+            <input type="number" class="form-control" id="pagoEfectivo" [value]="calcularMontoEfectivo()" readonly>
+        </div>
+        </div>
+        <button class="btn btn-primary w-100 mt-4" (click)="realizarCompra()">Realizar Compra</button>
+    </div>
+    </div>
+</div>
