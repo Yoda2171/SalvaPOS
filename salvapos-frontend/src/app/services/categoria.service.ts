@@ -5,7 +5,7 @@ import {
   Pagination,
 } from '../dashboard/Interface/categoria.inteface';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, finalize } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -41,6 +41,8 @@ export class CategoriaService {
     return this.http.get<Pagination>(this.apiUrl, { params }).pipe(
       tap((data) => {
         this.categoriasSubject.next(data); // Emitir los datos
+      }),
+      finalize(() => {
         this.loadingSubject.next(false); // Finalizar el estado de carga
       })
     );
@@ -54,6 +56,8 @@ export class CategoriaService {
     return this.http.get<Categoria>(url).pipe(
       tap((data) => {
         this.categoriaSubject.next(data); // Emitir los datos
+      }),
+      finalize(() => {
         this.loadingSubject.next(false); // Finalizar el estado de carga
       })
     );
