@@ -3,7 +3,9 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   OnInit,
+  ViewChild,
 } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import {
@@ -33,6 +35,8 @@ declare let window: any;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class InventarioComponent implements OnInit {
+  @ViewChild('searchInput') searchInput!: ElementRef;
+
   productos: Producto[] = [];
   searchTerm: string = ''; // Término de búsqueda
   currentPage: number = 1;
@@ -81,6 +85,11 @@ export default class InventarioComponent implements OnInit {
         this.showToast(); // Mostrar el toast si hay un mensaje de éxito
       }
     }
+
+    // Activar el input de búsqueda al ingresar al componente
+    setTimeout(() => {
+      this.searchInput.nativeElement.focus();
+    }, 0);
   }
 
   cargarProductos(search: string, page: number): void {
