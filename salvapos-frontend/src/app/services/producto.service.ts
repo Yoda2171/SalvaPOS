@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, finalize } from 'rxjs/operators';
 import {
   Pagination,
   Producto,
@@ -43,6 +43,8 @@ export class ProductoService {
     return this.http.get<Pagination>(this.apiUrl, { params }).pipe(
       tap((data) => {
         this.productosSubject.next(data); // Emitir los datos
+      }),
+      finalize(() => {
         this.loadingSubject.next(false); // Finalizar el estado de carga
       })
     );
@@ -56,6 +58,8 @@ export class ProductoService {
     return this.http.get<Producto>(url).pipe(
       tap((data) => {
         this.productoSubject.next(data); // Emitir los datos
+      }),
+      finalize(() => {
         this.loadingSubject.next(false); // Finalizar el estado de carga
       })
     );

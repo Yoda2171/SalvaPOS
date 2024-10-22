@@ -13,7 +13,7 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Categoria } from '../../../../Interface/categoria.inteface';
 import { ProductoService } from '../../../../../services/producto.service';
 import { Producto } from '../../../../Interface/producto.interface';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-edit-producto',
@@ -60,6 +60,24 @@ export default class EditProductoComponent implements OnInit {
     // Load categories and product data
     this.loading$ = this.categoriaService.loading$;
     this.categorias$ = this.categoriaService.getCategoriasAll();
+
+    // Listen for changes and convert the value of categoriaId to a number
+    this.productoForm.get('categoriaId')?.valueChanges.subscribe((value) => {
+      this.productoForm.patchValue(
+        { categoriaId: Number(value) },
+        { emitEvent: false }
+      );
+    });
+
+    // Suscribirse a las categorías para manejar el estado de carga
+    this.categorias$.subscribe({
+      next: () => {
+        // No es necesario manejar el estado de carga aquí, ya que se maneja en el servicio
+      },
+      error: (error) => {
+        console.error('Error al cargar las categorías', error);
+      },
+    });
 
     this.cargarProducto();
   }
