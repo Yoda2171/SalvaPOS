@@ -1,1 +1,93 @@
-<p>venta works!</p>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+        <h4 class="mb-4">Carrito de Compras</h4>
+
+        <!-- Listado de productos en el carrito -->
+        <div *ngFor="let item of carrito" class="row border-bottom py-3 align-items-center">
+        <div class="col-2">
+            <img [src]="item.image" alt="producto" class="img-fluid rounded shadow-sm">
+        </div>
+        <div class="col-4">
+            <p class="mb-0"><strong>{{ item.nombre }}</strong></p>
+            <p class="text-success mb-0">En stock</p>
+        </div>
+        <div class="col-2">
+            <p class="text-primary mb-0"><strong>{{ item.precio | currency:'CLP' }}</strong></p>
+        </div>
+            <div class="col-4 d-flex align-items-center justify-content-end">
+                <button class="btn btn-outline-primary me-2" (click)="disminuirCantidad(item)">-</button>
+                <input type="text" [(ngModel)]="item.cantidad" class="form-control w-25 text-center" />
+                <button class="btn btn-outline-primary ms-2" (click)="aumentarCantidad(item)">+</button>
+                <button class="btn btn-outline-danger ms-2" (click)="eliminarItem(item)">🗑️</button>
+            </div>
+        </div>
+
+        <!-- Total -->
+        <div class="row mt-3">
+        <div class="col text-end">
+            <p class="fs-4"><strong>Total: {{ calcularTotal() | currency:'CLP' }}</strong></p>
+        </div>
+        </div>
+    </div>
+
+        <!-- Sección de métodos de pago -->
+        <div class="col-md-4">
+        <h4>Método de Pago</h4>
+
+        <!-- Opción de tarjeta con icono de Font Awesome -->
+        <div class="form-check mb-3 d-flex align-items-center">
+            <input class="form-check-input" type="radio" id="tarjeta" value="tarjeta" [(ngModel)]="metodoPago">
+            <label class="form-check-label ms-2 d-flex align-items-center" for="tarjeta">
+            <i class="fas fa-credit-card" style="font-size: 24px; margin-right: 10px;"></i>
+            Tarjeta (Crédito/Débito)
+            </label>
+        </div>
+
+        <!-- Opción de efectivo con icono de Font Awesome -->
+        <div class="form-check mb-3 d-flex align-items-center">
+            <input class="form-check-input" type="radio" id="efectivo" value="efectivo" [(ngModel)]="metodoPago">
+            <label class="form-check-label ms-2 d-flex align-items-center" for="efectivo">
+            <i class="fas fa-money-bill-wave" style="font-size: 24px; margin-right: 10px;"></i>
+                Efectivo
+            </label>
+        </div>
+
+        <!-- Opciones solo si se elige tarjeta -->
+        <div *ngIf="metodoPago === 'tarjeta'" class="mt-3">
+            <!-- Selección de tarjeta de crédito con icono -->
+        <div class="form-check mb-2 d-flex align-items-center">
+            <input class="form-check-input" type="radio" id="tarjetaCredito" value="credito" [(ngModel)]="tipoTarjeta">
+            <label class="form-check-label ms-2 d-flex align-items-center" for="tarjetaCredito">
+                <i class="fas fa-credit-card" style="font-size: 24px; margin-right: 10px;"></i>
+                Tarjeta de Crédito
+            </label>
+        </div>
+
+            <!-- Selección de tarjeta de débito con icono -->
+        <div class="form-check mb-2 d-flex align-items-center">
+            <input class="form-check-input" type="radio" id="tarjetaDebito" value="debito" [(ngModel)]="tipoTarjeta">
+            <label class="form-check-label ms-2 d-flex align-items-center" for="tarjetaDebito">
+                <i class="fas fa-university" style="font-size: 24px; margin-right: 10px;"></i>
+                Tarjeta de Débito
+            </label>
+        </div>
+
+            <!-- Campo para el monto de la tarjeta -->
+            <div *ngIf="tipoTarjeta" class="mt-3">
+                <label for="pagoTarjeta">Monto a pagar con {{ tipoTarjeta }}:</label>
+                <input type="number" class="form-control" id="pagoTarjeta" [(ngModel)]="montoTarjeta" min="0">
+            </div>
+        </div>
+
+        <!-- Opciones solo si se elige efectivo -->
+        <div *ngIf="metodoPago === 'efectivo'" class="mt-3">
+            <label for="pagoEfectivo">Ingrese con cuánto paga:</label>
+            <input type="number" class="form-control" id="pagoEfectivo" [(ngModel)]="montoEfectivo" min="0">
+        </div>
+
+        <!-- Botón de compra -->
+        <button class="btn btn-primary w-100 mt-4" (click)="realizarCompra()">Realizar Compra</button>
+    </div>
+    </div>
+</div>

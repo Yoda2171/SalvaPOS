@@ -16,7 +16,7 @@ export default class ReporteVentaComponent {
     { id: 'V002', date: '08 Dec 2023', category: 'Medicine', amount: 200, quantity: 120 },
     { id: 'V003', date: '15 Dec 2023', category: 'Equipment', amount: 100, quantity: 60 },
     { id: 'V004', date: '20 Dec 2023', category: 'Medicine', amount: 175, quantity: 80 },
-    { id: 'V005', date: '31 Dec 2023', category: 'Equipment', amount: 300, quantity: 150 }
+    { id: 'V005', date: '31 Dec 2023', category: 'Equipment', amount: 300, quantity: 152 }
   ];
 
   @ViewChild('salesChart') salesChart!: ElementRef<HTMLCanvasElement>;
