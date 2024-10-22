@@ -11,15 +11,14 @@ import { FormsModule } from '@angular/forms';
 })
 export class VentaComponent {
   carrito = [
-    { nombre: 'Producto 1', precio: 2085, cantidad: 1, image: 'assets/img/producto1.jpg' },
-    { nombre: 'Producto 2', precio: 2085, cantidad: 1, image: 'assets/img/producto2.jpg' },
+    { nombre: 'Jarabe-Abrilar', precio: 2085, cantidad: 1, image: 'assets/img/Jarabe-Abrilar.jpg' },
+    { nombre: 'Paracetamol', precio: 2085, cantidad: 1, image: 'assets/img/paracetamol.jpg' },
   ];
 
   metodoPago: string = '';  // Puede ser 'tarjeta' o 'efectivo'
   tipoTarjeta: string = '';  // Puede ser 'credito' o 'debito'
   montoTarjeta: number = 0;
   montoEfectivo: number = 0;  // Monto ingresado al pagar en efectivo
-  cambio: number = 0;  // Cambio que debe devolverse
   montoMaximo: number = 100000;  // Límite máximo de 100,000 pesos (CLP)
 
   // Método para aumentar la cantidad de un producto en el carrito
@@ -43,26 +42,13 @@ export class VentaComponent {
   calcularTotal() {
     return this.carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
   }
-
-  // Método para calcular el monto restante a pagar en efectivo si la tarjeta no cubre el total
-  calcularMontoEfectivo() {
-    const total = this.calcularTotal();
-    return total - this.montoTarjeta;
-  }
-
-  // Método para calcular el cambio a devolver
-  calcularCambio() {
-    const total = this.calcularTotal();
-    this.cambio = this.montoEfectivo - total;
-  }
-
+  
   // Método para reiniciar el formulario después de cada pago
   resetFormulario() {
     this.metodoPago = '';  // Reiniciar el método de pago
     this.tipoTarjeta = '';  // Reiniciar el tipo de tarjeta
     this.montoTarjeta = 0;  // Reiniciar el monto de tarjeta
     this.montoEfectivo = 0;  // Reiniciar el monto en efectivo
-    this.cambio = 0;  // Reiniciar el cambio
   }
 
   realizarCompra() {
@@ -81,7 +67,7 @@ export class VentaComponent {
       }
 
       if (this.montoTarjeta < total) {
-        alert(`Pago parcial con ${this.tipoTarjeta}: $${this.montoTarjeta}. El resto ($${this.calcularMontoEfectivo()}) se pagará con efectivo.`);
+        alert(`Pago parcial con ${this.tipoTarjeta}: $${this.montoTarjeta}. El resto ($${total - this.montoTarjeta}) se pagará con efectivo.`);
       } else {
         alert('Compra realizada con éxito');
       }
@@ -101,9 +87,14 @@ export class VentaComponent {
         return;
       }
 
-      // Calcular el cambio solo cuando el pago es confirmado
-      this.calcularCambio();
-      alert(`Compra realizada con éxito. Se ha devuelto ${this.cambio.toLocaleString('es-CL')} pesos.`);
+      // Si el monto en efectivo es mayor que el total, se calcula el cambio y se muestra una alerta
+      if (this.montoEfectivo > total) {
+        const cambio = this.montoEfectivo - total;
+        alert(`Compra realizada con éxito. Se debe devolver ${cambio.toLocaleString('es-CL')} pesos.`);
+      } else {
+        alert('Compra realizada con éxito. No se requiere devolución.');
+      }
+
       this.resetFormulario();
     }
   }
