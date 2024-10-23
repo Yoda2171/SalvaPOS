@@ -12,7 +12,8 @@ import { ProductoService } from '../../../services/producto.service';
 import { Producto } from '../../Interface/producto.interface';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import * as bootstrap from 'bootstrap'; // Import Bootstrap
+
+import * as bootstrap from 'bootstrap'; // Para manejar Bootstrap modals y toasts
 
 @Component({
   selector: 'app-venta',
@@ -23,7 +24,7 @@ import * as bootstrap from 'bootstrap'; // Import Bootstrap
 })
 export default class VentaComponent implements OnInit, OnDestroy {
   @ViewChild('searchInput') searchInput!: ElementRef; // Referencia al input de búsqueda
-  @ViewChild('stockToast', { static: true }) stockToast!: ElementRef; // Referencia al Toast
+  @ViewChild('stockToast', { static: true }) stockToast!: ElementRef;
   carrito = [
     {
       nombre: 'Jarabe-Abrilar',
@@ -60,10 +61,27 @@ export default class VentaComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Enfocar el input cuando el componente carga
     this.focusSearchInput();
+    this.mostrarToast();
 
     // Inicializar el toast de Bootstrap
-    if (typeof window !== 'undefined') {
-      this.toastInstance = new bootstrap.Toast(this.stockToast.nativeElement);
+  }
+
+  ngAfterViewInit(): void {
+    if (
+      typeof document !== 'undefined' &&
+      this.stockToast &&
+      this.stockToast.nativeElement
+    ) {
+      try {
+        this.toastInstance = new bootstrap.Toast(this.stockToast.nativeElement);
+        console.log('Toast inicializado correctamente.');
+      } catch (error) {
+        console.error('Error al inicializar el toast:', error);
+      }
+    } else {
+      console.error(
+        'Elemento del Toast no disponible o el entorno no es un navegador.'
+      );
     }
   }
 
@@ -95,6 +113,14 @@ export default class VentaComponent implements OnInit, OnDestroy {
     this.devolverStock();
   }
 
+  // Método para mostrar el toast de Bootstrap
+  mostrarToast() {
+    if (this.toastInstance) {
+      this.toastInstance.show();
+    } else {
+      console.error('Toast no inicializado');
+    }
+  }
   // Método para devolver el stock al inventario
   devolverStock(): void {
     this.carrito.forEach((item) => {
@@ -143,7 +169,6 @@ export default class VentaComponent implements OnInit, OnDestroy {
     const itemExistente = this.carrito.find((item) => item.id === producto.id);
 
     if (itemExistente) {
-      // Si el producto ya está en el carrito, aumentar la cantidad
       if (itemExistente.stockDisponible > 0) {
         itemExistente.cantidad++;
         itemExistente.stockDisponible--;
@@ -155,33 +180,35 @@ export default class VentaComponent implements OnInit, OnDestroy {
             .subscribe();
         }
       } else {
-        this.mostrarToast();
+        this.mostrarToast(); // Mostrar el toast cuando el stock llegue a 0
       }
     } else {
-      // Si el producto no está en el carrito, agregarlo con cantidad 1
       if (producto.id === undefined) {
         console.error('El producto no tiene un ID definido');
         return;
       }
 
-      this.carrito.push({
+      const nuevoItem = {
         nombre: producto.nombre,
         precio: producto.precioVenta,
-        cantidad: 1, // Agregar con cantidad inicial de 1
-        id: producto.id, // ID del producto
-        stockDisponible: producto.cantidad - 1, // Stock inicial del producto
-      });
+        cantidad: 1,
+        id: producto.id,
+        stockDisponible: producto.cantidad - 1,
+      };
+      this.carrito.push(nuevoItem);
+
       this.productoService
         .ajustarStock(producto.id, -1)
         .pipe(takeUntil(this.destroy$))
         .subscribe();
+
+      if (nuevoItem.stockDisponible === 0) {
+        this.mostrarToast(); // Mostrar el toast si el stock inicial ya es 0
+      }
     }
 
-    // Limpiar el término de búsqueda y los resultados
     this.productosEncontrados = [];
     this.searchTerm = '';
-
-    // Restablecer el foco en el input después de agregar al carrito
     this.focusSearchInput();
   }
 
@@ -193,12 +220,15 @@ export default class VentaComponent implements OnInit, OnDestroy {
       this.productoService
         .ajustarStock(item.id, -1)
         .pipe(takeUntil(this.destroy$))
-        .subscribe(); // Reducir stock en el inventario
-    } else {
+        .subscribe();
+
+      console.log(item.stockDisponible);
+    }
+
+    if (item.stockDisponible == 0) {
       this.mostrarToast(); // Mostrar el toast si no hay más stock disponible
     }
 
-    // Mantener el foco en el campo de búsqueda
     this.focusSearchInput();
   }
 
@@ -246,11 +276,6 @@ export default class VentaComponent implements OnInit, OnDestroy {
 
     // Mantener el foco en el campo de búsqueda
     this.focusSearchInput();
-  }
-
-  // Mostrar un toast notificando que el stock está agotado
-  mostrarToast() {
-    this.toastInstance.show();
   }
 
   // Método para reenfocar el campo de búsqueda
