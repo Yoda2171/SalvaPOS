@@ -59,9 +59,7 @@ export default class VentaComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Enfocar el input cuando el componente carga
-    setTimeout(() => {
-      this.searchInput.nativeElement.focus();
-    }, 0);
+    this.focusSearchInput();
 
     // Inicializar el toast de Bootstrap
     if (typeof window !== 'undefined') {
@@ -73,6 +71,18 @@ export default class VentaComponent implements OnInit, OnDestroy {
   @HostListener('window:beforeunload', ['$event'])
   onBeforeUnload(event: any): void {
     this.devolverStock(); // Devolver el stock antes de salir de la página
+  }
+
+  // Escuchar clics en el documento para mantener el input de búsqueda enfocado
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (
+      this.searchInput &&
+      this.searchInput.nativeElement &&
+      event.target !== this.searchInput.nativeElement
+    ) {
+      this.focusSearchInput(); // Reenfocar el input si se hace clic afuera
+    }
   }
 
   // Método llamado cuando el componente se destruye
@@ -117,9 +127,13 @@ export default class VentaComponent implements OnInit, OnDestroy {
           if (this.productosEncontrados.length === 1) {
             this.agregarAlCarrito(this.productosEncontrados[0]);
           }
+
+          // Mantener el foco en el campo de búsqueda
+          this.focusSearchInput();
         },
         error: (error) => {
           console.error('Error al buscar productos:', error);
+          this.focusSearchInput(); // Enfocar siempre el input aunque haya error
         },
       });
   }
@@ -167,10 +181,8 @@ export default class VentaComponent implements OnInit, OnDestroy {
     this.productosEncontrados = [];
     this.searchTerm = '';
 
-    // Restablecer el foco en el input después de que Angular actualice la vista
-    setTimeout(() => {
-      this.searchInput.nativeElement.focus(); // Reenfocar el input
-    }, 0);
+    // Restablecer el foco en el input después de agregar al carrito
+    this.focusSearchInput();
   }
 
   // Método para aumentar la cantidad de un producto en el carrito
@@ -185,6 +197,9 @@ export default class VentaComponent implements OnInit, OnDestroy {
     } else {
       this.mostrarToast(); // Mostrar el toast si no hay más stock disponible
     }
+
+    // Mantener el foco en el campo de búsqueda
+    this.focusSearchInput();
   }
 
   // Método para disminuir la cantidad de un producto en el carrito
@@ -197,6 +212,9 @@ export default class VentaComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe(); // Aumentar stock en el inventario
     }
+
+    // Mantener el foco en el campo de búsqueda
+    this.focusSearchInput();
   }
 
   // Método para eliminar un producto del carrito
@@ -206,6 +224,9 @@ export default class VentaComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(); // Devolver el stock completo al inventario
     this.carrito = this.carrito.filter((i) => i !== item);
+
+    // Mantener el foco en el campo de búsqueda
+    this.focusSearchInput();
   }
 
   // Calcular el total de la compra
@@ -222,10 +243,22 @@ export default class VentaComponent implements OnInit, OnDestroy {
     this.tipoTarjeta = ''; // Reiniciar el tipo de tarjeta
     this.montoTarjeta = 0; // Reiniciar el monto de tarjeta
     this.montoEfectivo = 0; // Reiniciar el monto en efectivo
+
+    // Mantener el foco en el campo de búsqueda
+    this.focusSearchInput();
   }
 
   // Mostrar un toast notificando que el stock está agotado
   mostrarToast() {
     this.toastInstance.show();
+  }
+
+  // Método para reenfocar el campo de búsqueda
+  private focusSearchInput() {
+    setTimeout(() => {
+      if (this.searchInput && this.searchInput.nativeElement) {
+        this.searchInput.nativeElement.focus();
+      }
+    }, 0);
   }
 }
