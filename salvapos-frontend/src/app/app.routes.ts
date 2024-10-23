@@ -44,9 +44,9 @@ export const routes: Routes = [
       {
         path: 'venta',
         title: 'Venta',
-        loadComponent: () => import('./dashboard/pages/venta/venta.component').then(m => m.VentaComponent), // Asegúrate de usar '.then(m => m.VentaComponent)'
+        loadComponent: () => import('./dashboard/pages/venta/venta.component'),
       },
-      
+
       {
         path: 'reportes',
         title: 'Reportes',
