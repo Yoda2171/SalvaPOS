@@ -12,8 +12,9 @@ import { ProductoService } from '../../../services/producto.service';
 import { Producto } from '../../Interface/producto.interface';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-
-import * as bootstrap from 'bootstrap'; // Para manejar Bootstrap modals y toasts
+import * as bootstrap from 'bootstrap';
+import { MetodoPagoService } from '../../../services/metodo-pago.service';
+import { MetodoPago } from '../../Interface/metodoPago.interface';
 
 @Component({
   selector: 'app-venta',
@@ -23,105 +24,87 @@ import * as bootstrap from 'bootstrap'; // Para manejar Bootstrap modals y toast
   styleUrls: ['./venta.component.css'],
 })
 export default class VentaComponent implements OnInit, OnDestroy {
-  @ViewChild('searchInput') searchInput!: ElementRef; // Referencia al input de búsqueda
+  @ViewChild('searchInput') searchInput!: ElementRef;
   @ViewChild('stockToast', { static: true }) stockToast!: ElementRef;
-  carrito = [
-    {
-      nombre: 'Jarabe-Abrilar',
-      precio: 2085,
-      cantidad: 1,
-      id: 1, // ID del producto para identificarlo en el backend
-      stockDisponible: 5, // Stock inicial
-    },
-    {
-      nombre: 'Paracetamol',
-      precio: 2085,
-      cantidad: 1,
-      id: 2, // ID del producto para identificarlo en el backend
-      stockDisponible: 3, // Stock inicial
-    },
+  @ViewChild('detalleVentaModal', { static: true })
+  detalleVentaModal!: ElementRef;
+
+  carrito: any[] = [];
+  montoMaximo: number = 100000;
+  searchTerm: string = '';
+  productosEncontrados: Producto[] = [];
+  metodosPago: MetodoPago[] = [];
+  metodosDisponibles = [
+    { id: 1, nombre: 'Efectivo' },
+    { id: 2, nombre: 'Tarjeta de debito' },
+    { id: 3, nombre: 'Transferencia' },
+    { id: 4, nombre: 'Cheque' },
+    { id: 5, nombre: 'Tarjeta de credito' },
   ];
-
-  metodoPago: string = ''; // Puede ser 'tarjeta' o 'efectivo'
-  tipoTarjeta: string = ''; // Puede ser 'credito' o 'debito'
-  montoTarjeta: number = 0;
-  montoEfectivo: number = 0; // Monto ingresado al pagar en efectivo
-  montoMaximo: number = 100000; // Límite máximo de 100,000 pesos (CLP)
-  searchTerm: string = ''; // Término de búsqueda
-  productosEncontrados: Producto[] = []; // Productos encontrados en la búsqueda
-  loading$: Observable<boolean>; // Observable para el estado de carga
-
-  private toastInstance: any; // Instancia del toast
-  private destroy$ = new Subject<void>(); // Subject para manejar la destrucción del componente
+  loading$: Observable<boolean>;
+  private toastInstance: any;
+  private modalInstance: any; // Instancia del modal
+  private destroy$ = new Subject<void>();
 
   constructor(private readonly productoService: ProductoService) {
     this.loading$ = this.productoService.loading$;
   }
 
   ngOnInit(): void {
-    // Enfocar el input cuando el componente carga
     this.focusSearchInput();
+    this.mostrarModalDetalleVenta();
     this.mostrarToast();
-
-    // Inicializar el toast de Bootstrap
+    this.agregarMetodoPago(); // Agregar un método de pago al iniciar
   }
 
   ngAfterViewInit(): void {
-    if (
-      typeof document !== 'undefined' &&
-      this.stockToast &&
-      this.stockToast.nativeElement
-    ) {
+    if (this.stockToast && this.stockToast.nativeElement) {
       try {
         this.toastInstance = new bootstrap.Toast(this.stockToast.nativeElement);
-        console.log('Toast inicializado correctamente.');
       } catch (error) {
         console.error('Error al inicializar el toast:', error);
       }
-    } else {
-      console.error(
-        'Elemento del Toast no disponible o el entorno no es un navegador.'
-      );
+    }
+
+    if (this.detalleVentaModal && this.detalleVentaModal.nativeElement) {
+      try {
+        this.modalInstance = new bootstrap.Modal(
+          this.detalleVentaModal.nativeElement
+        );
+      } catch (error) {
+        console.error('Error al inicializar el modal:', error);
+      }
     }
   }
 
-  // Escuchar eventos de recarga o cierre de ventana
-  @HostListener('window:beforeunload', ['$event'])
-  onBeforeUnload(event: any): void {
-    this.devolverStock(); // Devolver el stock antes de salir de la página
-  }
-
-  // Escuchar clics en el documento para mantener el input de búsqueda enfocado
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (
-      this.searchInput &&
-      this.searchInput.nativeElement &&
-      event.target !== this.searchInput.nativeElement
-    ) {
-      this.focusSearchInput(); // Reenfocar el input si se hace clic afuera
+    const targetElement = event.target as HTMLElement;
+    const isInputElement =
+      targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA';
+
+    if (!isInputElement && this.searchInput && this.searchInput.nativeElement) {
+      this.focusSearchInput();
     }
   }
 
-  // Método llamado cuando el componente se destruye
-  ngOnDestroy(): void {
-    // Emitir un valor para destruir las suscripciones
-    this.destroy$.next();
-    this.destroy$.complete();
-
-    // Devolver todo el stock del carrito al inventario
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: any): void {
     this.devolverStock();
   }
 
-  // Método para mostrar el toast de Bootstrap
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.devolverStock();
+  }
+
   mostrarToast() {
     if (this.toastInstance) {
       this.toastInstance.show();
-    } else {
-      console.error('Toast no inicializado');
     }
   }
-  // Método para devolver el stock al inventario
+
   devolverStock(): void {
     this.carrito.forEach((item) => {
       if (item.cantidad > 0) {
@@ -135,7 +118,6 @@ export default class VentaComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Método para buscar productos
   buscarProductos() {
     if (this.searchTerm.trim() === '') {
       this.productosEncontrados = [];
@@ -148,23 +130,18 @@ export default class VentaComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.productosEncontrados = response.data;
-
-          // Si solo se encuentra un producto, agregarlo automáticamente al carrito
           if (this.productosEncontrados.length === 1) {
             this.agregarAlCarrito(this.productosEncontrados[0]);
           }
-
-          // Mantener el foco en el campo de búsqueda
           this.focusSearchInput();
         },
         error: (error) => {
           console.error('Error al buscar productos:', error);
-          this.focusSearchInput(); // Enfocar siempre el input aunque haya error
+          this.focusSearchInput();
         },
       });
   }
 
-  // Método para agregar un producto al carrito
   agregarAlCarrito(producto: Producto): void {
     const itemExistente = this.carrito.find((item) => item.id === producto.id);
 
@@ -180,13 +157,10 @@ export default class VentaComponent implements OnInit, OnDestroy {
             .subscribe();
         }
       } else {
-        this.mostrarToast(); // Mostrar el toast cuando el stock llegue a 0
+        this.mostrarToast();
       }
     } else {
-      if (producto.id === undefined) {
-        console.error('El producto no tiene un ID definido');
-        return;
-      }
+      if (producto.id === undefined) return;
 
       const nuevoItem = {
         nombre: producto.nombre,
@@ -203,7 +177,7 @@ export default class VentaComponent implements OnInit, OnDestroy {
         .subscribe();
 
       if (nuevoItem.stockDisponible === 0) {
-        this.mostrarToast(); // Mostrar el toast si el stock inicial ya es 0
+        this.mostrarToast();
       }
     }
 
@@ -212,54 +186,45 @@ export default class VentaComponent implements OnInit, OnDestroy {
     this.focusSearchInput();
   }
 
-  // Método para aumentar la cantidad de un producto en el carrito
   aumentarCantidad(item: any) {
     if (item.stockDisponible > 0) {
       item.cantidad++;
-      item.stockDisponible--; // Reducir stock disponible
+      item.stockDisponible--;
       this.productoService
         .ajustarStock(item.id, -1)
         .pipe(takeUntil(this.destroy$))
         .subscribe();
-
-      console.log(item.stockDisponible);
     }
 
     if (item.stockDisponible == 0) {
-      this.mostrarToast(); // Mostrar el toast si no hay más stock disponible
+      this.mostrarToast();
     }
 
     this.focusSearchInput();
   }
 
-  // Método para disminuir la cantidad de un producto en el carrito
   disminuirCantidad(item: any) {
     if (item.cantidad > 1) {
       item.cantidad--;
-      item.stockDisponible++; // Aumentar stock disponible
+      item.stockDisponible++;
       this.productoService
         .ajustarStock(item.id, 1)
         .pipe(takeUntil(this.destroy$))
-        .subscribe(); // Aumentar stock en el inventario
+        .subscribe();
     }
 
-    // Mantener el foco en el campo de búsqueda
     this.focusSearchInput();
   }
 
-  // Método para eliminar un producto del carrito
   eliminarItem(item: any) {
     this.productoService
       .ajustarStock(item.id, item.cantidad)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(); // Devolver el stock completo al inventario
+      .subscribe();
     this.carrito = this.carrito.filter((i) => i !== item);
-
-    // Mantener el foco en el campo de búsqueda
     this.focusSearchInput();
   }
 
-  // Calcular el total de la compra
   calcularTotal() {
     return this.carrito.reduce(
       (acc, item) => acc + item.precio * item.cantidad,
@@ -267,23 +232,78 @@ export default class VentaComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Método para reiniciar el formulario después de cada pago
-  resetFormulario() {
-    this.metodoPago = ''; // Reiniciar el método de pago
-    this.tipoTarjeta = ''; // Reiniciar el tipo de tarjeta
-    this.montoTarjeta = 0; // Reiniciar el monto de tarjeta
-    this.montoEfectivo = 0; // Reiniciar el monto en efectivo
+  realizarCompra() {
+    const total = this.calcularTotal();
+    const totalPagado = this.metodosPago.reduce(
+      (acc, pago) => acc + (pago.monto ?? 0),
+      0
+    );
 
-    // Mantener el foco en el campo de búsqueda
+    // Validar que se haya seleccionado al menos un método de pago
+
+    if (
+      this.metodosPago.length === 0 ||
+      this.metodosPago.some(
+        (pago) => pago.tipo === '' || (pago.monto ?? 0) <= 0
+      )
+    ) {
+      alert(
+        'Debe seleccionar un método de pago y asegurarse de que el monto sea mayor a 0.'
+      );
+      return;
+    }
+
+    // Validar que el monto total pagado cubra el total de la compra
+    if (totalPagado < total) {
+      alert(
+        `El total a pagar es $${total}, pero solo se han ingresado $${totalPagado}.`
+      );
+      return;
+    }
+
+    // Si todo es válido, mostrar el detalle de la venta
+    this.mostrarModalDetalleVenta();
+  }
+
+  mostrarModalDetalleVenta() {
+    if (this.modalInstance) {
+      this.modalInstance.show();
+    }
+  }
+
+  imprimirBoleta() {
+    window.print();
+  }
+
+  agregarMetodoPago() {
+    this.metodosPago.push({ tipo: '', monto: null }); // El monto será null para que el input esté vacío
+  }
+
+  eliminarMetodoPago(index: number) {
+    this.metodosPago.splice(index, 1);
+  }
+
+  resetFormulario() {
+    this.metodosPago = [{ tipo: '', monto: 0 }];
+    this.carrito = [];
+    this.searchTerm = '';
     this.focusSearchInput();
   }
 
-  // Método para reenfocar el campo de búsqueda
   private focusSearchInput() {
     setTimeout(() => {
       if (this.searchInput && this.searchInput.nativeElement) {
         this.searchInput.nativeElement.focus();
       }
     }, 0);
+  }
+
+  obtenerFechaActual() {
+    const fecha = new Date();
+    return fecha.toLocaleDateString('es-CL', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
   }
 }

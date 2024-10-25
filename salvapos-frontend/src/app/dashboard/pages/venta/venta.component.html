@@ -123,100 +123,129 @@
         Método de Pago
       </h4>
 
-      <!-- Opción de tarjeta con icono de Font Awesome -->
-      <div class="form-check mb-3 d-flex align-items-center">
-        <input
-          class="form-check-input"
-          type="radio"
-          id="tarjeta"
-          value="tarjeta"
-          [(ngModel)]="metodoPago"
-        />
-        <label
-          class="form-check-label ms-2 d-flex align-items-center"
-          for="tarjeta"
-        >
-          <i class="fas fa-credit-card fs-4 me-2"></i>Tarjeta (Crédito/Débito)
-        </label>
-      </div>
-
-      <!-- Opción de efectivo con icono de Font Awesome -->
-      <div class="form-check mb-3 d-flex align-items-center">
-        <input
-          class="form-check-input"
-          type="radio"
-          id="efectivo"
-          value="efectivo"
-          [(ngModel)]="metodoPago"
-        />
-        <label
-          class="form-check-label ms-2 d-flex align-items-center"
-          for="efectivo"
-        >
-          <i class="fas fa-money-bill-wave fs-4 me-2"></i>Efectivo
-        </label>
-      </div>
-
-      <!-- Opciones solo si se elige tarjeta -->
-      <div *ngIf="metodoPago === 'tarjeta'" class="mt-3">
-        <div class="form-check mb-2 d-flex align-items-center">
-          <input
-            class="form-check-input"
-            type="radio"
-            id="tarjetaCredito"
-            value="credito"
-            [(ngModel)]="tipoTarjeta"
-          />
-          <label
-            class="form-check-label ms-2 d-flex align-items-center"
-            for="tarjetaCredito"
-          >
-            <i class="fas fa-credit-card fs-4 me-2"></i>Tarjeta de Crédito
-          </label>
+      <!-- Lista de métodos de pago seleccionados -->
+      <div *ngFor="let pago of metodosPago; let i = index" class="mt-3">
+        <div class="mb-3">
+          <label class="fw-bold">Método de Pago {{ i + 1 }}:</label>
+          <div *ngFor="let metodo of metodosDisponibles" class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              [id]="'metodo-' + i + '-' + metodo.id"
+              [value]="metodo.nombre"
+              [(ngModel)]="pago.tipo"
+              name="metodo-{{ i }}"
+            />
+            <label
+              class="form-check-label"
+              [for]="'metodo-' + i + '-' + metodo.id"
+            >
+              {{ metodo.nombre }}
+            </label>
+          </div>
         </div>
 
-        <div class="form-check mb-2 d-flex align-items-center">
-          <input
-            class="form-check-input"
-            type="radio"
-            id="tarjetaDebito"
-            value="debito"
-            [(ngModel)]="tipoTarjeta"
-          />
-          <label
-            class="form-check-label ms-2 d-flex align-items-center"
-            for="tarjetaDebito"
-          >
-            <i class="fas fa-university fs-4 me-2"></i>Tarjeta de Débito
-          </label>
-        </div>
-
-        <div *ngIf="tipoTarjeta" class="mt-3">
-          <label for="pagoTarjeta">Monto a pagar con {{ tipoTarjeta }}:</label>
+        <div class="mb-2">
           <input
             type="number"
             class="form-control"
-            id="pagoTarjeta"
-            [(ngModel)]="montoTarjeta"
+            [(ngModel)]="pago.monto"
+            placeholder="Monto"
             min="0"
+            [value]="pago.monto === null ? '' : pago.monto"
+            required
           />
         </div>
+
+        <!-- Botón para eliminar un método de pago -->
+        <button class="btn btn-danger" (click)="eliminarMetodoPago(i)">
+          🗑️ Eliminar
+        </button>
       </div>
 
-      <!-- Opciones solo si se elige efectivo -->
-      <div *ngIf="metodoPago === 'efectivo'" class="mt-3">
-        <label for="pagoEfectivo">Ingrese con cuánto paga:</label>
-        <input
-          type="number"
-          class="form-control"
-          id="pagoEfectivo"
-          [(ngModel)]="montoEfectivo"
-          min="0"
-        />
-      </div>
+      <!-- Botón para agregar otro método de pago -->
+      <button
+        class="btn btn-outline-primary w-100 mt-3"
+        (click)="agregarMetodoPago()"
+      >
+        Agregar otro método de pago
+      </button>
 
       <!-- Botón de compra -->
-      <button class="btn btn-primary btn-lg w-100 mt-4">Realizar Compra</button>
+      <button
+        class="btn btn-primary btn-lg w-100 mt-4"
+        (click)="realizarCompra()"
+      >
+        Realizar Compra
+      </button>
+    </div>
+  </div>
+</div>
+<!-- Modal para mostrar el detalle de la venta -->
+<div
+  class="modal fade"
+  #detalleVentaModal
+  tabindex="-1"
+  aria-labelledby="detalleVentaModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detalleVentaModalLabel">
+          Detalle de la Venta
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <h6>Productos:</h6>
+        <ul class="list-group mb-3">
+          <li
+            *ngFor="let item of carrito"
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ item.nombre }} - {{ item.cantidad }} x
+            {{ item.precio | currency : "CLP" }}
+            <span class="fw-bold">{{
+              item.cantidad * item.precio | currency : "CLP"
+            }}</span>
+          </li>
+        </ul>
+
+        <h6>Métodos de Pago:</h6>
+        <ul class="list-group mb-3">
+          <li
+            *ngFor="let pago of metodosPago"
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ pago.tipo }}
+            <span class="fw-bold">{{ pago.monto | currency : "CLP" }}</span>
+          </li>
+        </ul>
+
+        <div class="d-flex justify-content-end">
+          <p class="fs-5 fw-bold">
+            Total: {{ calcularTotal() | currency : "CLP" }}
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="imprimirBoleta()"
+        >
+          Imprimir Boleta
+        </button>
+      </div>
     </div>
   </div>
 </div>
