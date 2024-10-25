@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -6,13 +6,15 @@ import {
   OnInit,
   ViewChild,
   HostListener,
+  AfterViewInit,
+  Inject,
+  PLATFORM_ID,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../../services/producto.service';
 import { Producto } from '../../Interface/producto.interface';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import * as bootstrap from 'bootstrap';
 import { MetodoPagoService } from '../../../services/metodo-pago.service';
 import { MetodoPago } from '../../Interface/metodoPago.interface';
 
@@ -23,7 +25,9 @@ import { MetodoPago } from '../../Interface/metodoPago.interface';
   templateUrl: './venta.component.html',
   styleUrls: ['./venta.component.css'],
 })
-export default class VentaComponent implements OnInit, OnDestroy {
+export default class VentaComponent
+  implements OnInit, OnDestroy, AfterViewInit
+{
   @ViewChild('searchInput') searchInput!: ElementRef;
   @ViewChild('stockToast', { static: true }) stockToast!: ElementRef;
   @ViewChild('detalleVentaModal', { static: true })
@@ -46,34 +50,41 @@ export default class VentaComponent implements OnInit, OnDestroy {
   private modalInstance: any; // Instancia del modal
   private destroy$ = new Subject<void>();
 
-  constructor(private readonly productoService: ProductoService) {
+  constructor(
+    private readonly productoService: ProductoService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     this.loading$ = this.productoService.loading$;
   }
 
   ngOnInit(): void {
     this.focusSearchInput();
-    this.mostrarModalDetalleVenta();
-    this.mostrarToast();
     this.agregarMetodoPago(); // Agregar un método de pago al iniciar
   }
 
   ngAfterViewInit(): void {
-    if (this.stockToast && this.stockToast.nativeElement) {
-      try {
-        this.toastInstance = new bootstrap.Toast(this.stockToast.nativeElement);
-      } catch (error) {
-        console.error('Error al inicializar el toast:', error);
-      }
-    }
+    if (isPlatformBrowser(this.platformId)) {
+      import('bootstrap').then((bootstrap) => {
+        if (this.stockToast && this.stockToast.nativeElement) {
+          try {
+            this.toastInstance = new bootstrap.Toast(
+              this.stockToast.nativeElement
+            );
+          } catch (error) {
+            console.error('Error al inicializar el toast:', error);
+          }
+        }
 
-    if (this.detalleVentaModal && this.detalleVentaModal.nativeElement) {
-      try {
-        this.modalInstance = new bootstrap.Modal(
-          this.detalleVentaModal.nativeElement
-        );
-      } catch (error) {
-        console.error('Error al inicializar el modal:', error);
-      }
+        if (this.detalleVentaModal && this.detalleVentaModal.nativeElement) {
+          try {
+            this.modalInstance = new bootstrap.Modal(
+              this.detalleVentaModal.nativeElement
+            );
+          } catch (error) {
+            console.error('Error al inicializar el modal:', error);
+          }
+        }
+      });
     }
   }
 
@@ -305,5 +316,9 @@ export default class VentaComponent implements OnInit, OnDestroy {
       month: 'long',
       day: 'numeric',
     });
+  }
+
+  private isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
   }
 }
