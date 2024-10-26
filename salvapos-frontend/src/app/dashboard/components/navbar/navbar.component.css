@@ -1,7 +1,9 @@
 :host {
   display: block;
 }
-
+.container-nav{
+  display: none;
+}
 .sidebar {
   width: 250px;
   height: 100vh;
@@ -75,10 +77,36 @@
 
 @media (max-width: 991px) {
   .sidebar {
-    display: none;
+    display:none;
+  }
+  .container-nav{
+    display: flex;
+    
+    text-align: center;
+    align-items: flex-start;
+    background-color: #264ECA;
+    width:  96vw;
+    height: 55px;
+  }
+  .nav-options ul{
+    display: flex;
+  }
+  .nav-options li{
+    list-style-type: none;
+  }
+  .nav-options a{
+    text-decoration: none;
+    color: white;
+    padding: 5px;
   }
 }
-
-
-
-
+@media (max-width: 768px)
+{
+  .container-nav{
+    width: 100vw;
+  }
+  .nav-options a{
+    padding: 5px;
+    font-size: 14px;
+  }
+}
