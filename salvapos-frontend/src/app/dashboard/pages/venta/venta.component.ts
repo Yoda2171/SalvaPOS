@@ -12,11 +12,10 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../../services/producto.service';
-import { Producto } from '../../Interface/producto.interface';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { MetodoPagoService } from '../../../services/metodo-pago.service';
 import { MetodoPago } from '../../Interface/metodoPago.interface';
+import { Pago, DetalleVenta, Producto } from '../../Interface/venta.interface';
 
 @Component({
   selector: 'app-venta',
@@ -33,12 +32,12 @@ export default class VentaComponent
   @ViewChild('detalleVentaModal', { static: true })
   detalleVentaModal!: ElementRef;
 
-  carrito: any[] = [];
+  carrito: DetalleVenta[] = [];
   montoMaximo: number = 100000;
   searchTerm: string = '';
-  productosEncontrados: Producto[] = [];
-  metodosPago: MetodoPago[] = [];
-  metodosDisponibles = [
+  productosEncontrados: any[] = [];
+  pago: Pago[] = [];
+  metodosDisponibles: MetodoPago[] = [
     { id: 1, nombre: 'Efectivo' },
     { id: 2, nombre: 'Tarjeta de debito' },
     { id: 3, nombre: 'Transferencia' },
@@ -48,11 +47,11 @@ export default class VentaComponent
   loading$: Observable<boolean>;
   private toastInstance: any;
   private modalInstance: any; // Instancia del modal
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly productoService: ProductoService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
     this.loading$ = this.productoService.loading$;
   }
@@ -120,7 +119,7 @@ export default class VentaComponent
     this.carrito.forEach((item) => {
       if (item.cantidad > 0) {
         this.productoService
-          .ajustarStock(item.id, item.cantidad)
+          .ajustarStock(item.producto.id, item.cantidad)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             error: (err) => console.error('Error al devolver el stock:', err),
@@ -154,42 +153,45 @@ export default class VentaComponent
   }
 
   agregarAlCarrito(producto: Producto): void {
-    const itemExistente = this.carrito.find((item) => item.id === producto.id);
+    const itemExistente = this.carrito.find(
+      (item) => item.producto.id === producto.id
+    );
 
     if (itemExistente) {
-      if (itemExistente.stockDisponible > 0) {
+      if (producto.cantidad > 0) {
         itemExistente.cantidad++;
-        itemExistente.stockDisponible--;
+        itemExistente.producto.cantidad--; // Reducir el stock disponible
+        itemExistente.subtotal =
+          itemExistente.cantidad * itemExistente.precioUnitario;
 
-        if (producto.id !== undefined) {
-          this.productoService
-            .ajustarStock(producto.id, -1)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe();
-        }
+        // Actualizar el stock en el backend
+        this.productoService
+          .ajustarStock(producto.id, -1)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe();
       } else {
-        this.mostrarToast();
+        this.mostrarToast(); // Mostrar toast si el stock es cero
       }
     } else {
-      if (producto.id === undefined) return;
+      if (producto.cantidad <= 0) {
+        this.mostrarToast(); // Mostrar toast si el producto está fuera de stock
+        return;
+      }
 
-      const nuevoItem = {
-        nombre: producto.nombre,
-        precio: producto.precioVenta,
+      const nuevoItem: DetalleVenta = {
+        producto,
         cantidad: 1,
-        id: producto.id,
-        stockDisponible: producto.cantidad - 1,
+        precioUnitario: producto.precioVenta,
+        subtotal: producto.precioVenta,
       };
+      producto.cantidad--; // Reducir el stock disponible
       this.carrito.push(nuevoItem);
 
+      // Ajustar el stock en el backend
       this.productoService
         .ajustarStock(producto.id, -1)
         .pipe(takeUntil(this.destroy$))
         .subscribe();
-
-      if (nuevoItem.stockDisponible === 0) {
-        this.mostrarToast();
-      }
     }
 
     this.productosEncontrados = [];
@@ -197,66 +199,68 @@ export default class VentaComponent
     this.focusSearchInput();
   }
 
-  aumentarCantidad(item: any) {
-    if (item.stockDisponible > 0) {
+  aumentarCantidad(item: DetalleVenta) {
+    if (item.producto.cantidad > 0) {
       item.cantidad++;
-      item.stockDisponible--;
+      item.producto.cantidad--; // Reducir el stock disponible
+      item.subtotal = item.cantidad * item.precioUnitario;
+
+      // Actualizar el stock en el backend
       this.productoService
-        .ajustarStock(item.id, -1)
+        .ajustarStock(item.producto.id, -1)
         .pipe(takeUntil(this.destroy$))
         .subscribe();
     }
-
-    if (item.stockDisponible == 0) {
-      this.mostrarToast();
+    if (item.producto.cantidad <= 0) {
+      this.mostrarToast(); // Mostrar toast si el producto está fuera de stock
+      return;
     }
-
     this.focusSearchInput();
   }
 
-  disminuirCantidad(item: any) {
+  disminuirCantidad(item: DetalleVenta) {
     if (item.cantidad > 1) {
       item.cantidad--;
-      item.stockDisponible++;
+      item.producto.cantidad++; // Aumentar el stock disponible
+      item.subtotal = item.cantidad * item.precioUnitario;
+
+      // Actualizar el stock en el backend
       this.productoService
-        .ajustarStock(item.id, 1)
+        .ajustarStock(item.producto.id, 1)
         .pipe(takeUntil(this.destroy$))
         .subscribe();
     }
-
     this.focusSearchInput();
   }
 
-  eliminarItem(item: any) {
+  eliminarItem(item: DetalleVenta) {
+    // Ajustar stock al eliminar item
     this.productoService
-      .ajustarStock(item.id, item.cantidad)
+      .ajustarStock(item.producto.id, item.cantidad)
       .pipe(takeUntil(this.destroy$))
       .subscribe();
+
+    // Aumentar el stock disponible en el objeto
+    item.producto.cantidad += item.cantidad;
+
     this.carrito = this.carrito.filter((i) => i !== item);
     this.focusSearchInput();
   }
 
   calcularTotal() {
-    return this.carrito.reduce(
-      (acc, item) => acc + item.precio * item.cantidad,
-      0
-    );
+    return this.carrito.reduce((acc, item) => acc + item.subtotal, 0);
   }
 
   realizarCompra() {
     const total = this.calcularTotal();
-    const totalPagado = this.metodosPago.reduce(
+    const totalPagado = this.pago.reduce(
       (acc, pago) => acc + (pago.monto ?? 0),
       0
     );
 
-    // Validar que se haya seleccionado al menos un método de pago
-
     if (
-      this.metodosPago.length === 0 ||
-      this.metodosPago.some(
-        (pago) => pago.tipo === '' || (pago.monto ?? 0) <= 0
-      )
+      this.pago.length === 0 ||
+      this.pago.some((pago) => (pago.monto ?? 0) <= 0)
     ) {
       alert(
         'Debe seleccionar un método de pago y asegurarse de que el monto sea mayor a 0.'
@@ -264,7 +268,6 @@ export default class VentaComponent
       return;
     }
 
-    // Validar que el monto total pagado cubra el total de la compra
     if (totalPagado < total) {
       alert(
         `El total a pagar es $${total}, pero solo se han ingresado $${totalPagado}.`
@@ -272,11 +275,31 @@ export default class VentaComponent
       return;
     }
 
-    // Si todo es válido, mostrar el detalle de la venta
     this.mostrarModalDetalleVenta();
   }
 
   mostrarModalDetalleVenta() {
+    const venta = {
+      total: this.calcularTotal().toFixed(2),
+      detalles: this.carrito.map((item) => ({
+        cantidad: item.cantidad,
+        precioUnitario: item.precioUnitario,
+        subtotal: item.subtotal,
+        producto: item.producto,
+      })),
+      pagos: this.pago
+        .filter((pago) => (pago.monto ?? 0) > 0)
+        .map((pago) => ({
+          monto: pago.monto?.toFixed(2) ?? '0.00',
+          metodoPago: {
+            id: this.obtenerMetodoPagoId(pago.metodoPago.nombre),
+            nombre: pago.metodoPago.nombre,
+          },
+        })),
+    };
+
+    console.log(venta);
+
     if (this.modalInstance) {
       this.modalInstance.show();
     }
@@ -287,15 +310,18 @@ export default class VentaComponent
   }
 
   agregarMetodoPago() {
-    this.metodosPago.push({ tipo: '', monto: null }); // El monto será null para que el input esté vacío
+    this.pago.push({
+      monto: null,
+      metodoPago: { nombre: '' },
+    });
   }
 
   eliminarMetodoPago(index: number) {
-    this.metodosPago.splice(index, 1);
+    this.pago.splice(index, 1);
   }
 
   resetFormulario() {
-    this.metodosPago = [{ tipo: '', monto: 0 }];
+    this.pago = [];
     this.carrito = [];
     this.searchTerm = '';
     this.focusSearchInput();
@@ -316,6 +342,11 @@ export default class VentaComponent
       month: 'long',
       day: 'numeric',
     });
+  }
+
+  private obtenerMetodoPagoId(nombre: string): number {
+    const metodo = this.metodosDisponibles.find((m) => m.nombre === nombre);
+    return metodo ? metodo.id! : 0;
   }
 
   private isBrowser(): boolean {

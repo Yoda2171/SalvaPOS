@@ -1,19 +1,26 @@
+import { MetodoPago } from './metodoPago.interface';
+
 export interface Venta {
-  id: number;
+  id?: number;
   total: number;
   fecha: Date;
   estado: string;
-  detalles: Detalle[];
-  pagos: string[];
+  detalles: DetalleVenta[];
+  pagos: Pago[];
 }
 
-export interface Detalle {
-  id: number;
-  venta: string;
+export interface DetalleVenta {
+  id?: number;
   producto: Producto;
   cantidad: number;
   precioUnitario: number;
   subtotal: number;
+}
+
+export interface Pago {
+  id?: number;
+  monto?: number | null;
+  metodoPago: MetodoPago;
 }
 
 export interface Producto {
@@ -23,9 +30,4 @@ export interface Producto {
   precioCosto: number;
   precioVenta: number;
   cantidad: number;
-}
-
-export interface Pago {
-  metodoPagoId: number;
-  monto: number;
 }

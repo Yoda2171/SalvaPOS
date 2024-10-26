@@ -73,12 +73,14 @@
         class="row border-bottom py-3 align-items-center"
       >
         <div class="col-4">
-          <p class="mb-0 fw-bold">{{ item.nombre }}</p>
-          <p class="text-success mb-0">En stock: {{ item.stockDisponible }}</p>
+          <p class="mb-0 fw-bold">{{ item.producto.nombre }}</p>
+          <p class="text-success mb-0">
+            En stock: {{ item.producto.cantidad }}
+          </p>
         </div>
         <div class="col-2">
           <p class="text-primary mb-0 fw-bold">
-            {{ item.precio | currency : "CLP" }}
+            {{ item.precioUnitario | currency : "CLP " }}
           </p>
         </div>
         <div class="col-4 d-flex align-items-center justify-content-end">
@@ -97,7 +99,7 @@
           <button
             class="btn btn-outline-primary rounded-circle ms-2"
             (click)="aumentarCantidad(item)"
-            [disabled]="item.stockDisponible == 0"
+            [disabled]="item.producto.cantidad == 0"
           >
             +
           </button>
@@ -111,7 +113,7 @@
       <div class="row mt-3">
         <div class="col text-end">
           <p class="fs-4 fw-bold">
-            Total: {{ calcularTotal() | currency : "CLP" }}
+            Total: {{ calcularTotal() | currency : "CLP " }}
           </p>
         </div>
       </div>
@@ -124,7 +126,7 @@
       </h4>
 
       <!-- Lista de métodos de pago seleccionados -->
-      <div *ngFor="let pago of metodosPago; let i = index" class="mt-3">
+      <div *ngFor="let pago of pago; let i = index" class="mt-3">
         <div class="mb-3">
           <label class="fw-bold">Método de Pago {{ i + 1 }}:</label>
           <div *ngFor="let metodo of metodosDisponibles" class="form-check">
@@ -133,7 +135,7 @@
               type="radio"
               [id]="'metodo-' + i + '-' + metodo.id"
               [value]="metodo.nombre"
-              [(ngModel)]="pago.tipo"
+              [(ngModel)]="pago.metodoPago.nombre"
               name="metodo-{{ i }}"
             />
             <label
@@ -181,6 +183,7 @@
     </div>
   </div>
 </div>
+
 <!-- Modal para mostrar el detalle de la venta -->
 <div
   class="modal fade"
@@ -209,21 +212,19 @@
             *ngFor="let item of carrito"
             class="list-group-item d-flex justify-content-between align-items-center"
           >
-            {{ item.nombre }} - {{ item.cantidad }} x
-            {{ item.precio | currency : "CLP" }}
-            <span class="fw-bold">{{
-              item.cantidad * item.precio | currency : "CLP"
-            }}</span>
+            {{ item.producto.nombre }} - {{ item.cantidad }} x
+            {{ item.precioUnitario | currency : "CLP" }}
+            <span class="fw-bold">{{ item.subtotal | currency : "CLP" }}</span>
           </li>
         </ul>
 
         <h6>Métodos de Pago:</h6>
         <ul class="list-group mb-3">
           <li
-            *ngFor="let pago of metodosPago"
+            *ngFor="let pago of pago"
             class="list-group-item d-flex justify-content-between align-items-center"
           >
-            {{ pago.tipo }}
+            {{ pago.metodoPago.nombre }}
             <span class="fw-bold">{{ pago.monto | currency : "CLP" }}</span>
           </li>
         </ul>
