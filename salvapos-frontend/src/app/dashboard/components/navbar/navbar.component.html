@@ -43,3 +43,30 @@
     </ul>
   </div>
 </nav>
+
+<div class="container-nav">
+  <nav class="navbar-nav">
+    <div class="nav-options">
+      <ul>
+        <li class="nav-item">
+          <a [routerLink] ="['home']" class="nav-link"> Home</a>
+        </li>
+        <li class="nav-item">
+          <a [routerLink]="['inventario']" class="nav-link"> Inventario </a>
+        </li>
+        <li class="nav-item">
+          <a [routerLink]="['reportes']" class="nav-link"> Reportes </a>
+        </li>
+        <li class="nav-item">
+          <a [routerLink] ="['/login']" class="nav-link"> Login </a>
+        </li>
+        <li clas="nav-item">
+          <a [routerLink]="['/register']" class="nav-link"> Registrarse</a>
+        </li>
+        <li clas="nav-item">
+          <a [routerLink]="['logout']" class="nav-link"> Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</div>
