@@ -3,8 +3,6 @@ import { MetodoPago } from './metodoPago.interface';
 export interface Venta {
   id?: number;
   total: number;
-  fecha: Date;
-  estado: string;
   detalles: DetalleVenta[];
   pagos: Pago[];
 }
@@ -30,4 +28,18 @@ export interface Producto {
   precioCosto: number;
   precioVenta: number;
   cantidad: number;
+}
+
+// Nueva interfaz para la estructura que envías a la API
+export interface VentaAPI {
+  total: number;
+  detalles: {
+    productoId: number;
+    cantidad: number;
+    precioUnitario: number;
+  }[];
+  pagos: {
+    metodoPagoId: number;
+    monto?: number | null;
+  }[];
 }

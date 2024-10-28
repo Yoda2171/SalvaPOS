@@ -1,9 +1,23 @@
 <div class="container mt-5 p-4 bg-light rounded shadow-lg">
   <div class="row">
     <div class="col-md-8">
-      <h4 class="mb-4 text-dark border-bottom pb-2 border-primary">
-        Carrito de Compras
-      </h4>
+      <h4 class="mb-4 text-dark border-bottom pb-2 border-primary">Venta</h4>
+
+      <!-- Alert para mensajes de error -->
+      <div
+        *ngIf="alertaError"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+        data-bs-delay="2000"
+      >
+        {{ alertaError }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
 
       <!-- Barra de búsqueda en la parte superior -->
       <div class="mb-3 d-flex">
@@ -33,6 +47,26 @@
           <div class="toast-body">
             Stock agotado. No se puede aumentar la cantidad.
           </div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Toast para notificaciones de éxito -->
+      <div
+        #successToast
+        class="toast align-items-center text-white bg-success border-0 toast position-fixed top-0 end-0 m-3"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        data-bs-delay="2000"
+      >
+        <div class="d-flex">
+          <div class="toast-body">Venta realizada con éxito.</div>
           <button
             type="button"
             class="btn-close btn-close-white me-2 m-auto"
@@ -98,7 +132,7 @@
           />
           <button
             class="btn btn-outline-primary rounded-circle ms-2"
-            (click)="aumentarCantidad(item)"
+            (click)="incrementarCantidad(item, item.producto)"
             [disabled]="item.producto.cantidad == 0"
           >
             +
@@ -176,7 +210,7 @@
       <!-- Botón de compra -->
       <button
         class="btn btn-primary btn-lg w-100 mt-4"
-        (click)="realizarCompra()"
+        (click)="irDetalleCompra()"
       >
         Realizar Venta
       </button>
@@ -239,11 +273,7 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
           Cerrar
         </button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          (click)="imprimirBoleta()"
-        >
+        <button type="button" class="btn btn-primary" (click)="realizarVenta()">
           Cobrar
         </button>
       </div>

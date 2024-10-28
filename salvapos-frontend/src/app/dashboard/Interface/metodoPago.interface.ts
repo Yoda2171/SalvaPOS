@@ -1,4 +1,4 @@
 export interface MetodoPago {
-  id?: number;
+  id?: number | null;
   nombre: string;
 }

@@ -68,7 +68,6 @@ export class CategoriaService {
   }
 
   createCategoria(categoria: Categoria): Observable<Categoria> {
-    console.log(categoria.nombre);
     this.loadingSubject.next(true); // Iniciar el estado de carga
 
     return this.http
@@ -83,8 +82,6 @@ export class CategoriaService {
   updateCategoria(id: number, categoria: Categoria): Observable<Categoria> {
     const url = `${this.apiUrl}/${id}`;
 
-    console.log(categoria.nombre);
-    console.log(url);
     this.loadingSubject.next(true); // Iniciar el estado de carga
 
     return this.http.patch<Categoria>(url, { nombre: categoria.nombre }).pipe(
