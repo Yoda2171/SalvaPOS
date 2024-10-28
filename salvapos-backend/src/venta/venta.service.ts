@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { CreateVentaDto } from './dto/create-venta.dto';
-import { DataSource, Repository } from 'typeorm';
+import { Between, DataSource, Repository } from 'typeorm';
 import { Venta } from './entities/venta.entity';
 import { DetalleVenta } from './entities/detalleVenta.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -174,6 +174,22 @@ export class VentaService {
   async findOne(id: number) {
     return this.ventaRepository.findOne({
       where: { id },
+      relations: ['detalles', 'pagos'],
+    });
+  }
+
+  // Método para obtener el historial de ventas filtrado por fecha
+  async getHistorialVentasPorFecha(fecha: string): Promise<Venta[]> {
+    // Convertir la fecha al formato correcto y crear un rango
+    const [day, month, year] = fecha.split('/');
+    const startDate = new Date(`${year}-${month}-${day}T00:00:00`);
+    const endDate = new Date(`${year}-${month}-${day}T23:59:59`);
+
+    // Filtrar ventas que caen entre el rango de la fecha especificada
+    return this.ventaRepository.find({
+      where: {
+        fecha: Between(startDate, endDate),
+      },
       relations: ['detalles', 'pagos'],
     });
   }

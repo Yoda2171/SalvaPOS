@@ -46,6 +46,14 @@ export const routes: Routes = [
         title: 'Venta',
         loadComponent: () => import('./dashboard/pages/venta/venta.component'),
       },
+      {
+        path: 'historialventa',
+        title: 'HisotorialVenta',
+        loadComponent: () =>
+          import(
+            './dashboard/pages/venta/pages/historialVenta/historialVenta.component'
+          ),
+      },
 
       {
         path: 'reportes',
