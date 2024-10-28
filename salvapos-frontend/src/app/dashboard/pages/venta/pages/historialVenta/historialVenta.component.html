@@ -67,17 +67,49 @@
 
     <!-- Detalles de la Venta Seleccionada -->
     <div class="col-md-6 py-3">
-      <h4 class="mb-3">Ticket {{ ventaSeleccionada?.id }}</h4>
+      <h4
+        class="mb-3"
+        [ngClass]="{
+          'text-decoration-line-through':
+            ventaSeleccionada?.estado === 'devuelta'
+        }"
+      >
+        Ticket {{ ventaSeleccionada?.id }}
+      </h4>
 
       <div *ngIf="ventaSeleccionada">
         <!-- Información de la venta -->
-        <p>
+        <p
+          [ngClass]="{
+            'text-decoration-line-through':
+              ventaSeleccionada.estado === 'devuelta'
+          }"
+        >
           <strong>Cajero:</strong>
           <!-- Cajero Nombre -->
         </p>
-        <p><strong>Cliente:</strong> Público en general</p>
-        <p><strong>Estado:</strong> {{ ventaSeleccionada.estado }}</p>
-        <p>
+        <p
+          [ngClass]="{
+            'text-decoration-line-through':
+              ventaSeleccionada.estado === 'devuelta'
+          }"
+        >
+          <strong>Cliente:</strong> Público en general
+        </p>
+        <p
+          [ngClass]="{
+            'text-decoration-line-through':
+              ventaSeleccionada.estado === 'devuelta'
+          }"
+        >
+          <strong>Estado:</strong> {{ ventaSeleccionada.estado }}
+        </p>
+        <p
+          [ngClass]="{
+            'text-decoration-line-through':
+              ventaSeleccionada.estado === 'devuelta'
+          }"
+        >
           <strong>Fecha:</strong>
           {{ ventaSeleccionada.fecha | date : "dd/MM/yyyy hh:mm a" }}
         </p>
@@ -92,7 +124,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of ventaSeleccionada.detalles">
+            <tr
+              *ngFor="let item of ventaSeleccionada.detalles"
+              [ngClass]="{
+                'text-decoration-line-through':
+                  ventaSeleccionada.estado === 'devuelta'
+              }"
+            >
               <td>{{ item.cantidad }}</td>
               <td>{{ item.producto.nombre }}</td>
               <td>{{ item.subtotal | currency }}</td>
@@ -101,11 +139,22 @@
         </table>
 
         <!-- Información de métodos de pago -->
-        <strong>Métodos de Pago:</strong>
+        <strong
+          [ngClass]="{
+            'text-decoration-line-through':
+              ventaSeleccionada.estado === 'devuelta'
+          }"
+        >
+          Métodos de Pago:
+        </strong>
         <ul class="list-group mb-3">
           <li
             *ngFor="let pago of ventaSeleccionada.pagos"
             class="list-group-item d-flex justify-content-between align-items-center"
+            [ngClass]="{
+              'text-decoration-line-through':
+                ventaSeleccionada.estado === 'devuelta'
+            }"
           >
             {{ pago.metodoPago.nombre }}
             <span class="fw-bold">{{ pago.monto | currency : "CLP" }}</span>
@@ -114,7 +163,13 @@
 
         <!-- Información de pago y total -->
         <div class="d-flex justify-content-end">
-          <p class="fs-5 fw-bold">
+          <p
+            class="fs-5 fw-bold"
+            [ngClass]="{
+              'text-decoration-line-through':
+                ventaSeleccionada.estado === 'devuelta'
+            }"
+          >
             Total: {{ ventaSeleccionada.total | currency : "CLP" }}
           </p>
         </div>
