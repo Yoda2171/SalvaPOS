@@ -52,8 +52,7 @@ export class VentaService {
         }
 
         // Actualizar la cantidad del producto dentro de la transacción
-        producto.cantidad -= detalle.cantidad;
-        await queryRunner.manager.save(producto); // Guardar el cambio en la cantidad dentro de la transacción
+        // Guardar el cambio en la cantidad dentro de la transacción
       }
 
       // Guardar los pagos de la venta

@@ -11,13 +11,17 @@ import { tap, finalize } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class CategoriaService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
   private readonly apiUrl = 'http://[::1]:3000/categoria';
 
   // BehaviorSubjects para el estado de carga y los datos
-  private loadingSubject = new BehaviorSubject<boolean>(false);
-  private categoriasSubject = new BehaviorSubject<Pagination | null>(null);
-  private categoriaSubject = new BehaviorSubject<Categoria | null>(null);
+  private readonly loadingSubject = new BehaviorSubject<boolean>(false);
+  private readonly categoriasSubject = new BehaviorSubject<Pagination | null>(
+    null
+  );
+  private readonly categoriaSubject = new BehaviorSubject<Categoria | null>(
+    null
+  );
 
   // Observables para el estado de carga y los datos
   loading$ = this.loadingSubject.asObservable();
@@ -64,7 +68,6 @@ export class CategoriaService {
   }
 
   createCategoria(categoria: Categoria): Observable<Categoria> {
-    console.log(categoria.nombre);
     this.loadingSubject.next(true); // Iniciar el estado de carga
 
     return this.http
@@ -79,8 +82,6 @@ export class CategoriaService {
   updateCategoria(id: number, categoria: Categoria): Observable<Categoria> {
     const url = `${this.apiUrl}/${id}`;
 
-    console.log(categoria.nombre);
-    console.log(url);
     this.loadingSubject.next(true); // Iniciar el estado de carga
 
     return this.http.patch<Categoria>(url, { nombre: categoria.nombre }).pipe(

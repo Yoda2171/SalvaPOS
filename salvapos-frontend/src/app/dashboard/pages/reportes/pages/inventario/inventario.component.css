@@ -1,3 +1,65 @@
-:host {
-  display: block;
+/* Fondo general */
+.container-fluid {
+  background-color: #f4f6f9;
+  min-height: 100vh;
+}
+
+/* Barra superior */
+.bg-primary {
+  background-color: #007bff !important;
+  color: white;
+}
+
+.bi {
+  font-size: 24px;
+}
+
+.fs-4 {
+  font-size: 1.5rem;
+}
+
+/* Filtros */
+.container {
+  margin-top: 20px;
+}
+
+/* Gráfico */
+/* Ajustar el tamaño del gráfico */
+canvas {
+  max-width: 100%;  /* Asegura que no crezca más allá de su contenedor */
+  height: 300px;    /* Cambia la altura según lo que prefieras */
+  margin-top: 20px; /* Añade espacio en la parte superior */
+}
+
+
+/* Tabla de detalles */
+.table {
+  margin-top: 30px;
+  font-size: 0.9rem;
+}
+
+thead th {
+  font-weight: bold;
+}
+
+tbody td {
+  padding: 10px;
+}
+
+/* Botones */
+.btn-primary {
+  background-color: #007bff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-outline-secondary {
+  border: 1px solid #d1d1d1;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f8f9fa;
 }

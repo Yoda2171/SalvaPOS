@@ -1,86 +1,48 @@
-<div
-  class="container-fluid vh-100 d-flex justify-content-center align-items-center"
->
-  <div class="card shadow p-4" style="width: 450px">
-    <!-- Logo o Imagen de cabecera -->
-    <img
-      src="assets/img/Registro.png"
-      class="card-img-top mb-4 mx-auto d-block"
-      alt="Logo de la Farmacia"
-      style="width: 100px"
-    />
+<!-- Contenedor principal -->
+<div class="container-fluid d-flex justify-content-center align-items-center bg-gradient vh-100">
+  <!-- Formulario de registro -->
+  <div id="registerForm" class="glass-card p-4 rounded-3 shadow-lg" style="max-width: 400px; width: 100%;">
+    <div class="text-center mb-4">
+      <img src="assets/img/Registro.png" alt="Logo" class="img-fluid mb-3" style="width: 80px;">
+      <h3 class="fw-bold">Registrar Nuevo Usuario</h3>
+    </div>
 
-    <!-- Título del formulario -->
-    <h3 class="text-center mb-4">Registrar Nuevo Usuario</h3>
-
-    <!-- Formulario de Registro -->
-    <form (ngSubmit)="onSubmit()">
-      <!-- Nombre completo -->
-      <div class="mb-3">
-        <label for="fullname" class="form-label">Nombre Completo</label>
-        <input
-          type="text"
-          id="fullname"
-          class="form-control"
-          [(ngModel)]="fullname"
-          name="fullname"
-          required
-          placeholder="Ingrese su nombre completo"
-        />
+    <form novalidate>
+      <!-- Campo de Nombre Completo -->
+      <div class="form-floating mb-3">
+        <input type="text" id="fullName" class="form-control" placeholder="Ingrese su nombre completo" required>
+        <label for="fullName"><i class="fas fa-user me-2"></i>Nombre Completo</label>
+        <div class="invalid-feedback">Debe rellenar este campo.</div>
       </div>
 
-      <!-- Correo electrónico -->
-      <div class="mb-3">
-        <label for="email" class="form-label">Correo Electrónico</label>
-        <input
-          type="email"
-          id="email"
-          class="form-control"
-          [(ngModel)]="email"
-          name="email"
-          required
-          placeholder="Ingrese su correo"
-        />
-      </div>
-      <!-- Role -->
-      <div class="mb-3">
-        <label for="role" class="form-label">Rol</label>
-        <input
-          type="text"
-          id="role"
-          class="form-control"
-          [(ngModel)]="role"
-          name="role"
-          required
-          placeholder="Ingrese un rol"
-        />
+      <!-- Campo de Correo Electrónico -->
+      <div class="form-floating mb-3">
+        <input type="email" id="email" class="form-control" placeholder="Ingrese su correo" required>
+        <label for="email"><i class="fas fa-envelope me-2"></i>Correo Electrónico</label>
+        <div class="invalid-feedback">Debe ingresar un correo válido.</div>
       </div>
 
-      <!-- Contraseña -->
-      <div class="mb-3">
-        <label for="password" class="form-label">Contraseña</label>
-        <input
-          type="password"
-          id="password"
-          class="form-control"
-          [(ngModel)]="password"
-          name="password"
-          required
-          placeholder="Ingrese su contraseña"
-        />
+      <!-- Campo de Rol -->
+      <div class="form-floating mb-3">
+        <input type="text" id="role" class="form-control" placeholder="Ingrese un rol" required>
+        <label for="role"><i class="fas fa-briefcase me-2"></i>Rol</label>
+        <div class="invalid-feedback">Debe rellenar este campo.</div>
       </div>
 
-      <!-- Botón de Registrar -->
-      <div class="d-grid gap-2">
-        <button type="submit" class="btn btn-success">Registrar</button>
+      <!-- Campo de Contraseña -->
+      <div class="form-floating mb-4">
+        <input type="password" id="password" class="form-control" placeholder="Ingrese su contraseña" required>
+        <label for="password"><i class="fas fa-lock me-2"></i>Contraseña</label>
+        <div class="invalid-feedback">Debe ingresar una contraseña.</div>
       </div>
 
-      <!-- Enlace a la página de Login -->
-      <div class="text-center mt-3">
-        <a href="/login" class="text-decoration-none"
-          >¿Ya tienes una cuenta? Inicia Sesión</a
-        >
-      </div>
+      <!-- Botón de registrar -->
+      <button type="submit" class="btn btn-success w-100 fw-bold py-2">Registrar</button>
     </form>
+
+    <!-- Enlace para iniciar sesión -->
+    <div class="text-center mt-3">
+      <a href="/login" class="text-decoration-none text-muted">¿Ya tienes una cuenta? Inicia Sesión</a>
+    </div>
   </div>
 </div>

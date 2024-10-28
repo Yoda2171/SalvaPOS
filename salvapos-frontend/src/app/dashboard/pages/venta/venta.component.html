@@ -1,1 +1,282 @@
-<p>venta works!</p>
+<div class="container mt-5 p-4 bg-light rounded shadow-lg">
+  <div class="row">
+    <div class="col-md-8">
+      <h4 class="mb-4 text-dark border-bottom pb-2 border-primary">Venta</h4>
+
+      <!-- Alert para mensajes de error -->
+      <div
+        *ngIf="alertaError"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+        data-bs-delay="2000"
+      >
+        {{ alertaError }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <!-- Barra de búsqueda en la parte superior -->
+      <div class="mb-3 d-flex">
+        <input
+          type="text"
+          class="form-control form-control-lg"
+          placeholder="Buscar productos por nombre o código de barras..."
+          [(ngModel)]="searchTerm"
+          (keydown.enter)="buscarProductos()"
+          #searchInput
+        />
+        <button class="btn btn-primary ms-2" (click)="buscarProductos()">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+
+      <!-- Toast para notificaciones -->
+      <div
+        #stockToast
+        class="toast align-items-center text-white bg-danger border-0 toast position-fixed top-0 end-0 m-3"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        data-bs-delay="2000"
+      >
+        <div class="d-flex">
+          <div class="toast-body">
+            Stock agotado. No se puede aumentar la cantidad.
+          </div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Toast para notificaciones de éxito -->
+      <div
+        #successToast
+        class="toast align-items-center text-white bg-success border-0 toast position-fixed top-0 end-0 m-3"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        data-bs-delay="2000"
+      >
+        <div class="d-flex">
+          <div class="toast-body">Venta realizada con éxito.</div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Indicador de carga -->
+      <div *ngIf="loading$ | async" class="text-center mb-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Cargando...</span>
+        </div>
+      </div>
+
+      <!-- Resultados de búsqueda -->
+      <div *ngIf="productosEncontrados.length > 0" class="mb-3">
+        <ul class="list-group">
+          <li
+            *ngFor="let producto of productosEncontrados"
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ producto.nombre }}
+            <button
+              class="btn btn-primary btn-sm"
+              (click)="agregarAlCarrito(producto)"
+            >
+              Agregar al Carrito
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Listado de productos en el carrito -->
+      <div
+        *ngFor="let item of carrito"
+        class="row border-bottom py-3 align-items-center"
+      >
+        <div class="col-4">
+          <p class="mb-0 fw-bold">{{ item.producto.nombre }}</p>
+          <p class="text-success mb-0">
+            En stock: {{ item.producto.cantidad }}
+          </p>
+        </div>
+        <div class="col-2">
+          <p class="text-primary mb-0 fw-bold">
+            {{ item.precioUnitario | currency : "CLP " }}
+          </p>
+        </div>
+        <div class="col-4 d-flex align-items-center justify-content-end">
+          <button
+            class="btn btn-outline-primary rounded-circle me-2"
+            (click)="disminuirCantidad(item)"
+          >
+            -
+          </button>
+          <input
+            type="text"
+            [(ngModel)]="item.cantidad"
+            class="form-control w-25 text-center"
+            readonly
+          />
+          <button
+            class="btn btn-outline-primary rounded-circle ms-2"
+            (click)="incrementarCantidad(item, item.producto)"
+            [disabled]="item.producto.cantidad == 0"
+          >
+            +
+          </button>
+          <button class="btn ms-2 eliminar-btn" (click)="eliminarItem(item)">
+            <span class="fs-4">🗑️</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Total -->
+      <div class="row mt-3">
+        <div class="col text-end">
+          <p class="fs-4 fw-bold">
+            Total: {{ calcularTotal() | currency : "CLP " }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de métodos de pago -->
+    <div class="col-md-4 bg-white rounded shadow p-4">
+      <h4 class="text-dark border-bottom pb-2 border-primary">
+        Método de Pago
+      </h4>
+
+      <!-- Lista de métodos de pago seleccionados -->
+      <div *ngFor="let pago of pago; let i = index" class="mt-3">
+        <div class="mb-3">
+          <label class="fw-bold">Método de Pago {{ i + 1 }}:</label>
+          <div *ngFor="let metodo of metodosDisponibles" class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              [id]="'metodo-' + i + '-' + metodo.id"
+              [value]="metodo.nombre"
+              [(ngModel)]="pago.metodoPago.nombre"
+              name="metodo-{{ i }}"
+            />
+            <label
+              class="form-check-label"
+              [for]="'metodo-' + i + '-' + metodo.id"
+            >
+              {{ metodo.nombre }}
+            </label>
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="pago.monto"
+            placeholder="Monto"
+            min="0"
+            [value]="pago.monto === null ? '' : pago.monto"
+            required
+          />
+        </div>
+
+        <!-- Botón para eliminar un método de pago -->
+        <button class="btn btn-danger" (click)="eliminarMetodoPago(i)">
+          🗑️ Eliminar
+        </button>
+      </div>
+
+      <!-- Botón para agregar otro método de pago -->
+      <button
+        class="btn btn-outline-primary w-100 mt-3"
+        (click)="agregarMetodoPago()"
+      >
+        Agregar otro método de pago
+      </button>
+
+      <!-- Botón de compra -->
+      <button
+        class="btn btn-primary btn-lg w-100 mt-4"
+        (click)="irDetalleCompra()"
+      >
+        Realizar Venta
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para mostrar el detalle de la venta -->
+<div
+  class="modal fade"
+  #detalleVentaModal
+  tabindex="-1"
+  aria-labelledby="detalleVentaModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detalleVentaModalLabel">
+          Detalle de la Venta
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <h6>Productos:</h6>
+        <ul class="list-group mb-3">
+          <li
+            *ngFor="let item of carrito"
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ item.producto.nombre }} - {{ item.cantidad }} x
+            {{ item.precioUnitario | currency : "CLP" }}
+            <span class="fw-bold">{{ item.subtotal | currency : "CLP" }}</span>
+          </li>
+        </ul>
+
+        <h6>Métodos de Pago:</h6>
+        <ul class="list-group mb-3">
+          <li
+            *ngFor="let pago of pago"
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ pago.metodoPago.nombre }}
+            <span class="fw-bold">{{ pago.monto | currency : "CLP" }}</span>
+          </li>
+        </ul>
+
+        <div class="d-flex justify-content-end">
+          <p class="fs-5 fw-bold">
+            Total: {{ calcularTotal() | currency : "CLP" }}
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="realizarVenta()">
+          Cobrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

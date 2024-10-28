@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 // Definimos las rutas de la aplicación
 export const routes: Routes = [
@@ -45,6 +46,7 @@ export const routes: Routes = [
         title: 'Venta',
         loadComponent: () => import('./dashboard/pages/venta/venta.component'),
       },
+
       {
         path: 'reportes',
         title: 'Reportes',
