@@ -29,4 +29,24 @@ export class VentaService {
       })
     );
   }
+
+  obtenerVentasPorFecha(fecha: string): Observable<Venta[]> {
+    this.loadingSubject.next(true); // Iniciar el estado de carga
+    const url = `${this.apiUrl}?fecha=${fecha}`; // Construir la URL para la solicitud
+    return this.http.get<Venta[]>(url).pipe(
+      tap(() => {
+        this.loadingSubject.next(false); // Finalizar el estado de carga
+      })
+    );
+  }
+
+  devolucionVenta(ventaId: string): Observable<Venta> {
+    this.loadingSubject.next(true); // Iniciar el estado de carga
+    const url = `${this.apiUrl}/${ventaId}/devolucion`; // Construir la URL para la solicitud
+    return this.http.delete<Venta>(url, {}).pipe(
+      tap(() => {
+        this.loadingSubject.next(false); // Finalizar el estado de carga
+      })
+    );
+  }
 }

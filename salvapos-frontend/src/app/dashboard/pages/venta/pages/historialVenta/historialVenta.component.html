@@ -1,0 +1,212 @@
+<app-navabar-venta></app-navabar-venta>
+<div class="container mt-3">
+  <div class="row">
+    <!-- Historial de Ventas -->
+    <div class="col-md-6 border-end">
+      <h4 class="mb-3">Historial de Ventas</h4>
+
+      <!-- Indicador de Carga -->
+      <div *ngIf="loading$ | async" class="text-center mb-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+
+      <!-- Barra de búsqueda -->
+      <div class="input-group mb-3">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por ID de venta o nombre del ticket..."
+          [(ngModel)]="searchTerm"
+        />
+        <button class="btn btn-outline-primary" (click)="buscarVentas()">
+          <i class="fa-solid fa-search"></i>
+        </button>
+      </div>
+
+      <!-- Selección de fecha -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <label for="fecha" class="form-label">Del día:</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="selectedDate"
+            (focus)="convertToDateInput($event)"
+            (blur)="convertToTextInput()"
+            placeholder="DD/MM/YYYY"
+          />
+        </div>
+        <button class="btn btn-secondary" (click)="setToday()">Hoy</button>
+      </div>
+
+      <!-- Lista de ventas con scroll -->
+      <div style="max-height: 650px; overflow-y: auto">
+        <ul class="list-group">
+          <li
+            *ngFor="let venta of ventas"
+            class="list-group-item d-flex justify-content-between align-items-center"
+            (click)="seleccionarVenta(venta)"
+            [ngClass]="{
+              'text-decoration-line-through': venta.estado === 'devuelta'
+            }"
+          >
+            <div>
+              <strong>ID Venta: {{ venta.id }}</strong>
+              <p class="mb-0 text-muted">
+                {{ venta.fecha | date : "hh:mm a" }} -
+                {{ venta.cantidad }} productos
+              </p>
+            </div>
+            <span class="badge bg-primary">{{ venta.total | currency }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Detalles de la Venta Seleccionada -->
+    <div class="col-md-6 py-3">
+      <h4 class="mb-3">Ticket {{ ventaSeleccionada?.id }}</h4>
+
+      <div *ngIf="ventaSeleccionada">
+        <!-- Información de la venta -->
+        <p>
+          <strong>Cajero:</strong>
+          <!-- Cajero Nombre -->
+        </p>
+        <p><strong>Cliente:</strong> Público en general</p>
+        <p><strong>Estado:</strong> {{ ventaSeleccionada.estado }}</p>
+        <p>
+          <strong>Fecha:</strong>
+          {{ ventaSeleccionada.fecha | date : "dd/MM/yyyy hh:mm a" }}
+        </p>
+
+        <!-- Detalles de productos -->
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Cant.</th>
+              <th>Descripción</th>
+              <th>Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of ventaSeleccionada.detalles">
+              <td>{{ item.cantidad }}</td>
+              <td>{{ item.producto.nombre }}</td>
+              <td>{{ item.subtotal | currency }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Información de métodos de pago -->
+        <strong>Métodos de Pago:</strong>
+        <ul class="list-group mb-3">
+          <li
+            *ngFor="let pago of ventaSeleccionada.pagos"
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ pago.metodoPago.nombre }}
+            <span class="fw-bold">{{ pago.monto | currency : "CLP" }}</span>
+          </li>
+        </ul>
+
+        <!-- Información de pago y total -->
+        <div class="d-flex justify-content-end">
+          <p class="fs-5 fw-bold">
+            Total: {{ ventaSeleccionada.total | currency : "CLP" }}
+          </p>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="d-flex justify-content-start">
+          <button
+            class="btn btn-secondary me-2"
+            (click)="mostrarConfirmacionDevolucion()"
+            [disabled]="ventaSeleccionada.estado === 'devuelta'"
+          >
+            Devolver Venta
+          </button>
+          <button
+            class="btn btn-secondary me-2"
+            [disabled]="ventaSeleccionada.estado === 'devuelta'"
+          >
+            Cancelar Venta
+          </button>
+          <button
+            class="btn btn-primary me-2"
+            [disabled]="ventaSeleccionada.estado === 'devuelta'"
+          >
+            Facturar
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="!ventaSeleccionada" class="alert alert-info">
+        Seleccione una venta para ver los detalles.
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación para Devolver Venta -->
+  <div
+    #confirmDevolucionModal
+    class="modal fade"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar Devolución</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Está seguro de que desea devolver esta venta?</p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="confirmarDevolucionVenta()"
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de Éxito -->
+  <div
+    #successToast
+    class="toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    data-bs-delay="3000"
+  >
+    <div class="d-flex">
+      <div class="toast-body">La venta ha sido devuelta exitosamente.</div>
+      <button
+        type="button"
+        class="btn-close btn-close-white me-2 m-auto"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+  </div>
+</div>

@@ -25,11 +25,19 @@ import {
 } from '../../Interface/venta.interface';
 import { VentaService } from '../../../services/venta.service';
 import { Router, RouterModule } from '@angular/router';
+import ReporteVentaComponent from '../reportes/pages/reporteVenta/reporteVenta.component';
+import { NavabarVentaComponent } from '../../components/navabarVenta/navabarVenta.component';
 
 @Component({
   selector: 'app-venta',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    ReporteVentaComponent,
+    NavabarVentaComponent,
+  ],
   templateUrl: './venta.component.html',
   styleUrls: ['./venta.component.css'],
 })
