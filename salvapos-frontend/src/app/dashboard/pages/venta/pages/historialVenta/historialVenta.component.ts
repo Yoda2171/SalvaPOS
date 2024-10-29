@@ -35,7 +35,7 @@ export default class HistorialVentaComponent implements AfterViewInit {
 
   constructor(
     private readonly ventaService: VentaService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
     this.loading$ = this.ventaService.loading$;
   }
