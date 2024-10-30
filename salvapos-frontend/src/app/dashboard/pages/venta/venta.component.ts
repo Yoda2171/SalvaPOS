@@ -22,11 +22,14 @@ import {
   DetalleVenta,
   Producto,
   VentaAPI,
+  Ventaboleta,
+  Venta,
 } from '../../Interface/venta.interface';
 import { VentaService } from '../../../services/venta.service';
 import { Router, RouterModule } from '@angular/router';
 import ReporteVentaComponent from '../reportes/pages/reporteVenta/reporteVenta.component';
 import { NavabarVentaComponent } from '../../components/navabarVenta/navabarVenta.component';
+import { ImpresoraService } from '../../../services/impresora.service';
 
 @Component({
   selector: 'app-venta',
@@ -71,12 +74,14 @@ export default class VentaComponent
   private modalInstance: any;
 
   alertaError: string | null = null;
+  private ventaId: any;
 
   private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly productoService: ProductoService,
     private readonly ventaService: VentaService,
+    private readonly impresoraService: ImpresoraService,
     private readonly cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
@@ -295,8 +300,6 @@ export default class VentaComponent
         productoId: item.producto.id,
         cantidad: item.cantidad,
         precioUnitario: item.precioUnitario,
-        subtotal: item.subtotal,
-        producto: item.producto,
       })),
       pagos: this.pago.map((pago) => ({
         metodoPagoId: this.obtenerMetodoPagoId(pago.metodoPago.nombre),
@@ -305,20 +308,18 @@ export default class VentaComponent
     };
 
     this.ventaService.createVenta(venta).subscribe({
-      next: () => {
-        this.mostrarSuccessToast();
+      next: (respuestaVenta: Venta) => {
+        this.ventaId = respuestaVenta.id; // Almacenar el ID de la venta
+        this.imprimirBoleta();
         this.modalInstance.hide();
+        this.resetFormulario(); // Llama al método para imprimir la boleta después de realizar la venta
       },
       error: (error) => {
         console.error('Error al realizar la venta:', error);
         alert('Hubo un error al procesar la venta.');
       },
     });
-
-    this.resetFormulario();
-    this.focusSearchInput();
   }
-
   // Métodos de Validación
   private validarMetodoPago(totalPagado: number, total: number): boolean {
     if (
@@ -328,6 +329,10 @@ export default class VentaComponent
       this.mostrarErrorAlert(
         'Debe seleccionar un método de pago y asegurarse de que el monto sea mayor a 0.'
       );
+      return false;
+    }
+    if (this.pago.some((pago) => pago.metodoPago.nombre === '')) {
+      this.mostrarErrorAlert('Debe seleccionar un método de pago.');
       return false;
     }
 
@@ -354,6 +359,10 @@ export default class VentaComponent
     this.pago = [];
     this.carrito = [];
     this.searchTerm = '';
+    this.ventaId = null;
+    this.productosEncontrados = [];
+    this.focusSearchInput();
+    this.cdr.detectChanges(); // Vuelve a enfocar el input de búsqueda
   }
 
   cerrarMensajeError() {
@@ -374,5 +383,49 @@ export default class VentaComponent
     return metodo && metodo.id !== undefined && metodo.id !== null
       ? metodo.id
       : 0;
+  }
+
+  private imprimirBoleta(): void {
+    const contenidoBoleta = this.generarContenidoBoleta(); // Genera el contenido formateado
+    const nombreImpresora = 'ImpresoraTermica'; // Reemplaza con el nombre real de la impresora
+
+    this.impresoraService
+      .imprimirBoleta(nombreImpresora, contenidoBoleta)
+      .then(() => {
+        this.modalInstance.hide(); // Cerrar el modal después de imprimir
+        this.resetFormulario(); // Limpiar el formulario de venta
+        this.mostrarSuccessToast(); // Mostrar un mensaje de éxito si deseas
+      })
+      .catch((error) => {
+        console.error('Error al imprimir la boleta:', error);
+        alert('Hubo un error al intentar imprimir la boleta.');
+      });
+  }
+
+  private generarContenidoBoleta(): string {
+    const encabezado = `R.U.T.: 77.163.978-K\nBOLETA ELECTRONICA\n\nINVERSIONES C&C SPA\nVENTA AL POR MENOR DE PRODUCTOS FARMACEUTICOS\nAV SIMON BOLIVAR 4109 MAIPU\n\n`;
+    const fechaObjeto = new Date();
+    const fechaFormateada = fechaObjeto.toLocaleDateString('es-CL');
+    const horaFormateada = fechaObjeto.toLocaleTimeString('es-CL', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    });
+    const fecha = `Emision: ${fechaFormateada} ${horaFormateada}\n\n`;
+    const idVenta = `Ticket: ${this.ventaId}\n\n`; // Agregar el ID de la venta
+    const items = this.carrito
+      .map(
+        (item) =>
+          `${item.producto.nombre}\t${
+            item.cantidad
+          } x ${item.precioUnitario.toFixed(2)}\t${item.subtotal.toFixed(2)}`
+      )
+      .join('\n');
+    const total = `\nNeto: ${(this.calcularTotal() * 0.81).toFixed(2)}\nIVA: ${(
+      this.calcularTotal() * 0.19
+    ).toFixed(2)}\nTotal: ${this.calcularTotal().toFixed(2)}\n`;
+
+    return `${encabezado}${fecha}${idVenta}${items}${total}`;
   }
 }

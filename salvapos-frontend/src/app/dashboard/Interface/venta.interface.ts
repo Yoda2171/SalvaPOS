@@ -32,12 +32,23 @@ export interface Producto {
 
 // Nueva interfaz para la estructura que envías a la API
 export interface VentaAPI {
+  id?: number;
   total: number;
   detalles: {
     productoId: number;
     cantidad: number;
     precioUnitario: number;
   }[];
+  pagos: {
+    metodoPagoId: number;
+    monto?: number | null;
+  }[];
+}
+
+export interface Ventaboleta {
+  id?: number;
+  total: number;
+  detalles: DetalleVenta[];
   pagos: {
     metodoPagoId: number;
     monto?: number | null;

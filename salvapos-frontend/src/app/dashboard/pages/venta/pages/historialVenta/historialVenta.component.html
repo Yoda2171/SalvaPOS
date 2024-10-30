@@ -186,8 +186,9 @@
           <button
             class="btn btn-secondary me-2"
             [disabled]="ventaSeleccionada.estado === 'devuelta'"
+            (click)="imprimirBoleta()"
           >
-            Cancelar Venta
+            Imprimir Boleta
           </button>
           <button
             class="btn btn-primary me-2"

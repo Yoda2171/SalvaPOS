@@ -19,6 +19,10 @@ export class NavbarComponent {
     .filter((route) => !route.path?.includes(':'))
     .filter((route) => !route.path?.includes('addproduct'))
     .filter((route) => !route.path?.includes('historialventa'))
+    .filter((route) => !route.path?.includes('reportesinvetario'))
+    .filter((route) => !route.path?.includes('reportesventa'))
+    .filter((route) => !route.path?.includes('reportescategoria'))
+    .filter((route) => !route.path?.includes('reportesmetodopago'))
     .filter((route) => !route.path?.includes('categoria'))
     .filter((route) => route.title);
 

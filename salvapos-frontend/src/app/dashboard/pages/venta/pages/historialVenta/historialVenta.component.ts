@@ -12,6 +12,7 @@ import { NavabarVentaComponent } from '../../../../components/navabarVenta/navab
 import { FormsModule } from '@angular/forms';
 import { VentaService } from '../../../../../services/venta.service';
 import { Observable } from 'rxjs';
+import { ImpresoraService } from '../../../../../services/impresora.service';
 
 @Component({
   selector: 'app-historial-venta',
@@ -35,6 +36,7 @@ export default class HistorialVentaComponent implements AfterViewInit {
 
   constructor(
     private readonly ventaService: VentaService,
+    private readonly impresoraService: ImpresoraService,
     @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
     this.loading$ = this.ventaService.loading$;
@@ -127,5 +129,47 @@ export default class HistorialVentaComponent implements AfterViewInit {
         },
       });
     }
+  }
+
+  imprimirBoleta(): void {
+    const contenidoBoleta = this.generarContenidoBoleta(); // Genera el contenido formateado
+    const nombreImpresora = 'ImpresoraTermica'; // Reemplaza con el nombre real de la impresora
+
+    this.impresoraService
+      .imprimirBoleta(nombreImpresora, contenidoBoleta)
+      .catch((error) => {
+        console.error('Error al imprimir la boleta:', error);
+        alert('Hubo un error al intentar imprimir la boleta.');
+      });
+  }
+
+  private generarContenidoBoleta(): string {
+    console.log(this.ventaSeleccionada);
+    const encabezado = `R.U.T.: 77.163.978-K\nBOLETA ELECTRONICA\n\nINVERSIONES C&C SPA\nVENTA AL POR MENOR DE PRODUCTOS FARMACEUTICOS\nAV SIMON BOLIVAR 4109 MAIPU\n\n`;
+
+    const fechaObjeto = new Date(this.ventaSeleccionada.fecha);
+    const fechaFormateada = fechaObjeto.toLocaleDateString('es-CL');
+    const horaFormateada = fechaObjeto.toLocaleTimeString('es-CL', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    });
+    const fecha = `Emision: ${fechaFormateada} ${horaFormateada}\n\n`;
+
+    const idVenta = `Ticket: ${this.ventaSeleccionada.id}\n\n`;
+    const items = this.ventaSeleccionada.detalles
+      .map(
+        (item: any) =>
+          `${item.producto.nombre}\t${item.cantidad} x ${item.precioUnitario}\t${item.subtotal}`
+      )
+      .join('\n');
+    const total = `\nNeto: ${(this.ventaSeleccionada.total * 0.81).toFixed(
+      2
+    )}\nIVA: ${(this.ventaSeleccionada.total * 0.19).toFixed(2)}\nTotal: ${
+      this.ventaSeleccionada.total
+    }\n`;
+
+    return `${encabezado}${fecha}${idVenta}${items}${total}`;
   }
 }
