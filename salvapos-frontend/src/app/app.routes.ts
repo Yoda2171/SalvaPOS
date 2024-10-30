@@ -59,8 +59,38 @@ export const routes: Routes = [
         path: 'reportes',
         title: 'Reportes',
         loadComponent: () =>
+          import('./dashboard/pages/reportes/reportes.component'),
+      },
+      {
+        path: 'reportesventa',
+        title: 'Reportes Venta',
+        loadComponent: () =>
           import(
             './dashboard/pages/reportes/pages/reporteVenta/reporteVenta.component'
+          ),
+      },
+      {
+        path: 'reportesinvetario',
+        title: 'Reportes Inventario',
+        loadComponent: () =>
+          import(
+            './dashboard/pages/reportes/pages/inventario/inventario.component'
+          ),
+      },
+      {
+        path: 'reportescategoria',
+        title: 'Reportes Categoria',
+        loadComponent: () =>
+          import(
+            './dashboard/pages/reportes/pages/reporteCategoria/reporteCategoria.component'
+          ),
+      },
+      {
+        path: 'reportesmetodopago',
+        title: 'Reportes Metodos de pago',
+        loadComponent: () =>
+          import(
+            './dashboard/pages/reportes/pages/reporteMetodoPago/reporteMetodoPago.component'
           ),
       },
       // Redirigir desde 'dashboard' a 'dashboard/home' si la ruta está vacía
