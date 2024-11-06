@@ -25,7 +25,8 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DATABASE_USERNAME, // Usuario de MySQL
       password: process.env.DATABASE_PASSWORD, // Contraseña de MySQL
       database: process.env.DATABASE_NAME, // Nombre de la base de datos
-      autoLoadEntities: true, // Carga automáticamente las entidades de TypeORM
+      autoLoadEntities: true,
+      timezone: 'Z',
       synchronize: true, // Sincroniza la base de datos según las entidades de TypeORM
     }),
     UsersModule,
