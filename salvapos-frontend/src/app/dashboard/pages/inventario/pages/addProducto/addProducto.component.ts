@@ -45,10 +45,19 @@ export default class AddProductoComponent implements OnInit {
     this.productoForm = this.fb.group({
       nombre: ['', Validators.required],
       codigoBarras: ['', Validators.required],
-      categoriaId: [[Validators.required, Validators.min(1)]], // Initialize with 0 and treat as a number
-      cantidad: [[Validators.required, Validators.min(1)]],
-      precioCosto: [[Validators.required, Validators.min(0.01)]],
-      precioVenta: [[Validators.required, Validators.min(0.01)]],
+      categoriaId: [null, [Validators.required, Validators.min(1)]], // Initialize with 0 and treat as a number
+      cantidad: [
+        null,
+        [Validators.required, Validators.min(1), Validators.max(1000)],
+      ],
+      precioCosto: [
+        null,
+        [Validators.required, Validators.min(1), Validators.max(10000000)],
+      ],
+      precioVenta: [
+        null,
+        [Validators.required, Validators.min(1), Validators.max(10000000)],
+      ],
     });
 
     // Load categories

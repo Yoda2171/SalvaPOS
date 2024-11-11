@@ -48,9 +48,18 @@ export default class EditProductoComponent implements OnInit {
       nombre: ['', Validators.required],
       codigoBarras: ['', Validators.required],
       categoriaId: [null, [Validators.required, Validators.min(1)]],
-      cantidad: [null, [Validators.required, Validators.min(1), Validators.max(1000000)]],
-      precioCosto: [null, [Validators.required, Validators.min(1), Validators.max(100000)]],
-      precioVenta: [null, [Validators.required, Validators.min(1), Validators.max(100000)]],
+      cantidad: [
+        null,
+        [Validators.required, Validators.min(1), Validators.max(1000)],
+      ],
+      precioCosto: [
+        null,
+        [Validators.required, Validators.min(1), Validators.max(10000000)],
+      ],
+      precioVenta: [
+        null,
+        [Validators.required, Validators.min(1), Validators.max(10000000)],
+      ],
     });
 
     this.productoId = +this.route.snapshot.paramMap.get('id')!;
