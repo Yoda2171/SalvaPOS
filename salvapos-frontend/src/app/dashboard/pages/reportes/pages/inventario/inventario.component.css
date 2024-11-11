@@ -1,65 +1,97 @@
-/* Fondo general */
-.container-fluid {
-  background-color: #f4f6f9;
-  min-height: 100vh;
-}
-
-/* Barra superior */
-.bg-primary {
-  background-color: #007bff !important;
-  color: white;
-}
-
-.bi {
-  font-size: 24px;
-}
-
-.fs-4 {
-  font-size: 1.5rem;
-}
-
-/* Filtros */
+/* Contenedor principal */
 .container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Títulos */
+h2, h4 {
+  color: #1a73e8;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 1.8em;
+}
+
+h4 {
+  font-size: 1.5em;
+}
+
+/* Selector de fecha */
+#date {
+  max-width: 200px;
+  margin: 0 auto;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Tabla de inventario */
+.table {
   margin-top: 20px;
 }
 
-/* Gráfico */
-/* Ajustar el tamaño del gráfico */
-canvas {
-  max-width: 100%;  /* Asegura que no crezca más allá de su contenedor */
-  height: 300px;    /* Cambia la altura según lo que prefieras */
-  margin-top: 20px; /* Añade espacio en la parte superior */
+.table thead {
+  background-color: #1a73e8;
+  color: white;
 }
 
-
-/* Tabla de detalles */
-.table {
-  margin-top: 30px;
-  font-size: 0.9rem;
+.table th, .table td {
+  text-align: center;
+  vertical-align: middle;
 }
 
-thead th {
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f9f9f9;
+}
+
+.table-striped tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.table th {
   font-weight: bold;
+  font-size: 1em;
 }
 
-tbody td {
+/* Gráfico del inventario */
+canvas {
+  margin-top: 30px;
+  border: 1px solid #e0e0e0;
   padding: 10px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
 }
 
-/* Botones */
-.btn-primary {
-  background-color: #007bff;
+/* Botón de acción (si decides agregar uno en el futuro) */
+button {
+  background-color: #1a73e8;
+  color: white;
   border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.btn-primary:hover {
-  background-color: #0056b3;
+button:hover {
+  background-color: #1557b6;
 }
 
-.btn-outline-secondary {
-  border: 1px solid #d1d1d1;
+/* Centrado de texto */
+.text-center {
+  text-align: center;
 }
 
-.btn-outline-secondary:hover {
-  background-color: #f8f9fa;
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  #date {
+    width: 100%;
+  }
 }

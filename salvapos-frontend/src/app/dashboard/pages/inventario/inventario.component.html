@@ -131,7 +131,28 @@
                 id="cantidadAjuste"
                 class="form-control"
                 formControlName="cantidadAjuste"
+                [ngClass]="{
+                  'is-invalid':
+                    stockForm.get('cantidadAjuste')?.invalid &&
+                    stockForm.get('cantidadAjuste')?.touched
+                }"
               />
+              <!-- Mensaje de error de validación -->
+              <div
+                *ngIf="
+                  stockForm.get('cantidadAjuste')?.invalid &&
+                  stockForm.get('cantidadAjuste')?.touched
+                "
+                class="invalid-feedback"
+              >
+                <span
+                  *ngIf="stockForm.get('cantidadAjuste')?.errors?.['required']"
+                  >Este campo es obligatorio.</span
+                >
+                <span *ngIf="stockForm.get('cantidadAjuste')?.errors?.['min']"
+                  >Debe ingresar una cantidad mayor a cero.</span
+                >
+              </div>
             </div>
           </form>
         </div>
@@ -146,6 +167,7 @@
           <button
             type="button"
             class="btn btn-primary"
+            [disabled]="stockForm.invalid"
             (click)="ajustarStock()"
           >
             Guardar Cambios
