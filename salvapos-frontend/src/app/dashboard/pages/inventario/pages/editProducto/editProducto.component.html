@@ -1,15 +1,12 @@
 <div class="container-fluid vh-100">
-  <!-- Formulario de editar producto -->
   <div class="container mt-5">
     <div class="card shadow-sm p-4">
-      <h3 class="mb-3">Editar Producto</h3>
-      <p class="text-muted">
-        *Todos los campos son obligatorios, excepto los mencionados como
-        (opcional).
+      <h3 class="mb-3 text-center">Editar Producto</h3>
+      <p class="text-muted text-center">
+        *Todos los campos son obligatorios, excepto los mencionados como .
       </p>
 
       <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
-        <!-- Indicador de carga -->
         <div *ngIf="loading$ | async" class="text-center">
           <div class="spinner-border" role="status">
             <span class="visually-hidden">Loading...</span>
@@ -27,7 +24,11 @@
               class="form-control"
               placeholder="Ingresa el nombre del producto"
               required
+              [ngClass]="{'is-invalid': productoForm.get('nombre')?.invalid && productoForm.get('nombre')?.touched}"
             />
+            <div *ngIf="productoForm.get('nombre')?.invalid && productoForm.get('nombre')?.touched" class="invalid-feedback">
+              El nombre del producto es obligatorio.
+            </div>
           </div>
           <div class="col-md-6">
             <label for="codigoBarras" class="form-label">Código de barra</label>
@@ -38,11 +39,15 @@
               class="form-control"
               placeholder="Ingresa el código de barra"
               required
+              [ngClass]="{'is-invalid': productoForm.get('codigoBarras')?.invalid && productoForm.get('codigoBarras')?.touched}"
             />
+            <div *ngIf="productoForm.get('codigoBarras')?.invalid && productoForm.get('codigoBarras')?.touched" class="invalid-feedback">
+              El código de barras es obligatorio.
+            </div>
           </div>
         </div>
 
-        <!-- Fila para categorias y cantidad -->
+        <!-- Fila para categorías y cantidad -->
         <div class="row mb-3" *ngIf="!(loading$ | async)">
           <div class="col-md-6">
             <label for="categoriaId" class="form-label">Categorías</label>
@@ -51,15 +56,16 @@
               formControlName="categoriaId"
               class="form-select"
               required
+              [ngClass]="{'is-invalid': productoForm.get('categoriaId')?.invalid && productoForm.get('categoriaId')?.touched}"
             >
               <option value="0">- Selecciona una categoría -</option>
-              <option
-                *ngFor="let categoria of categorias$ | async"
-                [value]="categoria.id"
-              >
+              <option *ngFor="let categoria of categorias$ | async" [value]="categoria.id">
                 {{ categoria.nombre }}
               </option>
             </select>
+            <div *ngIf="productoForm.get('categoriaId')?.invalid && productoForm.get('categoriaId')?.touched" class="invalid-feedback">
+              La categoría es obligatoria.
+            </div>
           </div>
           <div class="col-md-6">
             <label for="cantidad" class="form-label">Cantidad</label>
@@ -70,7 +76,13 @@
               class="form-control"
               placeholder="Ingresa la cantidad"
               required
+              [ngClass]="{'is-invalid': productoForm.get('cantidad')?.invalid && productoForm.get('cantidad')?.touched}"
             />
+            <div *ngIf="productoForm.get('cantidad')?.invalid && productoForm.get('cantidad')?.touched" class="invalid-feedback">
+              <span *ngIf="productoForm.get('cantidad')?.errors?.['required']">La cantidad es obligatoria.</span>
+              <span *ngIf="productoForm.get('cantidad')?.errors?.['min']">Debe ser al menos 1.</span>
+              <span *ngIf="productoForm.get('cantidad')?.errors?.['max']">No debe exceder 1,000,000.</span>
+            </div>
           </div>
         </div>
 
@@ -85,7 +97,13 @@
               class="form-control"
               placeholder="Ingresa el precio costo"
               required
+              [ngClass]="{'is-invalid': productoForm.get('precioCosto')?.invalid && productoForm.get('precioCosto')?.touched}"
             />
+            <div *ngIf="productoForm.get('precioCosto')?.invalid && productoForm.get('precioCosto')?.touched" class="invalid-feedback">
+              <span *ngIf="productoForm.get('precioCosto')?.errors?.['required']">El precio costo es obligatorio.</span>
+              <span *ngIf="productoForm.get('precioCosto')?.errors?.['min']">Debe ser mayor a 0.</span>
+              <span *ngIf="productoForm.get('precioCosto')?.errors?.['max']">No debe exceder 100,000.</span>
+            </div>
           </div>
           <div class="col-md-6">
             <label for="precioVenta" class="form-label">Precio Venta</label>
@@ -96,13 +114,16 @@
               class="form-control"
               placeholder="Ingresa el precio venta"
               required
+              [ngClass]="{'is-invalid': productoForm.get('precioVenta')?.invalid && productoForm.get('precioVenta')?.touched}"
             />
+            <div *ngIf="productoForm.get('precioVenta')?.invalid && productoForm.get('precioVenta')?.touched" class="invalid-feedback">
+              <span *ngIf="productoForm.get('precioVenta')?.errors?.['required']">El precio venta es obligatorio.</span>
+              <span *ngIf="productoForm.get('precioVenta')?.errors?.['min']">Debe ser mayor a 0.</span>
+              <span *ngIf="productoForm.get('precioVenta')?.errors?.['max']">No debe exceder 100,000.</span>
+            </div>
           </div>
         </div>
 
-        <!-- Fila para descripción del producto -->
-
-        <!-- Botón para guardar cambios -->
         <div class="d-grid" *ngIf="!(loading$ | async)">
           <button
             type="submit"

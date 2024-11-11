@@ -62,9 +62,12 @@ export default class InventarioComponent implements OnInit {
   ngOnInit(): void {
     this.cargarProductos(this.searchTerm, this.currentPage);
 
-    // Inicializar el formulario de ajuste de stock
+    // Inicializar el formulario de ajuste de stock con validaciones
     this.stockForm = this.fb.group({
-      cantidadAjuste: [0, [Validators.required]],
+      cantidadAjuste: [
+        null,
+        [Validators.required, Validators.min(1)], // Validación para campo requerido y mínimo de 1
+      ],
     });
 
     // Check if window is defined before using it
