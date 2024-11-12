@@ -25,6 +25,7 @@ import { ImpresoraService } from '../../../../../services/impresora.service';
 export default class HistorialVentaComponent implements AfterViewInit {
   searchTerm: string = '';
   selectedDate: string = ''; // Formato ISO para el input de fecha
+  internalDate: string = '';
   ventas: any[] = []; // Lista de ventas para mostrar
   ventaSeleccionada: any = null;
   loading$: Observable<boolean>;
@@ -67,24 +68,12 @@ export default class HistorialVentaComponent implements AfterViewInit {
       });
   }
 
-  convertToTextInput(): void {
-    const inputElement = document.querySelector(
-      'input[type="date"]'
-    ) as HTMLInputElement;
-    if (inputElement && inputElement.value) {
-      const [year, month, day] = inputElement.value.split('-');
+  onDateChange(newDate: string): void {
+    if (newDate) {
+      // Convierte la fecha de YYYY-MM-DD a DD/MM/YYYY
+      const [year, month, day] = newDate.split('-');
       this.selectedDate = `${day}/${month}/${year}`;
-      inputElement.type = 'text';
-    }
-    this.buscarVentas();
-  }
-
-  convertToDateInput(event: FocusEvent): void {
-    const inputElement = event.target as HTMLInputElement;
-    inputElement.type = 'date';
-    if (this.selectedDate) {
-      const [day, month, year] = this.selectedDate.split('/');
-      inputElement.value = `${year}-${month}-${day}`;
+      this.buscarVentas();
     }
   }
 
@@ -93,6 +82,7 @@ export default class HistorialVentaComponent implements AfterViewInit {
     const day = String(today.getDate()).padStart(2, '0');
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const year = today.getFullYear();
+    this.internalDate = `${year}-${month}-${day}`;
     this.selectedDate = `${day}/${month}/${year}`;
     this.buscarVentas();
   }
