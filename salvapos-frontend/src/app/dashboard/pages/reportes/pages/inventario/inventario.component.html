@@ -3,13 +3,22 @@
 
   <!-- Selector de fecha -->
   <div class="row mb-3">
-    <div class="col-md-4 offset-md-4 text-center">
-      <label for="date" class="form-label">Seleccionar Fecha:</label>
+    <div class="col-md-4 offset-md-2 text-center">
+      <label for="startDate" class="form-label">Fecha Inicio:</label>
       <input
         type="date"
-        id="date"
+        id="startDate"
         class="form-control"
-        (change)="onDateChange($event)"
+        (change)="onStartDateChange($event)"
+      />
+    </div>
+    <div class="col-md-4 text-center">
+      <label for="endDate" class="form-label">Fecha Fin:</label>
+      <input
+        type="date"
+        id="endDate"
+        class="form-control"
+        (change)="onEndDateChange($event)"
       />
     </div>
   </div>

@@ -1,6 +1,18 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { Chart, ChartOptions, ChartType, ChartDataset, registerables } from 'chart.js'; // Asegúrate de incluir registerables
-import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Inject,
+  OnInit,
+  PLATFORM_ID,
+} from '@angular/core';
+import {
+  Chart,
+  ChartOptions,
+  ChartType,
+  ChartDataset,
+  registerables,
+} from 'chart.js'; // Asegúrate de incluir registerables
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-inventario',
@@ -37,20 +49,24 @@ export default class InventoryReportComponent implements OnInit {
       },
     },
   };
-  
+
   public selectedDate: string = '';
 
-  constructor() {
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     // Registra todos los componentes de Chart.js, necesarios en la versión 3 y superior
     Chart.register(...registerables);
   }
 
   ngOnInit(): void {
-    this.createChart();
+    if (isPlatformBrowser(this.platformId)) {
+      this.createChart();
+    }
   }
 
   createChart(): void {
-    const chartCanvas = document.getElementById('inventoryChart') as HTMLCanvasElement;
+    const chartCanvas = document.getElementById(
+      'inventoryChart'
+    ) as HTMLCanvasElement;
     if (chartCanvas) {
       this.inventoryChart = new Chart(chartCanvas, {
         type: this.chartType,
@@ -63,7 +79,13 @@ export default class InventoryReportComponent implements OnInit {
     }
   }
 
-  onDateChange(event: any): void {
+  onEndDateChange(event: any): void {
+    this.selectedDate = event.target.value;
+    console.log('Fecha seleccionada:', this.selectedDate);
+    this.updateReportData(this.selectedDate);
+  }
+
+  onStartDateChange(event: any): void {
     this.selectedDate = event.target.value;
     console.log('Fecha seleccionada:', this.selectedDate);
     this.updateReportData(this.selectedDate);
