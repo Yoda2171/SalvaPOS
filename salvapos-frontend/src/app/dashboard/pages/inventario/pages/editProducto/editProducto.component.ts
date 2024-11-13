@@ -17,7 +17,7 @@ import { Categoria } from '../../../../Interface/categoria.inteface';
 import { ProductoService } from '../../../../../services/producto.service';
 import { Producto } from '../../../../Interface/producto.interface';
 import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-edit-producto',
@@ -58,11 +58,11 @@ export default class EditProductoComponent implements OnInit {
         [Validators.required, Validators.min(1), Validators.max(1000)],
       ],
       precioCosto: [
-        null,
+        '',
         [Validators.required, Validators.min(1), Validators.max(100000000)],
       ],
       precioVenta: [
-        null,
+        '',
         [Validators.required, Validators.min(1), Validators.max(100000000)],
       ],
     });
@@ -84,8 +84,8 @@ export default class EditProductoComponent implements OnInit {
               codigoBarras: producto.codigoBarras,
               categoriaId: producto.categoria.id,
               cantidad: producto.cantidad,
-              precioCosto: producto.precioCosto,
-              precioVenta: producto.precioVenta,
+              precioCosto: this.formatCurrency(producto.precioCosto),
+              precioVenta: this.formatCurrency(producto.precioVenta),
             });
           }
           observer.next(false);
@@ -159,6 +159,20 @@ export default class EditProductoComponent implements OnInit {
     const numericValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
     if (!isNaN(numericValue)) {
       this.productoForm.patchValue({ [controlName]: numericValue });
+    }
+  }
+
+  // Función para manejar la entrada en el monto
+  onMontoInput(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    const numericValue = input.value.replace(/\D/g, ''); // Elimina todos los caracteres no numéricos
+    if (numericValue === '') {
+      this.productoForm.patchValue({ [controlName]: null });
+      input.value = '';
+    } else {
+      const formattedValue = this.formatCurrency(parseFloat(numericValue));
+      this.productoForm.patchValue({ [controlName]: parseFloat(numericValue) });
+      input.value = formattedValue;
     }
   }
 }

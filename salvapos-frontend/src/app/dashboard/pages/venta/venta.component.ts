@@ -447,4 +447,16 @@ export default class VentaComponent
       }
     }
   }
+
+  onMontoInput(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const numericValue = input.value.replace(/\D/g, ''); // Elimina todos los caracteres no numéricos
+    if (numericValue === '') {
+      this.pago[index].monto = null;
+      input.value = '';
+    } else {
+      this.pago[index].monto = parseFloat(numericValue);
+      input.value = this.formatCurrency(this.pago[index].monto ?? null);
+    }
+  }
 }
