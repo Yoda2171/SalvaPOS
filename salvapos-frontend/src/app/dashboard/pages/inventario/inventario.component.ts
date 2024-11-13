@@ -172,4 +172,12 @@ export default class InventarioComponent implements OnInit {
     this.currentPage = page;
     this.cargarProductos(this.searchTerm, page);
   }
+
+  // Función para formatear el monto como moneda
+  formatCurrency(value: number | null): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
+  }
 }
