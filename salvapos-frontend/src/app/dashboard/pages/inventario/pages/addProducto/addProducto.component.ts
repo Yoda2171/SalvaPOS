@@ -7,12 +7,16 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
+  AsyncValidatorFn,
 } from '@angular/forms';
 import { CategoriaService } from '../../../../../services/categoria.service';
 import { Router, RouterModule } from '@angular/router';
 import { Categoria } from '../../../../Interface/categoria.inteface';
 import { ProductoService } from '../../../../../services/producto.service';
-import { Observable } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-add-producto',
@@ -43,8 +47,8 @@ export default class AddProductoComponent implements OnInit {
   ngOnInit(): void {
     // Initialize the form with default values
     this.productoForm = this.fb.group({
-      nombre: ['', Validators.required],
-      codigoBarras: ['', Validators.required],
+      nombre: ['', Validators.required, this.nombreValidator()],
+      codigoBarras: ['', Validators.required, this.codigoBarrasValidator()],
       categoriaId: [null, [Validators.required, Validators.min(1)]], // Initialize with 0 and treat as a number
       cantidad: [
         null,
@@ -81,6 +85,30 @@ export default class AddProductoComponent implements OnInit {
         console.error('Error al cargar las categorías', error);
       },
     });
+  }
+
+  nombreValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      return this.productoService.checkIfProductExists(control.value, '').pipe(
+        map((response: any) => {
+          console.log(`Product exists: ${response.existe}`); // Debugging line
+          return response.existe ? { nombreExists: true } : null;
+        }),
+        catchError(() => of(null))
+      );
+    };
+  }
+
+  codigoBarrasValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      return this.productoService.checkIfProductExists('', control.value).pipe(
+        map((response: any) => {
+          console.log(`Product exists: ${response.existe}`); // Debugging line
+          return response.existe ? { codigoBarrasExists: true } : null;
+        }),
+        catchError(() => of(null))
+      );
+    };
   }
 
   onSubmit(): void {
