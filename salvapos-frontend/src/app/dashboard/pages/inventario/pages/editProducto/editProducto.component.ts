@@ -59,11 +59,11 @@ export default class EditProductoComponent implements OnInit {
       ],
       precioCosto: [
         null,
-        [Validators.required, Validators.min(1), Validators.max(10000000)],
+        [Validators.required, Validators.min(1), Validators.max(100000000)],
       ],
       precioVenta: [
         null,
-        [Validators.required, Validators.min(1), Validators.max(10000000)],
+        [Validators.required, Validators.min(1), Validators.max(100000000)],
       ],
     });
 
@@ -143,5 +143,22 @@ export default class EditProductoComponent implements OnInit {
           console.error('Error al editar el producto', error);
         },
       });
+  }
+
+  // Función para formatear el monto como moneda
+  formatCurrency(value: number | null): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
+  }
+
+  // Función para manejar el cambio en el monto
+  onMontoChange(controlName: string, value: string): void {
+    // Elimina los puntos y convierte el valor a un número flotante
+    const numericValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+    if (!isNaN(numericValue)) {
+      this.productoForm.patchValue({ [controlName]: numericValue });
+    }
   }
 }

@@ -186,12 +186,12 @@
 
         <div class="mb-2">
           <input
-            type="number"
+            type="text"
             class="form-control"
             [(ngModel)]="pago.monto"
             placeholder="Monto"
-            min="0"
-            [value]="pago.monto === null ? '' : pago.monto"
+            [ngModel]="formatCurrency(pago.monto ?? null)"
+            (ngModelChange)="onMontoChange($event)"
             required
           />
         </div>
