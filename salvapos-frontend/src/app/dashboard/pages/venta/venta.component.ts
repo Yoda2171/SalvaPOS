@@ -429,28 +429,22 @@ export default class VentaComponent
     return `${encabezado}${fecha}${idVenta}${items}${total}`;
   }
 
-  // Función para formatear el monto como moneda
+  // Formatea el valor de entrada a formato moneda
   formatCurrency(value: number | null): string {
-    if (value === null || value === undefined) {
-      return '';
-    }
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
+    return value ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
   }
 
-  // Función para manejar el cambio en el monto
-  onMontoChange(value: string): void {
-    // Elimina los puntos y convierte el valor a un número flotante
+  // Actualiza el monto ingresado
+  onMontoChange(value: string, i: number): void {
     const numericValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
     if (!isNaN(numericValue)) {
-      for (let i = 0; i < this.pago.length; i++) {
-        this.pago[i].monto = numericValue;
-      }
+      this.pago[i].monto = numericValue;
     }
   }
 
   onMontoInput(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
-    const numericValue = input.value.replace(/\D/g, ''); // Elimina todos los caracteres no numéricos
+    const numericValue = input.value.replace(/\D/g, ''); // Elimina caracteres no numéricos
     if (numericValue === '') {
       this.pago[index].monto = null;
       input.value = '';
