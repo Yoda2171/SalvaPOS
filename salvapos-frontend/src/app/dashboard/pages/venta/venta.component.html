@@ -192,6 +192,7 @@
             placeholder="Monto"
             [ngModel]="formatCurrency(pago.monto ?? null)"
             (ngModelChange)="onMontoChange($event)"
+            (input)="onMontoInput($event,i)"
             required
           />
         </div>

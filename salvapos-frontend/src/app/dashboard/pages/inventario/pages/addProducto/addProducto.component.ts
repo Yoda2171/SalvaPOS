@@ -146,4 +146,18 @@ export default class AddProductoComponent implements OnInit {
       this.productoForm.patchValue({ [controlName]: numericValue });
     }
   }
+
+  // Función para manejar la entrada en el monto
+  onMontoInput(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    const numericValue = input.value.replace(/\D/g, ''); // Elimina todos los caracteres no numéricos
+    if (numericValue === '') {
+      this.productoForm.patchValue({ [controlName]: null });
+      input.value = '';
+    } else {
+      const formattedValue = this.formatCurrency(parseFloat(numericValue));
+      this.productoForm.patchValue({ [controlName]: parseFloat(numericValue) });
+      input.value = formattedValue;
+    }
+  }
 }
