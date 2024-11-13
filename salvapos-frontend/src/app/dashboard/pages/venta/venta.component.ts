@@ -428,4 +428,23 @@ export default class VentaComponent
 
     return `${encabezado}${fecha}${idVenta}${items}${total}`;
   }
+
+  // Función para formatear el monto como moneda
+  formatCurrency(value: number | null): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
+  }
+
+  // Función para manejar el cambio en el monto
+  onMontoChange(value: string): void {
+    // Elimina los puntos y convierte el valor a un número flotante
+    const numericValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+    if (!isNaN(numericValue)) {
+      for (let i = 0; i < this.pago.length; i++) {
+        this.pago[i].monto = numericValue;
+      }
+    }
+  }
 }
