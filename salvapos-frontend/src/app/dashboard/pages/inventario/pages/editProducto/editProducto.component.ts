@@ -7,13 +7,17 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
+  AsyncValidatorFn,
 } from '@angular/forms';
 import { CategoriaService } from '../../../../../services/categoria.service';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Categoria } from '../../../../Interface/categoria.inteface';
 import { ProductoService } from '../../../../../services/producto.service';
 import { Producto } from '../../../../Interface/producto.interface';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-edit-producto',
@@ -34,6 +38,7 @@ export default class EditProductoComponent implements OnInit {
   categorias$: Observable<Categoria[]> | null = null;
   loading$ = new Observable<boolean>();
   productoId!: number;
+  currentProducto!: Producto;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -45,8 +50,8 @@ export default class EditProductoComponent implements OnInit {
 
   ngOnInit(): void {
     this.productoForm = this.fb.group({
-      nombre: ['', Validators.required],
-      codigoBarras: ['', Validators.required],
+      nombre: ['', Validators.required, this.nombreValidator()],
+      codigoBarras: ['', Validators.required, this.codigoBarrasValidator()],
       categoriaId: [null, [Validators.required, Validators.min(1)]],
       cantidad: [
         null,
@@ -73,6 +78,7 @@ export default class EditProductoComponent implements OnInit {
       this.productoService.getProductoById(this.productoId).subscribe({
         next: (producto) => {
           if (producto) {
+            this.currentProducto = producto;
             this.productoForm.patchValue({
               nombre: producto.nombre,
               codigoBarras: producto.codigoBarras,
@@ -87,6 +93,36 @@ export default class EditProductoComponent implements OnInit {
         error: () => observer.next(false),
       });
     });
+  }
+
+  nombreValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (control.value === this.currentProducto?.nombre) {
+        return of(null);
+      }
+      return this.productoService.checkIfProductExists(control.value, '').pipe(
+        map((response: any) => {
+          console.log(`Product exists: ${response.existe}`); // Debugging line
+          return response.existe ? { nombreExists: true } : null;
+        }),
+        catchError(() => of(null))
+      );
+    };
+  }
+
+  codigoBarrasValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (control.value === this.currentProducto?.codigoBarras) {
+        return of(null);
+      }
+      return this.productoService.checkIfProductExists('', control.value).pipe(
+        map((response: any) => {
+          console.log(`Product exists: ${response.existe}`); // Debugging line
+          return response.existe ? { codigoBarrasExists: true } : null;
+        }),
+        catchError(() => of(null))
+      );
+    };
   }
 
   onSubmit(): void {

@@ -40,7 +40,14 @@
               "
               class="invalid-feedback"
             >
-              El nombre del producto es obligatorio.
+              <span *ngIf="productoForm.get('nombre')?.errors?.['required']">
+                El nombre del producto es obligatorio.
+              </span>
+              <span
+                *ngIf="productoForm.get('nombre')?.errors?.['nombreExists']"
+              >
+                El nombre del producto ya existe.
+              </span>
             </div>
           </div>
           <div class="col-md-6">
@@ -67,7 +74,16 @@
               "
               class="invalid-feedback"
             >
-              El código de barras es obligatorio.
+              <span
+                *ngIf="productoForm.get('codigoBarras')?.errors?.['required']"
+              >
+                El código de barras es obligatorio.
+              </span>
+              <span
+                *ngIf="productoForm.get('codigoBarras')?.errors?.['codigoBarrasExists']"
+              >
+                El código de barras ya existe.
+              </span>
             </div>
           </div>
         </div>
