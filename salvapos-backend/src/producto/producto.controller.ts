@@ -15,6 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from './dto/pagination.dto';
 import { Producto } from './entities/producto.entity';
 import { AjustarInventarioDto } from './dto/ajusteInventario.dto';
+import { CheckDto } from './dto/check.dto';
 
 @ApiTags('Producto')
 @Controller('producto')
@@ -63,5 +64,11 @@ export class ProductoController {
       +id,
       ajustarInventarioDto.cantidadAjuste,
     );
+  }
+
+  @Get('verificar-existencia/producto')
+  async verificarExistencia(@Query() query: CheckDto) {
+    const { nombre, codigoBarras } = query;
+    return this.productoService.verificarExistencia(nombre, codigoBarras);
   }
 }
