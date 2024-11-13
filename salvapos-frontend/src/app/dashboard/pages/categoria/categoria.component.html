@@ -14,7 +14,7 @@
       type="button"
       class="btn-close"
       aria-label="Close"
-      (click)="cerrarMensajeError()"
+      (click)="clearErrorMessage()"
     ></button>
   </div>
 
@@ -89,7 +89,7 @@
             <!-- Icono de eliminar categoría -->
             <i
               class="fas fa-trash-alt text-danger mx-2"
-              (click)="confirmarEliminacion(categoria)"
+              (click)="confirmDeletion(categoria)"
               title="Eliminar"
               style="cursor: pointer"
             ></i>
@@ -223,7 +223,7 @@
           <button
             type="button"
             class="btn btn-danger"
-            (click)="eliminarCategoria(categoriaSeleccionada)"
+            (click)="deleteCategory(categoriaSeleccionada)"
           >
             Eliminar
           </button>

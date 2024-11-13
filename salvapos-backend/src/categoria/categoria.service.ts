@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { Categoria } from './entities/categoria.entity';
@@ -12,13 +16,21 @@ export class CategoriaService {
     @InjectRepository(Categoria)
     private readonly categoriaRepository: Repository<Categoria>,
   ) {}
+
   async count(): Promise<number> {
-    return this.categoriaRepository.count(); // Contar registros
+    return this.categoriaRepository.count();
   }
 
   async createCategory(
     createCategoriaDto: CreateCategoriaDto,
   ): Promise<Categoria> {
+    const existingCategory = await this.categoriaRepository.findOne({
+      where: { nombre: createCategoriaDto.nombre },
+    });
+    if (existingCategory) {
+      throw new ConflictException('La categoría con este nombre ya existe');
+    }
+
     const nuevaCategoria = new Categoria();
     nuevaCategoria.nombre = createCategoriaDto.nombre;
 
@@ -30,10 +42,14 @@ export class CategoriaService {
   }
 
   async findById(id: number): Promise<Categoria> {
-    return await this.categoriaRepository.findOne({
+    const categoria = await this.categoriaRepository.findOne({
       where: { id },
       relations: ['productos'],
     });
+    if (!categoria) {
+      throw new NotFoundException('La categoría no existe');
+    }
+    return categoria;
   }
 
   async updateCategory(
@@ -41,8 +57,20 @@ export class CategoriaService {
     updateCategoriaDto: UpdateCategoriaDto,
   ): Promise<Categoria> {
     const categoria = await this.categoriaRepository.findOneBy({ id });
-    categoria.nombre = updateCategoriaDto.nombre;
+    if (!categoria) {
+      throw new NotFoundException('La categoría no existe');
+    }
 
+    if (categoria.nombre !== updateCategoriaDto.nombre) {
+      const existingCategory = await this.categoriaRepository.findOne({
+        where: { nombre: updateCategoriaDto.nombre },
+      });
+      if (existingCategory) {
+        throw new ConflictException('La categoría con este nombre ya existe');
+      }
+    }
+
+    categoria.nombre = updateCategoriaDto.nombre;
     return await this.categoriaRepository.save(categoria);
   }
 
@@ -53,11 +81,11 @@ export class CategoriaService {
     });
 
     if (!categoria) {
-      throw new Error('La categoría no existe');
+      throw new NotFoundException('La categoría no existe');
     }
 
     if (categoria.productos.length > 0) {
-      throw new Error('La categoría tiene productos asociados');
+      throw new ConflictException('La categoría tiene productos asociados');
     }
 
     await this.categoriaRepository.remove(categoria);
@@ -69,7 +97,6 @@ export class CategoriaService {
     });
   }
 
-  // Buscar categorías con paginación y búsqueda
   async buscarCategorias(paginationDto: PaginationDto): Promise<{
     totalItems: number;
     totalPages: number;
@@ -77,22 +104,20 @@ export class CategoriaService {
     limit: number;
     data: Categoria[];
   }> {
-    const { limit = 8, page = 1, search } = paginationDto; // Valores por defecto
+    const { limit = 8, page = 1, search } = paginationDto;
     const offset = (page - 1) * limit;
 
     const findOptions: any = {
       where: {},
       take: limit,
       skip: offset,
-      relations: ['productos'], // Incluye la relación con los productos
+      relations: ['productos'],
     };
 
-    // Búsqueda global por nombre de categoría
     if (search) {
       findOptions.where = { nombre: ILike(`%${search}%`) };
     }
 
-    // Obtener categorías paginadas
     const [categorias, totalItems] =
       await this.categoriaRepository.findAndCount(findOptions);
 
@@ -102,15 +127,14 @@ export class CategoriaService {
       );
     }
 
-    // Calcular total de páginas
     const totalPages = Math.ceil(totalItems / limit);
 
     return {
-      totalItems, // Total de categorías
-      totalPages, // Total de páginas
-      currentPage: page, // Página actual
-      limit, // Categorías por página
-      data: categorias, // Categorías de la página actual
+      totalItems,
+      totalPages,
+      currentPage: page,
+      limit,
+      data: categorias,
     };
   }
 }
