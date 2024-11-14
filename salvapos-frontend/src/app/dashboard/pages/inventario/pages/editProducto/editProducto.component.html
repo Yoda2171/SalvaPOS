@@ -173,8 +173,9 @@
               class="form-control"
               placeholder="Ingresa el precio costo"
               required
-              [value]="formatCurrency(productoForm.get('precioCosto')?.value ?? null)"
-        
+              [value]="
+                formatCurrency(productoForm.get('precioCosto')?.value ?? null)
+              "
               (input)="onMontoInput($event, 'precioCosto')"
               [ngClass]="{
                 'is-invalid':
@@ -212,7 +213,9 @@
               class="form-control"
               placeholder="Ingresa el precio venta"
               required
-              [value]="formatCurrency(productoForm.get('precioVenta')?.value ?? null)"
+              [value]="
+                formatCurrency(productoForm.get('precioVenta')?.value ?? null)
+              "
               (input)="onMontoInput($event, 'precioVenta')"
               [ngClass]="{
                 'is-invalid':

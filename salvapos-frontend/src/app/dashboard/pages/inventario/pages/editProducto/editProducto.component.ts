@@ -58,11 +58,11 @@ export default class EditProductoComponent implements OnInit {
         [Validators.required, Validators.min(1), Validators.max(1000)],
       ],
       precioCosto: [
-        '',
+        null,
         [Validators.required, Validators.min(1), Validators.max(100000000)],
       ],
       precioVenta: [
-        '',
+        null,
         [Validators.required, Validators.min(1), Validators.max(100000000)],
       ],
     });
@@ -131,8 +131,15 @@ export default class EditProductoComponent implements OnInit {
       return;
     }
 
+    const formValue = this.productoForm.value;
+    const updatedProducto = {
+      ...formValue,
+      precioCosto: parseFloat(formValue.precioCosto.replace(/\./g, '')),
+      precioVenta: parseFloat(formValue.precioVenta.replace(/\./g, '')),
+    };
+
     this.productoService
-      .updateProducto(this.productoId, this.productoForm.value)
+      .updateProducto(this.productoId, updatedProducto)
       .subscribe({
         next: () => {
           this.router.navigate(['/dashboard/inventario'], {
@@ -146,7 +153,7 @@ export default class EditProductoComponent implements OnInit {
   }
 
   // Función para formatear el monto como moneda
-  formatCurrency(value: number | null): string {
+  formatCurrency(value: number | string | null): string {
     if (value === null || value === undefined) {
       return '';
     }
@@ -170,8 +177,8 @@ export default class EditProductoComponent implements OnInit {
       this.productoForm.patchValue({ [controlName]: null });
       input.value = '';
     } else {
-      const formattedValue = this.formatCurrency(parseFloat(numericValue));
-      this.productoForm.patchValue({ [controlName]: parseFloat(numericValue) });
+      const formattedValue = this.formatCurrency(numericValue);
+      this.productoForm.patchValue({ [controlName]: numericValue });
       input.value = formattedValue;
     }
   }
