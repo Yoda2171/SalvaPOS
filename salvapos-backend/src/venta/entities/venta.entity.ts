@@ -7,7 +7,7 @@ export class Venta {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column()
   total: number;
 
   @Column('datetime', { default: () => 'CURRENT_TIMESTAMP' })

@@ -162,4 +162,9 @@ export default class HistorialVentaComponent implements AfterViewInit {
 
     return `${encabezado}${fecha}${idVenta}${items}${total}`;
   }
+
+  // Formatea el valor de entrada a formato moneda
+  formatCurrency(value: number | null): string {
+    return value ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+  }
 }

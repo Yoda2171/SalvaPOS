@@ -117,7 +117,7 @@
         </div>
         <div class="col-2">
           <p class="text-primary mb-0 fw-bold">
-            {{ item.precioUnitario | currency : "CLP " }}
+            $ {{ formatCurrency(item.precioUnitario) }}
           </p>
         </div>
         <div class="col-4 d-flex align-items-center justify-content-end">
@@ -150,7 +150,7 @@
       <div class="row mt-3">
         <div class="col text-end">
           <p class="fs-4 fw-bold">
-            Total: {{ calcularTotal() | currency : "CLP " }}
+            Total: $ {{ formatCurrency(calcularTotal()) || 0 }}
           </p>
         </div>
       </div>
@@ -163,36 +163,40 @@
       </h4>
 
       <!-- Lista de métodos de pago seleccionados -->
-      <!-- Lista de métodos de pago seleccionados -->
-<div *ngFor="let pago of pago; let i = index" class="mt-3">
-  <div class="mb-3">
-    <label class="fw-bold">Método de Pago {{ i + 1 }}:</label>
-    <div *ngFor="let metodo of metodosDisponibles" class="form-check">
-      <input
-        class="form-check-input"
-        type="radio"
-        [id]="'metodo-' + i + '-' + metodo.id"
-        [value]="metodo.nombre"
-        [(ngModel)]="pago.metodoPago.nombre"
-        name="metodo-{{ i }}"
-      />
-      <label class="form-check-label" [for]="'metodo-' + i + '-' + metodo.id">
-        {{ metodo.nombre }}
-      </label>
-    </div>
-    <input
-      type="text"
-      class="form-control mt-2"
-      placeholder="Monto"
-      (input)="onMontoInput($event, i)"
-      (change)="onMontoChange(pago.monto ? formatCurrency(pago.monto) : '', i)"
-      [ngModel]="pago.monto ? formatCurrency(pago.monto) : ''"
-    />
-  </div>
-  <button class="btn btn-danger" (click)="eliminarMetodoPago(i)">
-    🗑️ Eliminar
-  </button>
-</div>
+      <div *ngFor="let pago of pago; let i = index" class="mt-3">
+        <div class="mb-3">
+          <label class="fw-bold">Método de Pago {{ i + 1 }}:</label>
+          <div *ngFor="let metodo of metodosDisponibles" class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              [id]="'metodo-' + i + '-' + metodo.id"
+              [value]="metodo.nombre"
+              [(ngModel)]="pago.metodoPago.nombre"
+              name="metodo-{{ i }}"
+            />
+            <label
+              class="form-check-label"
+              [for]="'metodo-' + i + '-' + metodo.id"
+            >
+              {{ metodo.nombre }}
+            </label>
+          </div>
+          <input
+            type="text"
+            class="form-control mt-2"
+            placeholder="Monto"
+            (input)="onMontoInput($event, i)"
+            (change)="
+              onMontoChange(pago.monto ? formatCurrency(pago.monto) : '', i)
+            "
+            [ngModel]="pago.monto ? formatCurrency(pago.monto) : ''"
+          />
+        </div>
+        <button class="btn btn-danger" (click)="eliminarMetodoPago(i)">
+          🗑️ Eliminar
+        </button>
+      </div>
       <!-- Botón para agregar otro método de pago -->
       <button
         class="btn btn-outline-primary w-100 mt-3"
@@ -241,8 +245,10 @@
             class="list-group-item d-flex justify-content-between align-items-center"
           >
             {{ item.producto.nombre }} - {{ item.cantidad }} x
-            {{ item.precioUnitario | currency : "CLP" }}
-            <span class="fw-bold">{{ item.subtotal | currency : "CLP" }}</span>
+            {{ "$ " + formatCurrency(item.precioUnitario) }}
+            <span class="fw-bold">{{
+              "$ " + formatCurrency(item.subtotal)
+            }}</span>
           </li>
         </ul>
 
@@ -253,13 +259,15 @@
             class="list-group-item d-flex justify-content-between align-items-center"
           >
             {{ pago.metodoPago.nombre }}
-            <span class="fw-bold">{{ pago.monto | currency : "CLP" }}</span>
+            <span class="fw-bold">{{
+              pago.monto ? "$ " + formatCurrency(pago.monto) : 0
+            }}</span>
           </li>
         </ul>
 
         <div class="d-flex justify-content-end">
           <p class="fs-5 fw-bold">
-            Total: {{ calcularTotal() | currency : "CLP" }}
+            Total: {{ "$ " + formatCurrency(calcularTotal()) }}
           </p>
         </div>
       </div>

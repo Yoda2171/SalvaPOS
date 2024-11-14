@@ -104,6 +104,11 @@ export default class VentaComponent
     this.devolverStock();
   }
 
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: any): void {
+    this.devolverStock();
+  }
+
   // Inicialización de Bootstrap
   private initializeBootstrapComponents(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -338,7 +343,9 @@ export default class VentaComponent
 
     if (totalPagado < total) {
       this.mostrarErrorAlert(
-        `El total a pagar es $${total}, pero solo se han ingresado $${totalPagado}.`
+        `El total a pagar es $ ${this.formatCurrency(
+          total
+        )}, pero solo se han ingresado $ ${this.formatCurrency(totalPagado)}.`
       );
       return false;
     }
