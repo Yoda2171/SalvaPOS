@@ -43,18 +43,44 @@ export class DataProductService implements OnModuleInit {
     categorias: any[],
     cantidad: number,
   ): CreateProductoDto[] {
-    return Array.from({ length: cantidad }, () => {
+    const productos: CreateProductoDto[] = [];
+    const codigosBarras = new Set<string>();
+    const nombres = new Set<string>();
+
+    while (productos.length < cantidad) {
       const categoria =
         categorias[Math.floor(Math.random() * categorias.length)]; // Selección aleatoria
 
-      return {
-        codigoBarras: faker.string.alphanumeric(8),
-        nombre: faker.commerce.productName(),
-        precioCosto: parseFloat(faker.commerce.price()),
-        precioVenta: parseFloat(faker.commerce.price()),
-        cantidad: faker.number.int({ min: 0, max: 100 }),
+      let codigoBarras: string;
+      do {
+        codigoBarras = faker.string.alphanumeric(8);
+      } while (codigosBarras.has(codigoBarras));
+
+      let nombre: string;
+      do {
+        nombre = faker.commerce.productName();
+      } while (nombres.has(nombre));
+
+      let precioCosto: number;
+      let precioVenta: number;
+      do {
+        precioCosto = parseFloat(faker.commerce.price());
+        precioVenta = parseFloat(faker.commerce.price());
+      } while (precioVenta <= precioCosto);
+
+      productos.push({
+        codigoBarras,
+        nombre,
+        precioCosto,
+        precioVenta,
+        cantidad: faker.number.int({ min: 0, max: 999 }),
         categoriaId: categoria.id, // Asignar categoría aleatoria
-      };
-    });
+      });
+
+      codigosBarras.add(codigoBarras);
+      nombres.add(nombre);
+    }
+
+    return productos;
   }
 }
