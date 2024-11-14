@@ -21,6 +21,6 @@ export class PagoVenta {
   @JoinColumn({ name: 'metodo_pago_id' })
   metodoPago: MetodoPago;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column()
   monto: number;
 }

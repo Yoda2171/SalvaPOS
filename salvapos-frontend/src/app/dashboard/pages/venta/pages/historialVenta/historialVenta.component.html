@@ -54,11 +54,13 @@
             <div>
               <strong>ID Venta: {{ venta.id }}</strong>
               <p class="mb-0 text-muted">
-                {{ venta.fecha | date : "hh:mm a" }} -
+                {{ venta.fecha | date : "HH:MM  a" }} -
                 {{ venta.cantidad }} productos
               </p>
             </div>
-            <span class="badge bg-primary">{{ venta.total | currency }}</span>
+            <span class="badge bg-primary">{{
+              "$ " + formatCurrency(venta.total)
+            }}</span>
           </li>
         </ul>
       </div>
@@ -110,7 +112,7 @@
           }"
         >
           <strong>Fecha:</strong>
-          {{ ventaSeleccionada.fecha | date : "dd/MM/yyyy hh:mm a" }}
+          {{ ventaSeleccionada.fecha | date : "dd/MM/yyyy HH:MM a" }}
         </p>
 
         <!-- Detalles de productos -->
@@ -132,7 +134,7 @@
             >
               <td>{{ item.cantidad }}</td>
               <td>{{ item.producto.nombre }}</td>
-              <td>{{ item.subtotal | currency }}</td>
+              <td>{{ "$ " + formatCurrency(item.subtotal) }}</td>
             </tr>
           </tbody>
         </table>
@@ -156,7 +158,7 @@
             }"
           >
             {{ pago.metodoPago.nombre }}
-            <span class="fw-bold">{{ pago.monto | currency : "CLP" }}</span>
+            <span class="fw-bold">{{ "$ " + formatCurrency(pago.monto) }}</span>
           </li>
         </ul>
 
@@ -169,7 +171,7 @@
                 ventaSeleccionada.estado === 'devuelta'
             }"
           >
-            Total: {{ ventaSeleccionada.total | currency : "CLP" }}
+            Total: {{ "$ " + formatCurrency(ventaSeleccionada.total) }}
           </p>
         </div>
 
