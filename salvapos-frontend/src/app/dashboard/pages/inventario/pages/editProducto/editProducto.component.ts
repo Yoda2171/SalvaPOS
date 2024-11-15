@@ -97,7 +97,10 @@ export default class EditProductoComponent implements OnInit {
 
   nombreValidator(): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (control.value === this.currentProducto?.nombre) {
+      if (
+        control.value.toLowerCase() ===
+        this.currentProducto?.nombre.toLowerCase()
+      ) {
         return of(null);
       }
       return this.productoService.checkIfProductExists(control.value, '').pipe(
@@ -112,7 +115,10 @@ export default class EditProductoComponent implements OnInit {
 
   codigoBarrasValidator(): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (control.value === this.currentProducto?.codigoBarras) {
+      if (
+        control.value.toLowerCase() ===
+        this.currentProducto?.codigoBarras.toLowerCase()
+      ) {
         return of(null);
       }
       return this.productoService.checkIfProductExists('', control.value).pipe(
@@ -136,6 +142,7 @@ export default class EditProductoComponent implements OnInit {
       ...formValue,
       precioCosto: parseFloat(formValue.precioCosto.replace(/\./g, '')),
       precioVenta: parseFloat(formValue.precioVenta.replace(/\./g, '')),
+      categoriaId: +formValue.categoriaId,
     };
 
     this.productoService
