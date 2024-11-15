@@ -51,7 +51,6 @@ export class CategoriaService {
     }
     return categoria;
   }
-
   async updateCategory(
     id: number,
     updateCategoriaDto: UpdateCategoriaDto,
@@ -61,7 +60,9 @@ export class CategoriaService {
       throw new NotFoundException('La categoría no existe');
     }
 
-    if (categoria.nombre !== updateCategoriaDto.nombre) {
+    if (
+      categoria.nombre.toLowerCase() !== updateCategoriaDto.nombre.toLowerCase()
+    ) {
       const existingCategory = await this.categoriaRepository.findOne({
         where: { nombre: updateCategoriaDto.nombre },
       });
