@@ -46,7 +46,7 @@
           <td>{{ producto.codigoBarras }}</td>
           <td>{{ producto.nombre }}</td>
           <td>{{ formatCurrency(producto.precioCosto) }}</td>
-        <td>{{ formatCurrency(producto.precioVenta) }}</td>
+          <td>{{ formatCurrency(producto.precioVenta) }}</td>
           <td>{{ producto.cantidad }}</td>
           <td>{{ producto.categoria.nombre }}</td>
           <td>
@@ -67,7 +67,7 @@
     </table>
   </div>
 
-  <!-- Si no hay categorías, mostrar mensaje -->
+  <!-- Si no hay productos, mostrar mensaje -->
   <div *ngIf="productos.length === 0" class="alert alert-info">
     No hay productos disponibles.
   </div>
@@ -131,28 +131,7 @@
                 id="cantidadAjuste"
                 class="form-control"
                 formControlName="cantidadAjuste"
-                [ngClass]="{
-                  'is-invalid':
-                    stockForm.get('cantidadAjuste')?.invalid &&
-                    stockForm.get('cantidadAjuste')?.touched
-                }"
               />
-              <!-- Mensaje de error de validación -->
-              <div
-                *ngIf="
-                  stockForm.get('cantidadAjuste')?.invalid &&
-                  stockForm.get('cantidadAjuste')?.touched
-                "
-                class="invalid-feedback"
-              >
-                <span
-                  *ngIf="stockForm.get('cantidadAjuste')?.errors?.['required']"
-                  >Este campo es obligatorio.</span
-                >
-                <span *ngIf="stockForm.get('cantidadAjuste')?.errors?.['min']"
-                  >Debe ingresar una cantidad mayor a cero.</span
-                >
-              </div>
             </div>
           </form>
         </div>
@@ -167,7 +146,6 @@
           <button
             type="button"
             class="btn btn-primary"
-            [disabled]="stockForm.invalid"
             (click)="ajustarStock()"
           >
             Guardar Cambios

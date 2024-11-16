@@ -126,11 +126,7 @@ export default class InventarioComponent implements OnInit {
 
   // Método para enviar el ajuste de stock
   ajustarStock(): void {
-    if (
-      this.stockForm.invalid ||
-      !this.selectedProduct ||
-      this.selectedProduct.id === undefined
-    ) {
+    if (!this.selectedProduct || this.selectedProduct.id === undefined) {
       return;
     }
 
