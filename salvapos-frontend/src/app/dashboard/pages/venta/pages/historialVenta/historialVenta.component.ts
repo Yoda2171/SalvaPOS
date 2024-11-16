@@ -160,7 +160,7 @@ export default class HistorialVentaComponent implements AfterViewInit {
       Math.floor(this.ventaSeleccionada.total * 0.81)
     )}\nIVA: ${this.formatCurrency(
       Math.floor(this.ventaSeleccionada.total * 0.19)
-    )}\nTotal: ${this.ventaSeleccionada.total}\n`;
+    )}\nTotal: ${this.formatCurrency(this.ventaSeleccionada.total)}\n`;
 
     return `${encabezado}${fecha}${idVenta}${items}${total}`;
   }
