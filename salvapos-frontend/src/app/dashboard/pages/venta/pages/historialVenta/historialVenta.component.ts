@@ -143,7 +143,7 @@ export default class HistorialVentaComponent implements AfterViewInit {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: true,
+      hour12: false,
     });
     const fecha = `Emision: ${fechaFormateada} ${horaFormateada}\n\n`;
 
@@ -151,14 +151,16 @@ export default class HistorialVentaComponent implements AfterViewInit {
     const items = this.ventaSeleccionada.detalles
       .map(
         (item: any) =>
-          `${item.producto.nombre}\t${item.cantidad} x ${item.precioUnitario}\t${item.subtotal}`
+          `${item.producto.nombre}\t${item.cantidad} x ${this.formatCurrency(
+            item.precioUnitario
+          )}\t${this.formatCurrency(item.subtotal)}`
       )
       .join('\n');
-    const total = `\nNeto: ${(this.ventaSeleccionada.total * 0.81).toFixed(
-      2
-    )}\nIVA: ${(this.ventaSeleccionada.total * 0.19).toFixed(2)}\nTotal: ${
-      this.ventaSeleccionada.total
-    }\n`;
+    const total = `\nNeto: ${this.formatCurrency(
+      Math.floor(this.ventaSeleccionada.total * 0.81)
+    )}\nIVA: ${this.formatCurrency(
+      Math.floor(this.ventaSeleccionada.total * 0.19)
+    )}\nTotal: ${this.ventaSeleccionada.total}\n`;
 
     return `${encabezado}${fecha}${idVenta}${items}${total}`;
   }

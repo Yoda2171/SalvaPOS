@@ -45,12 +45,6 @@ export class VentaService {
           );
         }
 
-        if (producto.cantidad < detalle.cantidad) {
-          throw new BadRequestException(
-            `Stock insuficiente para el producto: ${producto.nombre}`,
-          );
-        }
-
         // Actualizar la cantidad del producto dentro de la transacción
         // Guardar el cambio en la cantidad dentro de la transacción
       }

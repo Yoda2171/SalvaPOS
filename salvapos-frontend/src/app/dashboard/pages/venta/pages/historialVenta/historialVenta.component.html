@@ -54,7 +54,7 @@
             <div>
               <strong>ID Venta: {{ venta.id }}</strong>
               <p class="mb-0 text-muted">
-                {{ venta.fecha | date : "HH:MM  a" }} -
+                {{ venta.fecha | date : "HH:mm a" }} -
                 {{ venta.cantidad }} productos
               </p>
             </div>
@@ -112,7 +112,7 @@
           }"
         >
           <strong>Fecha:</strong>
-          {{ ventaSeleccionada.fecha | date : "dd/MM/yyyy HH:MM a" }}
+          {{ ventaSeleccionada.fecha | date : "dd/MM/yyyy HH:mm a" }}
         </p>
 
         <!-- Detalles de productos -->
