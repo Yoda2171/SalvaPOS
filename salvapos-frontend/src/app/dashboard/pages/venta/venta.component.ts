@@ -417,21 +417,23 @@ export default class VentaComponent
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: true,
+      hour12: false,
     });
     const fecha = `Emision: ${fechaFormateada} ${horaFormateada}\n\n`;
     const idVenta = `Ticket: ${this.ventaId}\n\n`; // Agregar el ID de la venta
     const items = this.carrito
       .map(
         (item) =>
-          `${item.producto.nombre}\t${
-            item.cantidad
-          } x ${item.precioUnitario.toFixed(2)}\t${item.subtotal.toFixed(2)}`
+          `${item.producto.nombre}\t${item.cantidad} x ${this.formatCurrency(
+            item.precioUnitario
+          )}\t${this.formatCurrency(item.subtotal)}`
       )
       .join('\n');
-    const total = `\nNeto: ${(this.calcularTotal() * 0.81).toFixed(2)}\nIVA: ${(
-      this.calcularTotal() * 0.19
-    ).toFixed(2)}\nTotal: ${this.calcularTotal().toFixed(2)}\n`;
+    const total = `\nNeto: ${this.formatCurrency(
+      Math.floor(this.calcularTotal() * 0.81)
+    )}\nIVA: ${this.formatCurrency(
+      Math.floor(this.calcularTotal() * 0.19)
+    )}\nTotal: ${this.formatCurrency(this.calcularTotal())}\n`;
 
     return `${encabezado}${fecha}${idVenta}${items}${total}`;
   }
