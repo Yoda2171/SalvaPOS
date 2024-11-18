@@ -1,25 +1,44 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcryptjs from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async login(loginDto: LoginDto) {
-    const user = await this.usersService.findOneByEmail(loginDto.email);
+    const { email, password } = loginDto;
+
+    const user = await this.usersService.findOneByEmail(email);
 
     if (!user) {
-      return 'User not found';
+      throw new UnauthorizedException('User not found');
     }
 
-    if (user.password !== loginDto.password) {
-      return 'Invalid password';
+    const isPasswordValid = await bcryptjs.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
     }
 
-    return user;
+    const payload = { sub: user.id, email: user.email, role: user.role };
+
+    const token = await this.jwtService.signAsync(payload);
+
+    return {
+      token,
+      user,
+    };
   }
 
   logout() {
@@ -27,7 +46,7 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const { firstname, lastname, email, password } = registerDto;
+    const { firstname, lastname, email, password, role } = registerDto;
     const user = await this.usersService.findOneByEmail(email);
 
     if (user) {
@@ -40,6 +59,7 @@ export class AuthService {
       firstname,
       lastname,
       email,
+      role,
       password: hashedPassword,
     });
 
@@ -57,5 +77,9 @@ export class AuthService {
 
   changePassword() {
     return 'This action changes a user password';
+  }
+
+  profile() {
+    return 'This action returns a user profile';
   }
 }

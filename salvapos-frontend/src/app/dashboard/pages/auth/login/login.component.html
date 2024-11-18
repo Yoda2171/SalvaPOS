@@ -1,35 +1,85 @@
 <!-- Contenedor principal -->
-<div class="container-fluid d-flex justify-content-center align-items-center bg-gradient vh-100">
+<div
+  class="container-fluid d-flex justify-content-center align-items-center bg-gradient vh-100"
+>
   <!-- Formulario de login -->
-  <div id="loginForm" class="glass-card p-4 rounded-3 shadow-lg" style="max-width: 400px; width: 100%;">
+  <div
+    id="loginForm"
+    class="glass-card p-4 rounded-3 shadow-lg"
+    style="max-width: 400px; width: 100%"
+  >
     <div class="text-center mb-4">
-      <img src="assets/img/login.png" alt="Logo" class="img-fluid mb-3" style="width: 80px;">
+      <img
+        src="assets/img/login.png"
+        alt="Logo"
+        class="img-fluid mb-3"
+        style="width: 80px"
+      />
       <h3 class="fw-bold">Iniciar Sesión</h3>
     </div>
 
-    <form novalidate>
-      <!-- Campo de Nombre de Usuario -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+      <!-- Campo de Correo Electrónico -->
       <div class="form-floating mb-3">
-        <input type="text" id="username" class="form-control" placeholder="Ingrese su nombre de usuario" required>
-        <label for="username"><i class="fas fa-user me-2"></i>Nombre de Usuario</label>
-        <div class="invalid-feedback">Debe rellenar este campo.</div>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          formControlName="email"
+          placeholder="Ingrese su correo electrónico"
+          required
+        />
+        <label for="email"
+          ><i class="fas fa-envelope me-2"></i>Correo Electrónico</label
+        >
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            loginForm.get('email')?.invalid && loginForm.get('email')?.touched
+          "
+        >
+          Debe ingresar un correo válido.
+        </div>
       </div>
 
       <!-- Campo de Contraseña -->
       <div class="form-floating mb-4">
-        <input type="password" id="password" class="form-control" placeholder="Ingrese su contraseña" required>
+        <input
+          type="password"
+          id="password"
+          class="form-control"
+          formControlName="password"
+          placeholder="Ingrese su contraseña"
+          required
+        />
         <label for="password"><i class="fas fa-lock me-2"></i>Contraseña</label>
-        <div class="invalid-feedback">Debe rellenar este campo.</div>
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            loginForm.get('password')?.invalid &&
+            loginForm.get('password')?.touched
+          "
+        >
+          Debe ingresar una contraseña válida.
+        </div>
       </div>
 
       <!-- Botón de inicio de sesión -->
-      <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Iniciar Sesión</button>
+      <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
+        Iniciar Sesión
+      </button>
     </form>
 
     <!-- Enlaces para "Recuperar contraseña" y "Registrarse" -->
     <div class="d-flex justify-content-between mt-3">
       <!-- Enlace para recuperar contraseña -->
-      <a href="#" class="text-decoration-none text-muted" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">¿Se te olvidó la contraseña?</a>
+      <a
+        href="#"
+        class="text-decoration-none text-muted"
+        data-bs-toggle="modal"
+        data-bs-target="#forgotPasswordModal"
+        >¿Se te olvidó la contraseña?</a
+      >
 
       <!-- Enlace para registrar (visible solo para el super admin o desarrollador con show-admin-links 
         y para ocultarlo es super-admin-only es para ver como admin osea mientras) -- con ícono de ojo -->
@@ -40,21 +90,47 @@
   </div>
 
   <!-- Modal de recuperación de contraseña -->
-  <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+  <div
+    class="modal fade"
+    id="forgotPasswordModal"
+    tabindex="-1"
+    aria-labelledby="forgotPasswordModalLabel"
+    aria-hidden="true"
+  >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content glass-card">
         <div class="modal-header border-0">
-          <h5 class="modal-title" id="forgotPasswordModalLabel">Recuperar Contraseña</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title" id="forgotPasswordModalLabel">
+            Recuperar Contraseña
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
-          <p>Por favor, ingresa tu correo electrónico para recuperar tu contraseña.</p>
+          <p>
+            Por favor, ingresa tu correo electrónico para recuperar tu
+            contraseña.
+          </p>
           <div class="form-floating mb-3">
-            <input type="email" class="form-control" id="email" placeholder="Ingresa tu correo" required>
-            <label for="email"><i class="fas fa-envelope me-2"></i>Correo Electrónico</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              placeholder="Ingresa tu correo"
+              required
+            />
+            <label for="email"
+              ><i class="fas fa-envelope me-2"></i>Correo Electrónico</label
+            >
             <div class="invalid-feedback">Debe ingresar un correo válido.</div>
           </div>
-          <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Enviar</button>
+          <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
+            Enviar
+          </button>
         </div>
       </div>
     </div>

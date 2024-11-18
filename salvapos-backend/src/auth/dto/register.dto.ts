@@ -20,7 +20,7 @@ export class RegisterDto {
   @IsNotEmpty()
   lastname: string;
 
-  //   @IsString()
-  //   @IsNotEmpty()
-  //   rol: string;
+  @IsString()
+  @IsNotEmpty()
+  role: string;
 }
