@@ -64,8 +64,12 @@ export class DataProductService implements OnModuleInit {
       let precioCosto: number;
       let precioVenta: number;
       do {
-        precioCosto = parseFloat(faker.commerce.price());
-        precioVenta = parseFloat(faker.commerce.price());
+        precioCosto = parseFloat(
+          faker.commerce.price({ min: 0, max: 1000000 }),
+        );
+        precioVenta = parseFloat(
+          faker.commerce.price({ min: 0, max: 1000000 }),
+        );
       } while (precioVenta <= precioCosto);
 
       productos.push({

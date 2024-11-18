@@ -11,6 +11,7 @@ import { VentaModule } from './venta/venta.module';
 import { DataMetodoPagoService } from './data/data-metodo-pago/data-metodo-pago.service';
 import { MetodoPagoModule } from './metodo-pago/metodo-pago.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ConfigModule } from '@nestjs/config';
     CategoriaModule,
     VentaModule,
     MetodoPagoModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
