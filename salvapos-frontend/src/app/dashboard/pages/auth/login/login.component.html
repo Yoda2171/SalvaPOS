@@ -19,6 +19,18 @@
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+      <!-- Loading Indicator -->
+      <div *ngIf="loading$ | async" class="text-center mb-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="invalidCredentials" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
       <!-- Campo de Correo Electrónico -->
       <div class="form-floating mb-3">
         <input
@@ -27,6 +39,7 @@
           class="form-control"
           formControlName="email"
           placeholder="Ingrese su correo electrónico"
+          [ngClass]="{ 'is-invalid': invalidCredentials }"
           required
         />
         <label for="email"
@@ -50,6 +63,7 @@
           class="form-control"
           formControlName="password"
           placeholder="Ingrese su contraseña"
+          [ngClass]="{ 'is-invalid': invalidCredentials }"
           required
         />
         <label for="password"><i class="fas fa-lock me-2"></i>Contraseña</label>

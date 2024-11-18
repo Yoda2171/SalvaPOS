@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../services/auth.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,9 @@ import { AuthService } from '../../../../services/auth.service';
 })
 export default class LoginComponent {
   loginForm: FormGroup;
+  invalidCredentials: boolean = false;
+  errorMessage: string = '';
+  loading$: Observable<boolean>;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -29,20 +33,26 @@ export default class LoginComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+
+    this.loading$ = this.authService.loading$;
   }
 
   onSubmit() {
     if (this.loginForm.valid) {
       const loginData = this.loginForm.value;
       this.authService.login(loginData).subscribe(
-        (response) => {
+        (response: any) => {
           console.log('Login successful', response);
+          this.invalidCredentials = false;
+          this.errorMessage = '';
           // Navigate to the dashboard or another page
           this.router.navigate(['/dashboard']);
         },
-        (error) => {
+        (error: any) => {
           console.error('Login failed', error);
-          alert('Login failed. Please check your credentials and try again.');
+          this.invalidCredentials = true;
+          this.loginForm.reset();
+          this.errorMessage = 'Correo electrónico o contraseña incorrectos.';
         }
       );
     } else {
