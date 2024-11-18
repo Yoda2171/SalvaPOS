@@ -39,6 +39,11 @@
           class="form-control"
           formControlName="firstname"
           placeholder="Ingrese su nombre completo"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('firstname')?.invalid &&
+              registerForm.get('firstname')?.touched
+          }"
           required
         />
         <label for="firstName"><i class="fas fa-user me-2"></i>Nombre</label>
@@ -60,6 +65,11 @@
           class="form-control"
           formControlName="lastname"
           placeholder="Ingrese su apellido completo"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('lastname')?.invalid &&
+              registerForm.get('lastname')?.touched
+          }"
           required
         />
         <label for="lastName"><i class="fas fa-user me-2"></i>Apellido</label>
@@ -82,7 +92,12 @@
           class="form-control"
           formControlName="email"
           placeholder="Ingrese su correo"
-          [ngClass]="{ 'is-invalid': emailExists }"
+          [ngClass]="{
+            'is-invalid':
+              emailExists ||
+              (registerForm.get('email')?.invalid &&
+                registerForm.get('email')?.touched)
+          }"
           required
         />
         <label for="email"
@@ -110,6 +125,11 @@
           class="form-control"
           formControlName="role"
           placeholder="Ingrese un rol"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('role')?.invalid &&
+              registerForm.get('role')?.touched
+          }"
           required
         />
         <label for="role"><i class="fas fa-briefcase me-2"></i>Rol</label>
@@ -132,17 +152,31 @@
           class="form-control"
           formControlName="password"
           placeholder="Ingrese su contraseña"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('password')?.invalid &&
+              registerForm.get('password')?.touched
+          }"
           required
         />
         <label for="password"><i class="fas fa-lock me-2"></i>Contraseña</label>
         <div
           class="invalid-feedback"
           *ngIf="
-            registerForm.get('password')?.invalid &&
+            registerForm.get('password')?.errors?.['required'] &&
             registerForm.get('password')?.touched
           "
         >
           Debe ingresar una contraseña.
+        </div>
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            registerForm.get('password')?.errors?.['minlength'] &&
+            registerForm.get('password')?.touched
+          "
+        >
+          La contraseña debe tener al menos 8 caracteres.
         </div>
       </div>
 
