@@ -32,7 +32,7 @@ export default class RegisterComponent {
       firstname: ['', Validators.required],
       lastname: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
       role: ['', Validators.required],
     });
 
@@ -44,7 +44,6 @@ export default class RegisterComponent {
       const registerData = this.registerForm.value;
       console.log('Registro', registerData);
 
-      // Implement your registration logic here, e.g., call a service to register the user
       this.authService.register(registerData).subscribe(
         () => {
           this.emailExists = false;
@@ -53,13 +52,26 @@ export default class RegisterComponent {
         (error) => {
           console.error('Registration failed', error);
 
+          // Manejo del error de correo ya existente
           this.emailExists = true;
-
-          this.registerForm.get('email')?.reset();
+          this.registerForm.get('email')?.setErrors({ emailExists: true });
         }
       );
     } else {
-      console.log('Formulario inválido');
+      // Marca todos los controles como tocados para mostrar mensajes de error
+      this.markFormGroupTouched(this.registerForm);
+      console.log('Formulario inválido', this.registerForm.value);
     }
+  }
+
+  // Método auxiliar para marcar todos los controles como tocados
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.values(formGroup.controls).forEach((control) => {
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      } else {
+        control.markAsTouched();
+      }
+    });
   }
 }
