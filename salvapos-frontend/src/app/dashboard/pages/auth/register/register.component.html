@@ -19,6 +19,18 @@
     </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+      <!-- Loading Indicator -->
+      <div *ngIf="loading$ | async" class="text-center mb-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Alert Message -->
+      <div *ngIf="emailExists" class="alert alert-danger" role="alert">
+        Este correo ya está registrado.
+      </div>
+
       <!-- Campo de Nombre Completo -->
       <div class="form-floating mb-3">
         <input
@@ -70,6 +82,7 @@
           class="form-control"
           formControlName="email"
           placeholder="Ingrese su correo"
+          [ngClass]="{ 'is-invalid': emailExists }"
           required
         />
         <label for="email"
@@ -83,6 +96,9 @@
           "
         >
           Debe ingresar un correo válido.
+        </div>
+        <div class="invalid-feedback" *ngIf="emailExists">
+          Este correo ya está registrado.
         </div>
       </div>
 
