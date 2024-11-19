@@ -26,11 +26,6 @@
         </div>
       </div>
 
-      <!-- Alert Message -->
-      <div *ngIf="emailExists" class="alert alert-danger" role="alert">
-        Este correo ya está registrado.
-      </div>
-
       <!-- Campo de Nombre Completo -->
       <div class="form-floating mb-3">
         <input
@@ -106,14 +101,21 @@
         <div
           class="invalid-feedback"
           *ngIf="
+            registerForm.get('email')?.errors?.['emailExists'] &&
+            registerForm.get('email')?.touched
+          "
+        >
+          Este correo ya está registrado.
+        </div>
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            !registerForm.get('email')?.errors?.['emailExists'] &&
             registerForm.get('email')?.invalid &&
             registerForm.get('email')?.touched
           "
         >
           Debe ingresar un correo válido.
-        </div>
-        <div class="invalid-feedback" *ngIf="emailExists">
-          Este correo ya está registrado.
         </div>
       </div>
 
