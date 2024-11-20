@@ -4,16 +4,30 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { RoleService } from 'src/role/role.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+
+    private readonly roleService: RoleService,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return this.usersRepository.save(createUserDto);
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const role = await this.roleService.findById(createUserDto.roleId);
+
+    console.log(role);
+
+    const newUser = new User();
+    newUser.firstname = createUserDto.firstname;
+    newUser.lastname = createUserDto.lastname;
+    newUser.email = createUserDto.email;
+    newUser.password = createUserDto.password;
+    newUser.role = role;
+
+    return this.usersRepository.save(newUser);
   }
 
   findOneByEmail(email: string) {

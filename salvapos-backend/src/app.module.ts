@@ -12,6 +12,8 @@ import { DataMetodoPagoService } from './data/data-metodo-pago/data-metodo-pago.
 import { MetodoPagoModule } from './metodo-pago/metodo-pago.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { RoleModule } from './role/role.module';
+import { DataRoleService } from './data/data-role/data-role.service';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { AuthModule } from './auth/auth.module';
       timezone: 'Z',
       synchronize: true, // Sincroniza la base de datos según las entidades de TypeORM
     }),
+    RoleModule,
     UsersModule,
     ProductoModule,
     CategoriaModule,
@@ -40,6 +43,7 @@ import { AuthModule } from './auth/auth.module';
   controllers: [AppController],
   providers: [
     AppService,
+    DataRoleService,
     DataCategoryService,
     DataProductService,
     DataMetodoPagoService,
