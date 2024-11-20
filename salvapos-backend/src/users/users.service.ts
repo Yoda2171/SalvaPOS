@@ -30,10 +30,12 @@ export class UsersService {
     return this.usersRepository.save(newUser);
   }
 
-  findOneByEmail(email: string) {
-    return this.usersRepository.findOneBy({ email });
+  async findOneByEmail(email: string): Promise<User | undefined> {
+    return this.usersRepository.findOne({
+      where: { email },
+      relations: ['role'],
+    });
   }
-
   findAll() {
     return `This action returns all users`;
   }
