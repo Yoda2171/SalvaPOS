@@ -121,28 +121,31 @@
 
       <!-- Campo de Rol -->
       <div class="form-floating mb-3">
-        <input
-          type="text"
-          id="role"
-          class="form-control"
-          formControlName="role"
-          placeholder="Ingrese un rol"
+        <select
+          id="roleId"
+          class="form-select"
+          formControlName="roleId"
           [ngClass]="{
             'is-invalid':
-              registerForm.get('role')?.invalid &&
-              registerForm.get('role')?.touched
+              registerForm.get('roleId')?.invalid &&
+              registerForm.get('roleId')?.touched
           }"
           required
-        />
-        <label for="role"><i class="fas fa-briefcase me-2"></i>Rol</label>
+        >
+          <option value="" disabled selected>Seleccione un rol</option>
+          <option *ngFor="let role of roles" [value]="role.id">
+            {{ role.name }}
+          </option>
+        </select>
+        <label for="roleId"><i class="fas fa-briefcase me-2"></i>Rol</label>
         <div
           class="invalid-feedback"
           *ngIf="
-            registerForm.get('role')?.invalid &&
-            registerForm.get('role')?.touched
+            registerForm.get('roleId')?.invalid &&
+            registerForm.get('roleId')?.touched
           "
         >
-          Debe rellenar este campo.
+          Debe seleccionar un rol.
         </div>
       </div>
 

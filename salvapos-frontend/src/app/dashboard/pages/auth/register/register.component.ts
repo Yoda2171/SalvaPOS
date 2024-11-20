@@ -23,6 +23,11 @@ export default class RegisterComponent {
   emailExists: boolean = false;
   loading$: Observable<boolean>;
 
+  roles: { id: number; name: string }[] = [
+    { id: 1, name: 'Administrador' },
+    { id: 2, name: 'Cajero' },
+  ];
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly router: Router,
@@ -33,7 +38,7 @@ export default class RegisterComponent {
       lastname: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      role: ['', Validators.required],
+      roleId: ['', Validators.required],
     });
 
     this.loading$ = this.authService.loading$;
@@ -43,6 +48,8 @@ export default class RegisterComponent {
     if (this.registerForm.valid) {
       const registerData = this.registerForm.value;
       console.log('Registro', registerData);
+
+      registerData.roleId = parseInt(registerData.roleId);
 
       this.authService.register(registerData).subscribe(
         () => {

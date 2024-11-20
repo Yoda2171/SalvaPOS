@@ -8,10 +8,14 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcryptjs from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { RoleService } from 'src/role/role.service';
+
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly roleService: RoleService,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
@@ -31,7 +35,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid password');
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { sub: user.id, email: user.email, role: user.role.name };
 
     const token = await this.jwtService.signAsync(payload);
 
@@ -46,8 +50,10 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const { firstname, lastname, email, password, role } = registerDto;
+    const { firstname, lastname, email, password, roleId } = registerDto;
     const user = await this.usersService.findOneByEmail(email);
+
+    const role = await this.roleService.findById(roleId);
 
     if (user) {
       throw new BadRequestException('Email already exists');
@@ -55,13 +61,16 @@ export class AuthService {
 
     const hashedPassword = await bcryptjs.hash(password, 10);
 
-    await this.usersService.create({
-      firstname,
-      lastname,
-      email,
-      role,
-      password: hashedPassword,
-    });
+    const newUser = new CreateUserDto();
+    newUser.firstname = firstname;
+    newUser.lastname = lastname;
+    newUser.email = email;
+    newUser.password = hashedPassword;
+    newUser.roleId = role.id;
+
+    console.log(newUser);
+
+    await this.usersService.create(newUser);
 
     return {
       message: 'User created successfully',

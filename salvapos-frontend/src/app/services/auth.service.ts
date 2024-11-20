@@ -41,4 +41,8 @@ export class AuthService {
       })
     );
   }
+
+  getroles(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/roles`);
+  }
 }
