@@ -38,6 +38,14 @@ export class ProductoService {
       );
     }
 
+    const productoExistenteNombre = await this.productoRepository.findOne({
+      where: { nombre: createProductoDto.nombre },
+    });
+
+    if (productoExistenteNombre) {
+      throw new ConflictException('Ya existe un producto con ese nombre');
+    }
+
     const categoria = await this.categoriaService.findById(
       createProductoDto.categoriaId,
     );
@@ -118,8 +126,23 @@ export class ProductoService {
       }
     }
 
-    producto.codigoBarras = updateProductoDto.codigoBarras;
-    producto.nombre = updateProductoDto.nombre;
+    // Verificar si el nombre del producto está siendo actualizado y ya existe
+    if (
+      updateProductoDto.nombre.toLowerCase().trim() &&
+      updateProductoDto.nombre.toLowerCase().trim() !==
+        producto.nombre.toLowerCase().trim()
+    ) {
+      const productoExistenteNombre = await this.productoRepository.findOne({
+        where: { nombre: updateProductoDto.nombre.trim() },
+      });
+
+      if (productoExistenteNombre) {
+        throw new ConflictException('Ya existe un producto con ese nombre');
+      }
+    }
+
+    producto.codigoBarras = updateProductoDto.codigoBarras.trim();
+    producto.nombre = updateProductoDto.nombre.trim();
     producto.precioCosto = updateProductoDto.precioCosto;
     producto.precioVenta = updateProductoDto.precioVenta;
     producto.cantidad = updateProductoDto.cantidad;

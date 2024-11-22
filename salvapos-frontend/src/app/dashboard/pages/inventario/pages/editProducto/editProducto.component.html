@@ -80,7 +80,9 @@
                 El código de barras es obligatorio.
               </span>
               <span
-                *ngIf="productoForm.get('codigoBarras')?.errors?.['codigoBarrasExists']"
+                *ngIf="
+                  productoForm.get('codigoBarras')?.errors?.['codigoBarrasExists']
+                "
               >
                 El código de barras ya existe.
               </span>

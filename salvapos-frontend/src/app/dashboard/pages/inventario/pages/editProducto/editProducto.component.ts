@@ -1,34 +1,23 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { NavbarComponent } from '../../../../components/navbar/navbar.component';
 import {
   FormBuilder,
   Validators,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
-  AbstractControl,
-  ValidationErrors,
-  AsyncValidatorFn,
 } from '@angular/forms';
 import { CategoriaService } from '../../../../../services/categoria.service';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Categoria } from '../../../../Interface/categoria.inteface';
 import { ProductoService } from '../../../../../services/producto.service';
 import { Producto } from '../../../../Interface/producto.interface';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-edit-producto',
   standalone: true,
-  imports: [
-    CommonModule,
-    NavbarComponent,
-    ReactiveFormsModule,
-    RouterModule,
-    FormsModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule],
   templateUrl: './editProducto.component.html',
   styleUrls: ['./editProducto.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,8 +39,8 @@ export default class EditProductoComponent implements OnInit {
 
   ngOnInit(): void {
     this.productoForm = this.fb.group({
-      nombre: ['', Validators.required, this.nombreValidator()],
-      codigoBarras: ['', Validators.required, this.codigoBarrasValidator()],
+      nombre: ['', Validators.required],
+      codigoBarras: ['', Validators.required],
       categoriaId: [null, [Validators.required, Validators.min(1)]],
       cantidad: [
         null,
@@ -70,6 +59,10 @@ export default class EditProductoComponent implements OnInit {
     this.productoId = +this.route.snapshot.paramMap.get('id')!;
     this.categorias$ = this.categoriaService.getCategoriasAll();
     this.cargarProducto();
+
+    this.productoForm.valueChanges.subscribe(() => {
+      this.validateForm();
+    });
   }
 
   cargarProducto(): void {
@@ -93,42 +86,6 @@ export default class EditProductoComponent implements OnInit {
         error: () => observer.next(false),
       });
     });
-  }
-
-  nombreValidator(): AsyncValidatorFn {
-    return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (
-        control.value.toLowerCase() ===
-        this.currentProducto?.nombre.toLowerCase()
-      ) {
-        return of(null);
-      }
-      return this.productoService.checkIfProductExists(control.value, '').pipe(
-        map((response: any) => {
-          console.log(`Product exists: ${response.existe}`); // Debugging line
-          return response.existe ? { nombreExists: true } : null;
-        }),
-        catchError(() => of(null))
-      );
-    };
-  }
-
-  codigoBarrasValidator(): AsyncValidatorFn {
-    return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (
-        control.value.toLowerCase() ===
-        this.currentProducto?.codigoBarras.toLowerCase()
-      ) {
-        return of(null);
-      }
-      return this.productoService.checkIfProductExists('', control.value).pipe(
-        map((response: any) => {
-          console.log(`Product exists: ${response.existe}`); // Debugging line
-          return response.existe ? { codigoBarrasExists: true } : null;
-        }),
-        catchError(() => of(null))
-      );
-    };
   }
 
   onSubmit(): void {
@@ -155,6 +112,21 @@ export default class EditProductoComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error al editar el producto', error);
+
+          // Manejo de errores de nombre y código de barras ya existentes
+          if (error.error.message === 'Ya existe un producto con ese nombre') {
+            this.productoForm.get('nombre')?.setErrors({ nombreExists: true });
+            this.productoForm.get('nombre')?.markAsTouched();
+          }
+          if (
+            error.error.message ===
+            'Ya existe un producto con ese código de barras'
+          ) {
+            this.productoForm
+              .get('codigoBarras')
+              ?.setErrors({ codigoBarrasExists: true });
+            this.productoForm.get('codigoBarras')?.markAsTouched();
+          }
         },
       });
   }
@@ -188,5 +160,15 @@ export default class EditProductoComponent implements OnInit {
       this.productoForm.patchValue({ [controlName]: numericValue });
       input.value = formattedValue;
     }
+  }
+
+  // Función para validar el formulario
+  validateForm(): void {
+    Object.keys(this.productoForm.controls).forEach((key) => {
+      const control = this.productoForm.get(key);
+      if (control && control.invalid && control.touched) {
+        control.markAsTouched();
+      }
+    });
   }
 }
