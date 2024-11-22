@@ -1,11 +1,15 @@
 <div class="container mt-4">
     <h2 class="text-center">Reporte de Inventario</h2>
 
-    <!-- Selector de fecha -->
-    <div class="row mb-3">
+    <!-- Selector de fechas -->
+    <div class="row mb-4">
         <div class="col-md-4 offset-md-4 text-center">
-            <label for="date" class="form-label">Seleccionar Fecha:</label>
-            <input type="date" id="date" class="form-control" (change)="onDateChange($event)">
+            <label for="startDate" class="form-label">Fecha de Inicio:</label>
+            <input type="date" id="startDate" class="form-control" (change)="onDateChange($event, 'start')">
+        </div>
+        <div class="col-md-4 text-center">
+            <label for="endDate" class="form-label">Fecha de Fin:</label>
+            <input type="date" id="endDate" class="form-control" (change)="onDateChange($event, 'end')">
         </div>
     </div>
 

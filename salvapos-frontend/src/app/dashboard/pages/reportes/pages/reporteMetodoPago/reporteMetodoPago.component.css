@@ -1,3 +1,72 @@
-:host {
-  display: block;
+/* Contenedor principal */
+.container {
+  margin-top: 30px;
+  margin-bottom: 50px;
+}
+
+/* Títulos */
+h2, h4 {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* Estilos de la tabla */
+table {
+  width: 100%;
+  margin-bottom: 30px;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+thead {
+  background-color: #007bff;
+  color: white;
+}
+
+th {
+  font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+  background-color: #f1f1f1;
+  cursor: pointer;
+}
+
+/* Estilos de los campos de fecha */
+.input-date {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Estilo del gráfico */
+#paymentMethodChart {
+  max-width: 100%;
+  height: 300px;
+  margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+  /* Hacer que los campos de fecha se ajusten en pantallas pequeñas */
+  .col-md-4 {
+    margin-bottom: 15px;
+    width: 100%;
+  }
 }
