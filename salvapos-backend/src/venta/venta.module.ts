@@ -6,11 +6,13 @@ import { Venta } from './entities/venta.entity';
 import { DetalleVenta } from './entities/detalleVenta.entity';
 import { ProductoModule } from 'src/producto/producto.module';
 import { PagoVenta } from './entities/pagoVenta.entity';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Venta, DetalleVenta, PagoVenta]),
     ProductoModule,
+    UsersModule,
   ],
   controllers: [VentaController],
   providers: [VentaService],

@@ -1,1 +1,65 @@
-<p>reporteMetodoPago works!</p>,
+<div class="container mt-4">
+  <h2 class="text-center">Reporte de Métodos de Pago</h2>
+
+  <!-- Selector de fechas -->
+  <div class="row mb-3">
+    <div class="col-md-4 offset-md-4 text-center">
+      <label for="startDate" class="form-label">Fecha de Inicio:</label>
+      <input
+        type="date"
+        id="startDate"
+        class="form-control"
+        (change)="onDateChange($event, 'start')"
+      />
+    </div>
+    <div class="col-md-4 text-center">
+      <label for="endDate" class="form-label">Fecha de Fin:</label>
+      <input
+        type="date"
+        id="endDate"
+        class="form-control"
+        (change)="onDateChange($event, 'end')"
+      />
+    </div>
+  </div>
+
+  <!-- Tabla de métodos de pago -->
+  <div class="row">
+    <div class="col-md-12">
+      <h4 class="text-center">Detalles de Métodos de Pago</h4>
+      <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th>Método de Pago</th>
+            <th>Total de Pagos</th>
+            <th>Valor Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Tarjeta de Crédito</td>
+            <td>150</td>
+            <td>$3000.00</td>
+          </tr>
+          <tr>
+            <td>Tarjeta de Débito</td>
+            <td>120</td>
+            <td>$2400.00</td>
+          </tr>
+          <tr>
+            <td>Efectivo</td>
+            <td>80</td>
+            <td>$1600.00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Gráfico de Métodos de Pago -->
+  <div class="row mt-5">
+    <div class="col-md-12">
+      <canvas id="paymentMethodChart"></canvas>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+} from 'typeorm';
 import { DetalleVenta } from './detalleVenta.entity';
 import { PagoVenta } from './pagoVenta.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class Venta {
@@ -21,4 +28,7 @@ export class Venta {
 
   @OneToMany(() => PagoVenta, (pago) => pago.venta, { cascade: true })
   pagos: PagoVenta[];
+
+  @ManyToOne(() => User, (user) => user.ventas)
+  user: User;
 }

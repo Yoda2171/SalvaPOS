@@ -88,6 +88,7 @@ export default class HistorialVentaComponent implements AfterViewInit {
   }
 
   seleccionarVenta(venta: any): void {
+    console.log('Venta seleccionada:', venta);
     this.ventaSeleccionada = venta;
   }
 

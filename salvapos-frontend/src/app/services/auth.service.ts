@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap, finalize } from 'rxjs/operators';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root',
@@ -20,13 +21,23 @@ export class AuthService {
     this.loadingSubject.next(true); // Start loading state
 
     return this.http.post(`${this.apiUrl}/login`, loginDto).pipe(
-      tap((response) => {
+      tap((response: any) => {
         console.log('Login successful', response);
+        localStorage.setItem('token', response.token);
       }),
       finalize(() => {
         this.loadingSubject.next(false); // End loading state
       })
     );
+  }
+
+  getCurrentUser(): any {
+    const token = localStorage.getItem('token');
+    if (token) {
+      console.log('Token', jwtDecode(token));
+      return jwtDecode(token);
+    }
+    return null;
   }
 
   register(registerDto: any): Observable<any> {
@@ -42,7 +53,11 @@ export class AuthService {
     );
   }
 
-  getroles(): Observable<any> {
+  getRoles(): Observable<any> {
     return this.http.get(`${this.apiUrl}/roles`);
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
   }
 }

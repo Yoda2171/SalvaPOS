@@ -1,3 +1,4 @@
+import e from 'express';
 import { MetodoPago } from './metodoPago.interface';
 
 export interface Venta {
@@ -5,6 +6,14 @@ export interface Venta {
   total: number;
   detalles: DetalleVenta[];
   pagos: Pago[];
+  user: User;
+}
+
+export interface User {
+  id?: number;
+  firtsname: string;
+  lastname: string;
+  email: string;
 }
 
 export interface DetalleVenta {
@@ -43,6 +52,7 @@ export interface VentaAPI {
     metodoPagoId: number;
     monto?: number | null;
   }[];
+  userId?: number;
 }
 
 export interface Ventaboleta {

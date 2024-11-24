@@ -86,7 +86,12 @@
               ventaSeleccionada.estado === 'devuelta'
           }"
         >
-          <strong>Cajero:</strong>
+          <strong>Cajero:</strong
+          >{{
+            ventaSeleccionada.user.firstname +
+              " " +
+              ventaSeleccionada.user.lastname
+          }}
           <!-- Cajero Nombre -->
         </p>
         <p
