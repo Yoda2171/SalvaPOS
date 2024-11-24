@@ -7,17 +7,17 @@
       <h3 class="fw-bold">Iniciar Sesión</h3>
     </div>
 
-    <form novalidate>
+    <form novalidate (ngSubmit)="onSubmit()">
       <!-- Campo de Nombre de Usuario -->
       <div class="form-floating mb-3">
-        <input type="text" id="username" class="form-control" placeholder="Ingrese su nombre de usuario" required>
+        <input type="text" id="username" class="form-control" placeholder="Ingrese su nombre de usuario" required [(ngModel)]="username" name="username">
         <label for="username"><i class="fas fa-user me-2"></i>Nombre de Usuario</label>
         <div class="invalid-feedback">Debe rellenar este campo.</div>
       </div>
 
       <!-- Campo de Contraseña -->
       <div class="form-floating mb-4">
-        <input type="password" id="password" class="form-control" placeholder="Ingrese su contraseña" required>
+        <input type="password" id="password" class="form-control" placeholder="Ingrese su contraseña" required [(ngModel)]="password" name="password">
         <label for="password"><i class="fas fa-lock me-2"></i>Contraseña</label>
         <div class="invalid-feedback">Debe rellenar este campo.</div>
       </div>
@@ -32,7 +32,7 @@
       <a href="#" class="text-decoration-none text-muted" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">¿Se te olvidó la contraseña?</a>
 
       <!-- Enlace para registrar (visible solo para el super admin o desarrollador con show-admin-links 
-        y para ocultarlo es super-admin-only es para ver como admin osea mientras) -- con ícono de ojo -->
+        y para ocultarlo es super-admin-only es para ver como admin osea mientras) -->
       <a href="#" class="text-decoration-none text-muted show-admin-links">
         <i class="fas fa-eye me-1"></i>Registrarse
       </a>
