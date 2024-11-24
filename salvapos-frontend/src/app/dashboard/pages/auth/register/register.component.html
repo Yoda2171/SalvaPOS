@@ -1,48 +1,201 @@
 <!-- Contenedor principal -->
-<div class="container-fluid d-flex justify-content-center align-items-center bg-gradient vh-100">
+<div
+  class="container-fluid d-flex justify-content-center align-items-center bg-gradient vh-100"
+>
   <!-- Formulario de registro -->
-  <div id="registerForm" class="glass-card p-4 rounded-3 shadow-lg" style="max-width: 400px; width: 100%;">
+  <div
+    id="registerForm"
+    class="glass-card p-4 rounded-3 shadow-lg"
+    style="max-width: 400px; width: 100%"
+  >
     <div class="text-center mb-4">
-      <img src="assets/img/Registro.png" alt="Logo" class="img-fluid mb-3" style="width: 80px;">
+      <img
+        src="assets/img/Registro.png"
+        alt="Logo"
+        class="img-fluid mb-3"
+        style="width: 80px"
+      />
       <h3 class="fw-bold">Registrar Nuevo Usuario</h3>
     </div>
 
-    <form novalidate>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+      <!-- Loading Indicator -->
+      <div *ngIf="loading$ | async" class="text-center mb-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
       <!-- Campo de Nombre Completo -->
       <div class="form-floating mb-3">
-        <input type="text" id="fullName" class="form-control" placeholder="Ingrese su nombre completo" required>
-        <label for="fullName"><i class="fas fa-user me-2"></i>Nombre Completo</label>
-        <div class="invalid-feedback">Debe rellenar este campo.</div>
+        <input
+          type="text"
+          id="firstName"
+          class="form-control"
+          formControlName="firstname"
+          placeholder="Ingrese su nombre completo"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('firstname')?.invalid &&
+              registerForm.get('firstname')?.touched
+          }"
+          required
+        />
+        <label for="firstName"><i class="fas fa-user me-2"></i>Nombre</label>
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            registerForm.get('firstname')?.invalid &&
+            registerForm.get('firstname')?.touched
+          "
+        >
+          Debe rellenar este campo.
+        </div>
+      </div>
+
+      <div class="form-floating mb-3">
+        <input
+          type="text"
+          id="lastName"
+          class="form-control"
+          formControlName="lastname"
+          placeholder="Ingrese su apellido completo"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('lastname')?.invalid &&
+              registerForm.get('lastname')?.touched
+          }"
+          required
+        />
+        <label for="lastName"><i class="fas fa-user me-2"></i>Apellido</label>
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            registerForm.get('lastname')?.invalid &&
+            registerForm.get('lastname')?.touched
+          "
+        >
+          Debe rellenar este campo.
+        </div>
       </div>
 
       <!-- Campo de Correo Electrónico -->
       <div class="form-floating mb-3">
-        <input type="email" id="email" class="form-control" placeholder="Ingrese su correo" required>
-        <label for="email"><i class="fas fa-envelope me-2"></i>Correo Electrónico</label>
-        <div class="invalid-feedback">Debe ingresar un correo válido.</div>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          formControlName="email"
+          placeholder="Ingrese su correo"
+          [ngClass]="{
+            'is-invalid':
+              emailExists ||
+              (registerForm.get('email')?.invalid &&
+                registerForm.get('email')?.touched)
+          }"
+          required
+        />
+        <label for="email"
+          ><i class="fas fa-envelope me-2"></i>Correo Electrónico</label
+        >
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            registerForm.get('email')?.errors?.['emailExists'] &&
+            registerForm.get('email')?.touched
+          "
+        >
+          Este correo ya está registrado.
+        </div>
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            !registerForm.get('email')?.errors?.['emailExists'] &&
+            registerForm.get('email')?.invalid &&
+            registerForm.get('email')?.touched
+          "
+        >
+          Debe ingresar un correo válido.
+        </div>
       </div>
 
       <!-- Campo de Rol -->
       <div class="form-floating mb-3">
-        <input type="text" id="role" class="form-control" placeholder="Ingrese un rol" required>
-        <label for="role"><i class="fas fa-briefcase me-2"></i>Rol</label>
-        <div class="invalid-feedback">Debe rellenar este campo.</div>
+        <select
+          id="roleId"
+          class="form-select"
+          formControlName="roleId"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('roleId')?.invalid &&
+              registerForm.get('roleId')?.touched
+          }"
+          required
+        >
+          <option value="" disabled selected>Seleccione un rol</option>
+          <option *ngFor="let role of roles" [value]="role.id">
+            {{ role.name }}
+          </option>
+        </select>
+        <label for="roleId"><i class="fas fa-briefcase me-2"></i>Rol</label>
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            registerForm.get('roleId')?.invalid &&
+            registerForm.get('roleId')?.touched
+          "
+        >
+          Debe seleccionar un rol.
+        </div>
       </div>
 
       <!-- Campo de Contraseña -->
       <div class="form-floating mb-4">
-        <input type="password" id="password" class="form-control" placeholder="Ingrese su contraseña" required>
+        <input
+          type="password"
+          id="password"
+          class="form-control"
+          formControlName="password"
+          placeholder="Ingrese su contraseña"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('password')?.invalid &&
+              registerForm.get('password')?.touched
+          }"
+          required
+        />
         <label for="password"><i class="fas fa-lock me-2"></i>Contraseña</label>
-        <div class="invalid-feedback">Debe ingresar una contraseña.</div>
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            registerForm.get('password')?.errors?.['required'] &&
+            registerForm.get('password')?.touched
+          "
+        >
+          Debe ingresar una contraseña.
+        </div>
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            registerForm.get('password')?.errors?.['minlength'] &&
+            registerForm.get('password')?.touched
+          "
+        >
+          La contraseña debe tener al menos 8 caracteres.
+        </div>
       </div>
 
       <!-- Botón de registrar -->
-      <button type="submit" class="btn btn-success w-100 fw-bold py-2">Registrar</button>
+      <button type="submit" class="btn btn-success w-100 fw-bold py-2">
+        Registrar
+      </button>
     </form>
 
     <!-- Enlace para iniciar sesión -->
     <div class="text-center mt-3">
-      <a href="/login" class="text-decoration-none text-muted">¿Ya tienes una cuenta? Inicia Sesión</a>
+      <a href="/login" class="text-decoration-none text-muted"
+        >¿Ya tienes una cuenta? Inicia Sesión</a
+      >
     </div>
   </div>
 </div>

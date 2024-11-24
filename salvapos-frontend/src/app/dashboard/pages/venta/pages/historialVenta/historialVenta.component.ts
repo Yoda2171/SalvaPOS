@@ -25,6 +25,7 @@ import { ImpresoraService } from '../../../../../services/impresora.service';
 export default class HistorialVentaComponent implements AfterViewInit {
   searchTerm: string = '';
   selectedDate: string = ''; // Formato ISO para el input de fecha
+  internalDate: string = '';
   ventas: any[] = []; // Lista de ventas para mostrar
   ventaSeleccionada: any = null;
   loading$: Observable<boolean>;
@@ -67,24 +68,12 @@ export default class HistorialVentaComponent implements AfterViewInit {
       });
   }
 
-  convertToTextInput(): void {
-    const inputElement = document.querySelector(
-      'input[type="date"]'
-    ) as HTMLInputElement;
-    if (inputElement && inputElement.value) {
-      const [year, month, day] = inputElement.value.split('-');
+  onDateChange(newDate: string): void {
+    if (newDate) {
+      // Convierte la fecha de YYYY-MM-DD a DD/MM/YYYY
+      const [year, month, day] = newDate.split('-');
       this.selectedDate = `${day}/${month}/${year}`;
-      inputElement.type = 'text';
-    }
-    this.buscarVentas();
-  }
-
-  convertToDateInput(event: FocusEvent): void {
-    const inputElement = event.target as HTMLInputElement;
-    inputElement.type = 'date';
-    if (this.selectedDate) {
-      const [day, month, year] = this.selectedDate.split('/');
-      inputElement.value = `${year}-${month}-${day}`;
+      this.buscarVentas();
     }
   }
 
@@ -93,11 +82,13 @@ export default class HistorialVentaComponent implements AfterViewInit {
     const day = String(today.getDate()).padStart(2, '0');
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const year = today.getFullYear();
+    this.internalDate = `${year}-${month}-${day}`;
     this.selectedDate = `${day}/${month}/${year}`;
     this.buscarVentas();
   }
 
   seleccionarVenta(venta: any): void {
+    console.log('Venta seleccionada:', venta);
     this.ventaSeleccionada = venta;
   }
 
@@ -153,7 +144,7 @@ export default class HistorialVentaComponent implements AfterViewInit {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: true,
+      hour12: false,
     });
     const fecha = `Emision: ${fechaFormateada} ${horaFormateada}\n\n`;
 
@@ -161,15 +152,22 @@ export default class HistorialVentaComponent implements AfterViewInit {
     const items = this.ventaSeleccionada.detalles
       .map(
         (item: any) =>
-          `${item.producto.nombre}\t${item.cantidad} x ${item.precioUnitario}\t${item.subtotal}`
+          `${item.producto.nombre}\t${item.cantidad} x ${this.formatCurrency(
+            item.precioUnitario
+          )}\t${this.formatCurrency(item.subtotal)}`
       )
       .join('\n');
-    const total = `\nNeto: ${(this.ventaSeleccionada.total * 0.81).toFixed(
-      2
-    )}\nIVA: ${(this.ventaSeleccionada.total * 0.19).toFixed(2)}\nTotal: ${
-      this.ventaSeleccionada.total
-    }\n`;
+    const total = `\nNeto: ${this.formatCurrency(
+      Math.floor(this.ventaSeleccionada.total * 0.81)
+    )}\nIVA: ${this.formatCurrency(
+      Math.floor(this.ventaSeleccionada.total * 0.19)
+    )}\nTotal: ${this.formatCurrency(this.ventaSeleccionada.total)}\n`;
 
     return `${encabezado}${fecha}${idVenta}${items}${total}`;
+  }
+
+  // Formatea el valor de entrada a formato moneda
+  formatCurrency(value: number | null): string {
+    return value ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
   }
 }

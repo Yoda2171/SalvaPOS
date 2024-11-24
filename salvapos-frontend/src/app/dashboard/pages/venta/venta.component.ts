@@ -22,25 +22,19 @@ import {
   DetalleVenta,
   Producto,
   VentaAPI,
-  Ventaboleta,
   Venta,
 } from '../../Interface/venta.interface';
 import { VentaService } from '../../../services/venta.service';
 import { Router, RouterModule } from '@angular/router';
-import ReporteVentaComponent from '../reportes/pages/reporteVenta/reporteVenta.component';
+
 import { NavabarVentaComponent } from '../../components/navabarVenta/navabarVenta.component';
 import { ImpresoraService } from '../../../services/impresora.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-venta',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    ReporteVentaComponent,
-    NavabarVentaComponent,
-  ],
+  imports: [CommonModule, FormsModule, RouterModule, NavabarVentaComponent],
   templateUrl: './venta.component.html',
   styleUrls: ['./venta.component.css'],
 })
@@ -82,6 +76,7 @@ export default class VentaComponent
     private readonly productoService: ProductoService,
     private readonly ventaService: VentaService,
     private readonly impresoraService: ImpresoraService,
+    private readonly authService: AuthService,
     private readonly cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
@@ -101,6 +96,11 @@ export default class VentaComponent
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.devolverStock();
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: any): void {
     this.devolverStock();
   }
 
@@ -294,6 +294,8 @@ export default class VentaComponent
   }
 
   realizarVenta(): void {
+    const currentUser = this.authService.getCurrentUser();
+    console.log('currentUser', currentUser);
     const venta: VentaAPI = {
       total: this.calcularTotal(),
       detalles: this.carrito.map((item) => ({
@@ -305,6 +307,7 @@ export default class VentaComponent
         metodoPagoId: this.obtenerMetodoPagoId(pago.metodoPago.nombre),
         monto: pago.monto ?? 0,
       })),
+      userId: currentUser?.sub,
     };
 
     this.ventaService.createVenta(venta).subscribe({
@@ -338,7 +341,9 @@ export default class VentaComponent
 
     if (totalPagado < total) {
       this.mostrarErrorAlert(
-        `El total a pagar es $${total}, pero solo se han ingresado $${totalPagado}.`
+        `El total a pagar es $ ${this.formatCurrency(
+          total
+        )}, pero solo se han ingresado $ ${this.formatCurrency(totalPagado)}.`
       );
       return false;
     }
@@ -410,22 +415,49 @@ export default class VentaComponent
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: true,
+      hour12: false,
     });
     const fecha = `Emision: ${fechaFormateada} ${horaFormateada}\n\n`;
     const idVenta = `Ticket: ${this.ventaId}\n\n`; // Agregar el ID de la venta
     const items = this.carrito
       .map(
         (item) =>
-          `${item.producto.nombre}\t${
-            item.cantidad
-          } x ${item.precioUnitario.toFixed(2)}\t${item.subtotal.toFixed(2)}`
+          `${item.producto.nombre}\t${item.cantidad} x ${this.formatCurrency(
+            item.precioUnitario
+          )}\t${this.formatCurrency(item.subtotal)}`
       )
       .join('\n');
-    const total = `\nNeto: ${(this.calcularTotal() * 0.81).toFixed(2)}\nIVA: ${(
-      this.calcularTotal() * 0.19
-    ).toFixed(2)}\nTotal: ${this.calcularTotal().toFixed(2)}\n`;
+    const total = `\nNeto: ${this.formatCurrency(
+      Math.floor(this.calcularTotal() * 0.81)
+    )}\nIVA: ${this.formatCurrency(
+      Math.floor(this.calcularTotal() * 0.19)
+    )}\nTotal: ${this.formatCurrency(this.calcularTotal())}\n`;
 
     return `${encabezado}${fecha}${idVenta}${items}${total}`;
+  }
+
+  // Formatea el valor de entrada a formato moneda
+  formatCurrency(value: number | null): string {
+    return value ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+  }
+
+  // Actualiza el monto ingresado
+  onMontoChange(value: string, i: number): void {
+    const numericValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+    if (!isNaN(numericValue)) {
+      this.pago[i].monto = numericValue;
+    }
+  }
+
+  onMontoInput(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const numericValue = input.value.replace(/\D/g, ''); // Elimina caracteres no numéricos
+    if (numericValue === '') {
+      this.pago[index].monto = null;
+      input.value = '';
+    } else {
+      this.pago[index].monto = parseFloat(numericValue);
+      input.value = this.formatCurrency(this.pago[index].monto ?? null);
+    }
   }
 }

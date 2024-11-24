@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,9 +27,34 @@ export class ProductoService {
   async createProducto(
     createProductoDto: CreateProductoDto,
   ): Promise<Producto> {
+    // Verificar si el producto con el código de barras ya existe
+    const productoExistente = await this.productoRepository.findOne({
+      where: { codigoBarras: createProductoDto.codigoBarras },
+    });
+
+    if (productoExistente) {
+      throw new ConflictException(
+        'Ya existe un producto con ese código de barras',
+      );
+    }
+
+    const productoExistenteNombre = await this.productoRepository.findOne({
+      where: { nombre: createProductoDto.nombre },
+    });
+
+    if (productoExistenteNombre) {
+      throw new ConflictException('Ya existe un producto con ese nombre');
+    }
+
     const categoria = await this.categoriaService.findById(
       createProductoDto.categoriaId,
     );
+
+    // Verificar si la categoría existe
+    if (!categoria) {
+      throw new NotFoundException('Categoría no encontrada');
+    }
+
     const nuevoProducto = new Producto();
     nuevoProducto.codigoBarras = createProductoDto.codigoBarras;
     nuevoProducto.nombre = createProductoDto.nombre;
@@ -32,6 +62,13 @@ export class ProductoService {
     nuevoProducto.precioVenta = createProductoDto.precioVenta;
     nuevoProducto.cantidad = createProductoDto.cantidad;
     nuevoProducto.categoria = categoria;
+
+    // Validación: el precio de venta no puede ser menor que el precio de costo
+    if (nuevoProducto.precioVenta < nuevoProducto.precioCosto) {
+      throw new BadRequestException(
+        'El precio de venta no puede ser menor que el precio de costo',
+      );
+    }
 
     return await this.productoRepository.save(nuevoProducto);
   }
@@ -64,18 +101,69 @@ export class ProductoService {
     const categoria = await this.categoriaService.findById(
       updateProductoDto.categoriaId,
     );
+    if (!categoria) {
+      throw new NotFoundException('Categoría no encontrada');
+    }
+
     const producto = await this.productoRepository.findOneBy({ id });
-    producto.codigoBarras = updateProductoDto.codigoBarras;
-    producto.nombre = updateProductoDto.nombre;
+    if (!producto) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    // Verificar si el código de barras del producto está siendo actualizado y ya existe
+    if (
+      updateProductoDto.codigoBarras &&
+      updateProductoDto.codigoBarras !== producto.codigoBarras
+    ) {
+      const productoExistente = await this.productoRepository.findOne({
+        where: { codigoBarras: updateProductoDto.codigoBarras },
+      });
+
+      if (productoExistente) {
+        throw new ConflictException(
+          'Ya existe un producto con ese código de barras',
+        );
+      }
+    }
+
+    // Verificar si el nombre del producto está siendo actualizado y ya existe
+    if (
+      updateProductoDto.nombre.toLowerCase().trim() &&
+      updateProductoDto.nombre.toLowerCase().trim() !==
+        producto.nombre.toLowerCase().trim()
+    ) {
+      const productoExistenteNombre = await this.productoRepository.findOne({
+        where: { nombre: updateProductoDto.nombre.trim() },
+      });
+
+      if (productoExistenteNombre) {
+        throw new ConflictException('Ya existe un producto con ese nombre');
+      }
+    }
+
+    producto.codigoBarras = updateProductoDto.codigoBarras.trim();
+    producto.nombre = updateProductoDto.nombre.trim();
     producto.precioCosto = updateProductoDto.precioCosto;
     producto.precioVenta = updateProductoDto.precioVenta;
     producto.cantidad = updateProductoDto.cantidad;
     producto.categoria = categoria;
 
+    // Validación: el precio de venta no puede ser menor que el precio de costo
+    if (producto.precioVenta < producto.precioCosto) {
+      throw new BadRequestException(
+        'El precio de venta no puede ser menor que el precio de costo',
+      );
+    }
+
     return await this.productoRepository.save(producto);
   }
 
   async deleteProducto(id: number): Promise<void> {
+    const producto = await this.productoRepository.findOneBy({ id });
+    if (!producto) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
     await this.productoRepository.delete(id);
   }
 
@@ -153,5 +241,36 @@ export class ProductoService {
     // Actualizar la cantidad del producto
     producto.cantidad = nuevaCantidad;
     return await this.productoRepository.save(producto);
+  }
+
+  async verificarExistencia(nombre?: string, codigoBarras?: string) {
+    const findOptions: any = {
+      where: [],
+    };
+
+    // Ensure 'nombre' is a valid string before adding it to the query
+    if (nombre && typeof nombre === 'string') {
+      findOptions.where.push({ nombre: Like(`%${nombre}%`) });
+    }
+
+    // Ensure 'codigoBarras' is a valid string before adding it to the query
+    if (codigoBarras && typeof codigoBarras === 'string') {
+      findOptions.where.push({ codigoBarras: Like(`%${codigoBarras}%`) });
+    }
+
+    // Check if there's any condition to apply
+    if (findOptions.where.length === 0) {
+      // If both parameters are invalid (undefined or not strings), return a response indicating no results
+      return { existe: false };
+    }
+
+    const productoExistente =
+      await this.productoRepository.findOne(findOptions);
+
+    if (productoExistente) {
+      return { existe: true, producto: productoExistente };
+    }
+
+    return { existe: false };
   }
 }

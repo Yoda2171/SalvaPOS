@@ -48,7 +48,9 @@ export default class InventoryReportComponent implements OnInit {
   }
 
   createChart(): void {
-    const chartCanvas = document.getElementById('inventoryChart') as HTMLCanvasElement;
+    const chartCanvas = document.getElementById(
+      'inventoryChart'
+    ) as HTMLCanvasElement;
     if (chartCanvas) {
       this.inventoryChart = new Chart(chartCanvas, {
         type: this.chartType,

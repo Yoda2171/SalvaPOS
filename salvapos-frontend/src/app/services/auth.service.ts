@@ -1,39 +1,63 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { tap, finalize } from 'rxjs/operators';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class AuthService {
-    private apiUrl = 'https://mi-backend.com/api'; // Cambia esto con la URL de tu API backend
+    private readonly http = inject(HttpClient);
+    private readonly apiUrl = 'http://[::1]:3000/auth';
 
-    constructor(private http: HttpClient) { }
+    // BehaviorSubject for loading state
+    private readonly loadingSubject = new BehaviorSubject<boolean>(false);
+    loading$ = this.loadingSubject.asObservable();
 
-    // Método para registrar un nuevo usuario
-    register(user: any): Observable<any> {
-        return this.http.post(`${this.apiUrl}/register`, user);
+    constructor() { }
+
+    login(loginDto: any): Observable<any> {
+        this.loadingSubject.next(true); // Start loading state
+
+        return this.http.post(`${this.apiUrl}/login`, loginDto).pipe(
+            tap((response: any) => {
+                console.log('Login successful', response);
+                localStorage.setItem('token', response.token);
+            }),
+            finalize(() => {
+                this.loadingSubject.next(false); // End loading state
+            })
+        );
     }
 
-    // Método para iniciar sesión
-    login(credentials: any): Observable<any> {
-        return this.http.post(`${this.apiUrl}/login`, credentials);
+    getCurrentUser(): any {
+        const token = localStorage.getItem('token');
+        if (token) {
+            console.log('Token', jwtDecode(token));
+            return jwtDecode(token);
+        }
+        return null;
     }
 
-    // Método para obtener el rol del usuario desde el almacenamiento local
-    getUserRole(): string {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        return user?.role || ''; // Devuelve el rol del usuario
+    register(registerDto: any): Observable<any> {
+        this.loadingSubject.next(true); // Start loading state
+
+        return this.http.post(`${this.apiUrl}/register`, registerDto).pipe(
+            tap((response) => {
+                console.log('Registration successful', response);
+            }),
+            finalize(() => {
+                this.loadingSubject.next(false); // End loading state
+            })
+        );
     }
 
-    // Método para verificar si el usuario está autenticado
-    isAuthenticated(): boolean {
-        return !!localStorage.getItem('userToken');  // Verifica si el token está presente en el localStorage
+    getRoles(): Observable<any> {
+        return this.http.get(`${this.apiUrl}/roles`);
     }
 
-    // Método para cerrar sesión
     logout(): void {
-        localStorage.removeItem('userToken');  // Elimina el token
-        localStorage.removeItem('user');  // Elimina los datos del usuario
+        localStorage.removeItem('token');
     }
 }

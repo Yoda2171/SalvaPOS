@@ -7,12 +7,16 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
+  AsyncValidatorFn,
 } from '@angular/forms';
 import { CategoriaService } from '../../../../../services/categoria.service';
 import { Router, RouterModule } from '@angular/router';
 import { Categoria } from '../../../../Interface/categoria.inteface';
 import { ProductoService } from '../../../../../services/producto.service';
-import { Observable } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-add-producto',
@@ -43,12 +47,21 @@ export default class AddProductoComponent implements OnInit {
   ngOnInit(): void {
     // Initialize the form with default values
     this.productoForm = this.fb.group({
-      nombre: ['', Validators.required],
-      codigoBarras: ['', Validators.required],
-      categoriaId: [[Validators.required, Validators.min(1)]], // Initialize with 0 and treat as a number
-      cantidad: [[Validators.required, Validators.min(1)]],
-      precioCosto: [[Validators.required, Validators.min(0.01)]],
-      precioVenta: [[Validators.required, Validators.min(0.01)]],
+      nombre: ['', Validators.required, this.nombreValidator()],
+      codigoBarras: ['', Validators.required, this.codigoBarrasValidator()],
+      categoriaId: [null, [Validators.required, Validators.min(1)]], // Initialize with 0 and treat as a number
+      cantidad: [
+        null,
+        [Validators.required, Validators.min(1), Validators.max(1000)],
+      ],
+      precioCosto: [
+        null,
+        [Validators.required, Validators.min(1), Validators.max(100000000)],
+      ],
+      precioVenta: [
+        null,
+        [Validators.required, Validators.min(1), Validators.max(100000000)],
+      ],
     });
 
     // Load categories
@@ -74,6 +87,30 @@ export default class AddProductoComponent implements OnInit {
     });
   }
 
+  nombreValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      return this.productoService.checkIfProductExists(control.value, '').pipe(
+        map((response: any) => {
+          console.log(`Product exists: ${response.existe}`); // Debugging line
+          return response.existe ? { nombreExists: true } : null;
+        }),
+        catchError(() => of(null))
+      );
+    };
+  }
+
+  codigoBarrasValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      return this.productoService.checkIfProductExists('', control.value).pipe(
+        map((response: any) => {
+          console.log(`Product exists: ${response.existe}`); // Debugging line
+          return response.existe ? { codigoBarrasExists: true } : null;
+        }),
+        catchError(() => of(null))
+      );
+    };
+  }
+
   onSubmit(): void {
     if (this.productoForm.invalid) {
       return;
@@ -91,5 +128,36 @@ export default class AddProductoComponent implements OnInit {
         console.error('Error al agregar el producto', error);
       },
     });
+  }
+
+  // Función para formatear el monto como moneda
+  formatCurrency(value: number | null): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
+  }
+
+  // Función para manejar el cambio en el monto
+  onMontoChange(controlName: string, value: string): void {
+    // Elimina los puntos y convierte el valor a un número flotante
+    const numericValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+    if (!isNaN(numericValue)) {
+      this.productoForm.patchValue({ [controlName]: numericValue });
+    }
+  }
+
+  // Función para manejar la entrada en el monto
+  onMontoInput(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    const numericValue = input.value.replace(/\D/g, ''); // Elimina todos los caracteres no numéricos
+    if (numericValue === '') {
+      this.productoForm.patchValue({ [controlName]: null });
+      input.value = '';
+    } else {
+      const formattedValue = this.formatCurrency(parseFloat(numericValue));
+      this.productoForm.patchValue({ [controlName]: parseFloat(numericValue) });
+      input.value = formattedValue;
+    }
   }
 }

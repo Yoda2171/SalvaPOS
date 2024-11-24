@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { tap, finalize } from 'rxjs/operators';
+import { tap, finalize, catchError } from 'rxjs/operators';
 import {
   Pagination,
   Producto,
@@ -20,10 +20,12 @@ export class ProductoService {
     null
   );
   private readonly productoSubject = new BehaviorSubject<Producto | null>(null);
+  private readonly checkLoadingSubject = new BehaviorSubject<boolean>(false);
 
   // Observables para el estado de carga y los datos
   loading$ = this.loadingSubject.asObservable();
   productos$ = this.productosSubject.asObservable();
+  checkLoading$ = this.checkLoadingSubject.asObservable();
   producto$ = this.productoSubject.asObservable();
 
   constructor() {}
@@ -99,6 +101,26 @@ export class ProductoService {
     return this.http.patch<Producto>(url, { cantidadAjuste: cantidad }).pipe(
       tap((data) => {
         this.loadingSubject.next(false); // Finalizar el estado de carga
+      })
+    );
+  }
+
+  checkIfProductExists(
+    nombre: string,
+    codigoBarras: string
+  ): Observable<boolean> {
+    const url = `${this.apiUrl}/verificar-existencia/producto`;
+    const params = new HttpParams()
+      .set('nombre', nombre)
+      .set('codigoBarras', codigoBarras);
+
+    this.checkLoadingSubject.next(true); // Start loading for the check
+
+    return this.http.get<boolean>(url, { params }).pipe(
+      tap(() => this.checkLoadingSubject.next(false)), // Stop loading when the request is complete
+      catchError((error) => {
+        this.checkLoadingSubject.next(false); // Stop loading in case of an error
+        throw error; // Propagate the error
       })
     );
   }

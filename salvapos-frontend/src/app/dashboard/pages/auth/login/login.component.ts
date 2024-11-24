@@ -1,40 +1,65 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../services/auth.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class LoginComponent {
-  username: string = '';
-  password: string = '';
+  loginForm: FormGroup;
+  invalidCredentials: boolean = false;
+  errorMessage: string = '';
+  loading$: Observable<boolean>;
+
+  constructor(
+    private readonly fb: FormBuilder,
+    private readonly authService: AuthService,
+    private readonly router: Router
+  ) {
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+    });
+
+    this.loading$ = this.authService.loading$;
+  }
 
   constructor(private router: Router, private authService: AuthService) {}
 
   onSubmit() {
-    if (this.username && this.password) {
-      // Aquí deberías validar el login y redirigir al dashboard si el login es correcto
-      this.authService.login({ username: this.username, password: this.password }).subscribe(response => {
-        if (response.token) {
-          // Guardamos el token en el localStorage
-          localStorage.setItem('userToken', response.token);
-          localStorage.setItem('user', JSON.stringify(response.user)); // Guarda los datos del usuario
-          
-          // Redirige al dashboard
+    if (this.loginForm.valid) {
+      const loginData = this.loginForm.value;
+      this.authService.login(loginData).subscribe(
+        (response: any) => {
+          console.log('Login successful', response);
+          this.invalidCredentials = false;
+          this.errorMessage = '';
+
+          // Navigate to the dashboard or another page
           this.router.navigate(['/dashboard']);
-        } else {
-          alert('Credenciales incorrectas');
+        },
+        (error: any) => {
+          console.error('Login failed', error);
+          this.invalidCredentials = true;
+          this.loginForm.reset();
+          this.errorMessage = 'Correo electrónico o contraseña incorrectos.';
         }
-      });
+      );
     } else {
-      alert('Por favor, complete todos los campos.');
+      console.log('Formulario inválido');
     }
   }
 }

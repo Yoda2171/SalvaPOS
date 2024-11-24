@@ -30,11 +30,10 @@
         <div>
           <label for="fecha" class="form-label">Del día:</label>
           <input
-            type="text"
+            type="date"
             class="form-control"
-            [(ngModel)]="selectedDate"
-            (focus)="convertToDateInput($event)"
-            (blur)="convertToTextInput()"
+            [(ngModel)]="internalDate"
+            (ngModelChange)="onDateChange($event)"
             placeholder="DD/MM/YYYY"
           />
         </div>
@@ -55,11 +54,13 @@
             <div>
               <strong>ID Venta: {{ venta.id }}</strong>
               <p class="mb-0 text-muted">
-                {{ venta.fecha | date : "hh:mm a" }} -
+                {{ venta.fecha | date : "HH:mm a" }} -
                 {{ venta.cantidad }} productos
               </p>
             </div>
-            <span class="badge bg-primary">{{ venta.total | currency }}</span>
+            <span class="badge bg-primary">{{
+              "$ " + formatCurrency(venta.total)
+            }}</span>
           </li>
         </ul>
       </div>
@@ -85,7 +86,12 @@
               ventaSeleccionada.estado === 'devuelta'
           }"
         >
-          <strong>Cajero:</strong>
+          <strong>Cajero:</strong
+          >{{
+            ventaSeleccionada.user.firstname +
+              " " +
+              ventaSeleccionada.user.lastname
+          }}
           <!-- Cajero Nombre -->
         </p>
         <p
@@ -111,7 +117,7 @@
           }"
         >
           <strong>Fecha:</strong>
-          {{ ventaSeleccionada.fecha | date : "dd/MM/yyyy hh:mm a" }}
+          {{ ventaSeleccionada.fecha | date : "dd/MM/yyyy HH:mm a" }}
         </p>
 
         <!-- Detalles de productos -->
@@ -133,7 +139,7 @@
             >
               <td>{{ item.cantidad }}</td>
               <td>{{ item.producto.nombre }}</td>
-              <td>{{ item.subtotal | currency }}</td>
+              <td>{{ "$ " + formatCurrency(item.subtotal) }}</td>
             </tr>
           </tbody>
         </table>
@@ -157,7 +163,7 @@
             }"
           >
             {{ pago.metodoPago.nombre }}
-            <span class="fw-bold">{{ pago.monto | currency : "CLP" }}</span>
+            <span class="fw-bold">{{ "$ " + formatCurrency(pago.monto) }}</span>
           </li>
         </ul>
 
@@ -170,7 +176,7 @@
                 ventaSeleccionada.estado === 'devuelta'
             }"
           >
-            Total: {{ ventaSeleccionada.total | currency : "CLP" }}
+            Total: {{ "$ " + formatCurrency(ventaSeleccionada.total) }}
           </p>
         </div>
 

@@ -27,8 +27,19 @@ export class DataCategoryService implements OnModuleInit {
   }
 
   generateCategories(cantidad: number): CreateCategoriaDto[] {
-    return Array.from({ length: cantidad }, () => ({
-      nombre: faker.commerce.department(),
-    }));
+    const categorias: CreateCategoriaDto[] = [];
+    const nombres = new Set<string>();
+
+    while (categorias.length < cantidad) {
+      let nombre: string;
+      do {
+        nombre = faker.commerce.department();
+      } while (nombres.has(nombre));
+
+      categorias.push({ nombre });
+      nombres.add(nombre);
+    }
+
+    return categorias;
   }
 }
