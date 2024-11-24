@@ -9,7 +9,7 @@ export class AuthGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     // Verifica si hay un token de usuario en el localStorage
-    const isAuthenticated = !!localStorage.getItem('userToken');
+    const isAuthenticated = !!localStorage.getItem('token');
 
     if (isAuthenticated) {
       return true;  // Permite el acceso si el usuario está autenticado

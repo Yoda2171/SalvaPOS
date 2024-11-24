@@ -13,9 +13,9 @@ export class RoleGuard implements CanActivate {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): boolean {
-        const userRole = this.authService.getUserRole(); // Método que obtiene el rol del usuario desde el AuthService
+        const userRole = this.authService.getCurrentUser(); // Método que obtiene el rol del usuario desde el AuthService
 
-        if (userRole === 'superadmin') {
+        if (userRole.role === 'Administrador') {
             return true;  // Permite el acceso si el usuario es superadmin
         } else {
             this.router.navigate(['/dashboard']); // Redirige al dashboard si no es superadmin

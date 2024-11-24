@@ -31,12 +31,21 @@
       <li class="nav-item" *ngFor="let item of menuItems">
         <a class="nav-link" [routerLink]="[item.path]">{{ item.title }}</a>
       </li>
-      <li class="nav-item">
+
+      <!-- Mostrar 'Login' y 'Register' solo para usuarios no autenticados -->
+      <li class="nav-item" *ngIf="!isPharmacist()">
         <a class="nav-link" [routerLink]="['/login']">Login</a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" *ngIf="!isPharmacist()">
         <a class="nav-link" [routerLink]="['/register']">Register</a>
       </li>
+
+      <!-- Mostrar 'Reportes' solo para superadministradores -->
+      <li class="nav-item" *ngIf="isSuperAdmin()">
+        <a class="nav-link" [routerLink]="['/reportes']">Reportes</a>
+      </li>
+
+      <!-- Logout -->
       <li class="nav-item">
         <a class="nav-link" (click)="logout()">Logout</a>
       </li>

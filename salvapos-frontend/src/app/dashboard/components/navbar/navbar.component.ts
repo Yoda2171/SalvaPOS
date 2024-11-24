@@ -9,7 +9,7 @@ import { AuthService } from '../../../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterModule],
   templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.css',
+  styleUrls: ['./navbar.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavbarComponent {
@@ -25,15 +25,19 @@ export class NavbarComponent {
     .filter((route) => !route.path?.includes('reportescategoria'))
     .filter((route) => !route.path?.includes('reportesmetodopago'))
     .filter((route) => !route.path?.includes('categoria'))
-
     .filter((route) => route.title);
+
+  public userRole: string = ''; // Para almacenar el rol del usuario
+  isNavbarOpen = true;
 
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router
-  ) {}
-
-  isNavbarOpen = true;
+  ) {
+    // Obtener el rol del usuario del localStorage
+    const user = this.authService.getCurrentUser();
+    this.userRole = user?.role || '';
+  }
 
   toggleNavbar() {
     this.isNavbarOpen = !this.isNavbarOpen; // Alterna entre abierto y cerrado
@@ -42,5 +46,15 @@ export class NavbarComponent {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  // Método para determinar si el usuario es superadministrador
+  isSuperAdmin() {
+    return this.userRole === 'Administrador'; // Suponiendo que el rol se guarda como 'superadmin'
+  }
+
+  // Método para determinar si el usuario es farmacéutico (cajero)
+  isPharmacist() {
+    return this.userRole === 'Cajero'; // Suponiendo que el rol se guarda como 'pharmacist'
   }
 }

@@ -67,7 +67,7 @@ export const routes: Routes = [
         title: 'Reportes',
         loadComponent: () =>
           import('./dashboard/pages/reportes/reportes.component'),
-        canActivate: [AuthGuard],  // Protege la ruta
+        canActivate: [SuperAdminGuard],  // Protege la ruta
       },
       {
         path: 'reportesventa',
@@ -76,7 +76,7 @@ export const routes: Routes = [
           import(
             './dashboard/pages/reportes/pages/reporteVenta/reporteVenta.component'
           ),
-        canActivate: [AuthGuard],  // Protege la ruta
+        canActivate: [SuperAdminGuard],  // Protege la ruta
       },
       {
         path: 'reportesinvetario',
@@ -85,7 +85,7 @@ export const routes: Routes = [
           import(
             './dashboard/pages/reportes/pages/inventario/inventario.component'
           ),
-        canActivate: [AuthGuard],  // Protege la ruta
+        canActivate: [SuperAdminGuard],  // Protege la ruta
       },
       {
         path: 'reportescategoria',
@@ -94,7 +94,7 @@ export const routes: Routes = [
           import(
             './dashboard/pages/reportes/pages/reporteCategoria/reporteCategoria.component'
           ),
-        canActivate: [AuthGuard],  // Protege la ruta
+        canActivate: [SuperAdminGuard],  // Protege la ruta
       },
       {
         path: 'reportesmetodopago',
@@ -103,7 +103,7 @@ export const routes: Routes = [
           import(
             './dashboard/pages/reportes/pages/reporteMetodoPago/reporteMetodoPago.component'
           ),
-        canActivate: [AuthGuard],  // Protege la ruta
+        canActivate: [SuperAdminGuard],  // Protege la ruta
       },
       // Redirigir desde 'dashboard' a 'dashboard/home' si la ruta está vacía
       {

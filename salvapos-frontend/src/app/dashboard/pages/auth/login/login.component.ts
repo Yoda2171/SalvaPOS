@@ -37,7 +37,7 @@ export default class LoginComponent {
     this.loading$ = this.authService.loading$;
   }
 
-  constructor(private router: Router, private authService: AuthService) {}
+
 
   onSubmit() {
     if (this.loginForm.valid) {
