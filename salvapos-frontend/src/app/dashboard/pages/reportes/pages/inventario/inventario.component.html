@@ -1,80 +1,61 @@
 <div class="container mt-4">
   <h2 class="text-center">Reporte de Inventario</h2>
-
-  <!-- Selector de fechas -->
-  <div class="row mb-4">
-    <div class="col-md-4 offset-md-4 text-center">
-      <label for="startDate" class="form-label">Fecha de Inicio:</label>
-      <input
-        type="date"
-        id="startDate"
-        class="form-control"
-        (change)="onDateChange($event, 'start')"
-      />
+  <form [formGroup]="dateForm">
+    <div class="row mb-3">
+      <div class="col">
+        <label for="startDate">Fecha de Inicio</label>
+        <input
+          type="date"
+          id="startDate"
+          formControlName="startDate"
+          class="form-control"
+        />
+      </div>
+      <div class="col">
+        <label for="endDate">Fecha de Fin</label>
+        <input
+          type="date"
+          id="endDate"
+          formControlName="endDate"
+          class="form-control"
+        />
+      </div>
     </div>
-    <div class="col-md-4 text-center">
-      <label for="endDate" class="form-label">Fecha de Fin:</label>
-      <input
-        type="date"
-        id="endDate"
-        class="form-control"
-        (change)="onDateChange($event, 'end')"
-      />
-    </div>
-  </div>
-
-  <!-- Tabla de inventario -->
-  <div class="row">
-    <div class="col-md-12">
-      <h4 class="text-center">Detalles del Inventario</h4>
-      <table class="table table-bordered table-striped">
-        <thead class="thead-dark">
-          <tr>
-            <th>Producto</th>
-            <th>Categoría</th>
-            <th>Cantidad en Stock</th>
-            <th>Precio Unitario</th>
-            <th>Valor Total en Stock</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Product A</td>
-            <td>Categoría 1</td>
-            <td>50</td>
-            <td>$10.00</td>
-            <td>$500.00</td>
-          </tr>
-          <tr>
-            <td>Product B</td>
-            <td>Categoría 2</td>
-            <td>30</td>
-            <td>$15.00</td>
-            <td>$450.00</td>
-          </tr>
-          <tr>
-            <td>Product C</td>
-            <td>Categoría 1</td>
-            <td>70</td>
-            <td>$8.00</td>
-            <td>$560.00</td>
-          </tr>
-          <tr>
-            <td>Product D</td>
-            <td>Categoría 3</td>
-            <td>40</td>
-            <td>$12.00</td>
-            <td>$480.00</td>
-          </tr>
-        </tbody>
-      </table>
+  </form>
+  <div *ngIf="loading$ | async" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
     </div>
   </div>
-
-  <!-- Gráfico del inventario -->
-  <div class="row mt-5">
-    <div class="col-md-12">
-      <canvas id="inventoryChart"></canvas>
+  <table
+    *ngIf="!(loading$ | async) && soldProducts.length > 0"
+    class="table table-striped mt-4"
+  >
+    <thead>
+      <tr>
+        <th>Nombre Producto</th>
+        <th>Categoría Producto</th>
+        <th>Cantidad Total Vendida</th>
+        <th>Precio Unitario</th>
+        <th>Total Vendido</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let product of soldProducts">
+        <td>{{ product.nombreProducto }}</td>
+        <td>{{ product.categoriaProducto }}</td>
+        <td>{{ product.cantidadTotalVendida }}</td>
+        <td>{{ product.precioUnitario }}</td>
+        <td>{{ product.totalVendido }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div
+    class="d-flex justify-content-center"
+    [hidden]="(loading$ | async) || soldProducts.length === 0"
+  >
+    <div style="width: 60%">
+      <canvas #barChart></canvas>
     </div>
   </div>
 </div>

@@ -1,103 +1,136 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {
-  Chart,
-  ChartOptions,
-  ChartType,
-  ChartDataset,
-  registerables,
-} from 'chart.js';
+  ChangeDetectionStrategy,
+  Component,
+  AfterViewInit,
+  OnInit,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { VentaService } from '../../../../../services/venta.service';
+import { SoldMetodoPago } from '../../../../Interface/soldProduct.interface';
+import { Chart, ChartConfiguration, ChartData, registerables } from 'chart.js';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-reporte-metodo-pago',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './reporteMetodoPago.component.html',
   styleUrls: ['./reporteMetodoPago.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class ReporteMetodoPagoComponent implements OnInit {
-  public paymentMethodChart: any;
-  public chartLabels: string[] = [
-    'Tarjeta de Crédito',
-    'Tarjeta de Débito',
-    'Efectivo',
-  ];
-  public chartData: ChartDataset<'pie'>[] = [
-    {
-      data: [150, 120, 80],
-      label: 'Total de Pagos',
-      backgroundColor: ['#36a2eb', '#ffcd56', '#ff6384'],
-    },
-  ];
-  public chartType: ChartType = 'pie';
-  public chartOptions: ChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      tooltip: {
-        enabled: true,
-      },
-    },
-  };
+export default class ReporteMetodoPagoComponent
+  implements OnInit, AfterViewInit
+{
+  @ViewChild('barChart') barChart!: ElementRef<HTMLCanvasElement>;
+  metodoPagoData: SoldMetodoPago[] = [];
+  chart!: Chart<'pie', number[], string>;
+  loading$!: Observable<boolean>;
+  dateForm: FormGroup;
 
-  public startDate: string = '';
-  public endDate: string = '';
-  public loading: boolean = false;
-
-  constructor() {
-    Chart.register(...registerables);
+  constructor(
+    private readonly ventaService: VentaService,
+    private readonly fb: FormBuilder
+  ) {
+    this.dateForm = this.fb.group({
+      startDate: [''],
+      endDate: [''],
+    });
   }
 
   ngOnInit(): void {
-    this.createChart();
+    this.loading$ = this.ventaService.loading$;
+
+    this.dateForm.valueChanges.subscribe(() => {
+      this.loadMetodoPagoData();
+    });
   }
 
-  // Crear el gráfico
-  createChart(): void {
-    const chartCanvas = document.getElementById(
-      'paymentMethodChart'
-    ) as HTMLCanvasElement;
-    if (chartCanvas) {
-      this.paymentMethodChart = new Chart(chartCanvas, {
-        type: this.chartType,
-        data: {
-          labels: this.chartLabels,
-          datasets: this.chartData,
-        },
-        options: this.chartOptions,
+  ngAfterViewInit(): void {
+    this.initializeChart();
+  }
+
+  loadMetodoPagoData(): void {
+    const { startDate, endDate } = this.dateForm.value;
+    if (!startDate || !endDate) {
+      return; // No cargar datos si las fechas no están seleccionadas
+    }
+
+    this.ventaService
+      .metodoPagoVendidos(startDate, endDate)
+      .subscribe((data) => {
+        this.metodoPagoData = data;
+        this.updateChartData();
       });
+  }
+
+  initializeChart(): void {
+    const context = this.barChart.nativeElement.getContext('2d');
+    if (context) {
+      // Configuración inicial del gráfico
+      const chartData: ChartData<'pie', number[], string> = {
+        labels: this.metodoPagoData.map((item) => item.nombreMetodoPago), // Inicial con métodos de pago
+        datasets: [
+          {
+            label: 'Total Vendido',
+            data: this.metodoPagoData.map((item) => item.totalVendido), // Datos iniciales
+            backgroundColor: [
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+            ],
+            borderColor: [
+              'rgba(75, 192, 192, 1)',
+              'rgba(255, 99, 132, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+            ],
+            borderWidth: 1,
+          },
+        ],
+      };
+
+      const config: ChartConfiguration<'pie', number[], string> = {
+        type: 'pie',
+        data: chartData,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+          },
+        },
+      };
+
+      // Inicialización del gráfico
+      this.chart = new Chart(context, config);
+    } else {
+      console.error('No se pudo obtener el contexto del canvas.');
     }
   }
 
-  // Manejar el cambio de fecha y actualizar los datos del reporte
-  onDateChange(event: any, type: string): void {
-    if (type === 'start') {
-      this.startDate = event.target.value;
-    } else if (type === 'end') {
-      this.endDate = event.target.value;
-    }
-    console.log('Fecha de inicio:', this.startDate);
-    console.log('Fecha de fin:', this.endDate);
-    this.updateChartData();
-  }
-
-  // Actualizar los datos del gráfico
   updateChartData(): void {
-    // Actualizar datos con base en el rango de fechas seleccionado
-    console.log(
-      `Datos actualizados desde ${this.startDate} hasta ${this.endDate}`
-    );
-    this.chartData = [
-      {
-        data: [180, 140, 100], // Nuevos datos simulados
-        label: 'Total de Pagos',
-        backgroundColor: ['#36a2eb', '#ffcd56', '#ff6384'],
-      },
-    ];
-    this.paymentMethodChart.update();
+    if (this.chart) {
+      // Actualización de etiquetas y datos
+      this.chart.data.labels = this.metodoPagoData.map(
+        (item) => item.nombreMetodoPago
+      );
+      this.chart.data.datasets[0].data = this.metodoPagoData.map(
+        (item) => item.totalVendido
+      );
+      this.chart.update();
+    } else {
+      console.warn('El gráfico aún no ha sido inicializado.');
+    }
   }
 }

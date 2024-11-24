@@ -1,42 +1,5 @@
-.container {
-  padding-top: 50px;
-}
-
-.text-center {
-  text-align: center;
-}
-
-h2 {
-  color: #007bff;
-}
-
-label {
-  font-weight: bold;
-}
-
-#categoryChart {
-  max-width: 100%;
-  height: 400px;
-  margin: 0 auto;
-}
-
-.row {
-  margin-bottom: 20px;
-}
-
-.form-label {
-  font-size: 1rem;
-}
-
-input[type="date"] {
-  width: 100%;
-}
-
-button {
-  margin-top: 20px;
-}
-
-table {
-  width: 100%;
-  margin-top: 30px;
-}
+canvas {
+    display: block;
+    width: 100%;
+    height: 400px;
+  }
