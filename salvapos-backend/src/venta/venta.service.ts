@@ -12,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProductoService } from 'src/producto/producto.service';
 import { PagoVenta } from './entities/pagoVenta.entity';
 import { Producto } from 'src/producto/entities/producto.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class VentaService {
@@ -23,6 +24,7 @@ export class VentaService {
     @InjectRepository(PagoVenta)
     private readonly pagoVentaRepository: Repository<PagoVenta>,
     private readonly productoService: ProductoService,
+    private readonly usersService: UsersService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -32,7 +34,7 @@ export class VentaService {
     await queryRunner.startTransaction();
 
     try {
-      const { detalles, pagos, total } = createVentaDto;
+      const { detalles, pagos, total, userId } = createVentaDto;
 
       // Verificar y actualizar inventario de cada producto dentro de la transacción
       for (const detalle of detalles) {
@@ -46,7 +48,8 @@ export class VentaService {
         }
 
         // Actualizar la cantidad del producto dentro de la transacción
-        // Guardar el cambio en la cantidad dentro de la transacción
+        producto.cantidad -= detalle.cantidad;
+        await queryRunner.manager.save(producto);
       }
 
       // Guardar los pagos de la venta
@@ -65,8 +68,14 @@ export class VentaService {
         );
       }
 
+      // Obtener el usuario (cajero)
+      const user = await this.usersService.findOneById(userId);
+      if (!user) {
+        throw new NotFoundException(`Usuario no encontrado: ${userId}`);
+      }
+
       // Crear la venta y los detalles
-      const venta = this.ventaRepository.create({ total });
+      const venta = this.ventaRepository.create({ total, user });
       await queryRunner.manager.save(venta);
 
       // Guardar los detalles de la venta
@@ -161,14 +170,14 @@ export class VentaService {
 
   async findAll() {
     return this.ventaRepository.find({
-      relations: ['detalles', 'pagos'],
+      relations: ['detalles', 'pagos', 'user'],
     });
   }
 
   async findOne(id: number) {
     return this.ventaRepository.findOne({
       where: { id },
-      relations: ['detalles', 'pagos'],
+      relations: ['detalles', 'pagos', 'user'],
     });
   }
 
@@ -184,7 +193,7 @@ export class VentaService {
       where: {
         fecha: Between(startDate, endDate),
       },
-      relations: ['detalles', 'pagos'],
+      relations: ['detalles', 'pagos', 'user'],
     });
   }
 }

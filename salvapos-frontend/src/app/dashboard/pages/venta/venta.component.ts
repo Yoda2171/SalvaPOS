@@ -22,25 +22,19 @@ import {
   DetalleVenta,
   Producto,
   VentaAPI,
-  Ventaboleta,
   Venta,
 } from '../../Interface/venta.interface';
 import { VentaService } from '../../../services/venta.service';
 import { Router, RouterModule } from '@angular/router';
-import ReporteVentaComponent from '../reportes/pages/reporteVenta/reporteVenta.component';
+
 import { NavabarVentaComponent } from '../../components/navabarVenta/navabarVenta.component';
 import { ImpresoraService } from '../../../services/impresora.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-venta',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    ReporteVentaComponent,
-    NavabarVentaComponent,
-  ],
+  imports: [CommonModule, FormsModule, RouterModule, NavabarVentaComponent],
   templateUrl: './venta.component.html',
   styleUrls: ['./venta.component.css'],
 })
@@ -82,6 +76,7 @@ export default class VentaComponent
     private readonly productoService: ProductoService,
     private readonly ventaService: VentaService,
     private readonly impresoraService: ImpresoraService,
+    private readonly authService: AuthService,
     private readonly cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
@@ -299,6 +294,8 @@ export default class VentaComponent
   }
 
   realizarVenta(): void {
+    const currentUser = this.authService.getCurrentUser();
+    console.log('currentUser', currentUser);
     const venta: VentaAPI = {
       total: this.calcularTotal(),
       detalles: this.carrito.map((item) => ({
@@ -310,6 +307,7 @@ export default class VentaComponent
         metodoPagoId: this.obtenerMetodoPagoId(pago.metodoPago.nombre),
         monto: pago.monto ?? 0,
       })),
+      userId: currentUser?.sub,
     };
 
     this.ventaService.createVenta(venta).subscribe({

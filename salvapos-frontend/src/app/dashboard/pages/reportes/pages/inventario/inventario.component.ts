@@ -1,25 +1,19 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Inject,
-  OnInit,
-  PLATFORM_ID,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {
   Chart,
   ChartOptions,
   ChartType,
   ChartDataset,
   registerables,
-} from 'chart.js'; // Asegúrate de incluir registerables
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+} from 'chart.js';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-inventario',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './inventario.component.html',
-  styleUrls: ['./inventario.component.css'], // Corrección: Usa "styleUrls" en plural
+  styleUrls: ['./inventario.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class InventoryReportComponent implements OnInit {
@@ -42,7 +36,7 @@ export default class InventoryReportComponent implements OnInit {
   public chartType: ChartType = 'bar';
   public chartOptions: ChartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Asegura que el gráfico se ajuste al contenedor
+    maintainAspectRatio: false,
     scales: {
       y: {
         beginAtZero: true,
@@ -50,17 +44,18 @@ export default class InventoryReportComponent implements OnInit {
     },
   };
 
-  public selectedDate: string = '';
+  // Variables para el rango de fechas
+  public startDate: string = '';
+  public endDate: string = '';
+  public loading: boolean = false;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  constructor() {
     // Registra todos los componentes de Chart.js, necesarios en la versión 3 y superior
     Chart.register(...registerables);
   }
 
   ngOnInit(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      this.createChart();
-    }
+    this.createChart();
   }
 
   createChart(): void {
@@ -79,20 +74,49 @@ export default class InventoryReportComponent implements OnInit {
     }
   }
 
-  onEndDateChange(event: any): void {
-    this.selectedDate = event.target.value;
-    console.log('Fecha seleccionada:', this.selectedDate);
-    this.updateReportData(this.selectedDate);
+  onDateChange(event: any, type: string): void {
+    if (type === 'start') {
+      this.startDate = event.target.value;
+    } else if (type === 'end') {
+      this.endDate = event.target.value;
+    }
+
+    if (
+      this.startDate &&
+      this.endDate &&
+      new Date(this.startDate) > new Date(this.endDate)
+    ) {
+      alert('La fecha de inicio no puede ser mayor a la fecha de fin.');
+      return;
+    }
+
+    console.log('Fecha de inicio:', this.startDate);
+    console.log('Fecha de fin:', this.endDate);
+
+    this.updateReportData(this.startDate, this.endDate);
   }
 
-  onStartDateChange(event: any): void {
-    this.selectedDate = event.target.value;
-    console.log('Fecha seleccionada:', this.selectedDate);
-    this.updateReportData(this.selectedDate);
-  }
+  updateReportData(startDate: string, endDate: string): void {
+    console.log(
+      `Actualizando datos para el rango de fechas: ${startDate} a ${endDate}`
+    );
+    // Aquí debes filtrar los datos según las fechas seleccionadas.
+    // A modo de ejemplo, cambiaré los datos aleatoriamente.
 
-  updateReportData(date: string): void {
-    console.log(`Actualizando datos para la fecha: ${date}`);
-    // Lógica para actualizar el gráfico y la tabla según la fecha seleccionada
+    this.chartData = [
+      {
+        data: [
+          Math.random() * 100,
+          Math.random() * 100,
+          Math.random() * 100,
+          Math.random() * 100,
+        ],
+        label: 'Stock Quantity',
+        backgroundColor: ['rgba(75, 192, 192, 0.2)'],
+        borderColor: ['rgba(75, 192, 192, 1)'],
+        borderWidth: 1,
+      },
+    ];
+    this.inventoryChart.update(); // Actualizar el gráfico con los nuevos datos
   }
 }

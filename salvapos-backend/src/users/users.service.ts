@@ -36,6 +36,14 @@ export class UsersService {
       relations: ['role'],
     });
   }
+
+  async findOneById(id: number): Promise<User | undefined> {
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: ['role'],
+    });
+  }
+
   findAll() {
     return `This action returns all users`;
   }

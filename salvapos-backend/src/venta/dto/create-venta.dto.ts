@@ -11,4 +11,7 @@ export class CreateVentaDto {
 
   @IsNumber()
   total: number;
+
+  @IsNumber()
+  userId: number;
 }

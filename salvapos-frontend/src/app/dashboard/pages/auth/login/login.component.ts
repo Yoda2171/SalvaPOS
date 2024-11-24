@@ -45,6 +45,7 @@ export default class LoginComponent {
           console.log('Login successful', response);
           this.invalidCredentials = false;
           this.errorMessage = '';
+
           // Navigate to the dashboard or another page
           this.router.navigate(['/dashboard']);
         },
