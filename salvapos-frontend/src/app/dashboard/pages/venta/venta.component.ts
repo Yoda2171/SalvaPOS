@@ -69,6 +69,7 @@ export default class VentaComponent
 
   alertaError: string | null = null;
   private ventaId: any;
+  private ventaboleta: any;
 
   private readonly destroy$ = new Subject<void>();
 
@@ -313,9 +314,17 @@ export default class VentaComponent
     this.ventaService.createVenta(venta).subscribe({
       next: (respuestaVenta: Venta) => {
         this.ventaId = respuestaVenta.id; // Almacenar el ID de la venta
-        this.imprimirBoleta();
-        this.modalInstance.hide();
-        this.resetFormulario(); // Llama al método para imprimir la boleta después de realizar la venta
+        this.ventaService.getVentaById(this.ventaId).subscribe({
+          next: (venta) => {
+            this.imprimirBoleta(venta); // Imprimir la boleta con los datos obtenidos de la base de datos
+            this.modalInstance.hide();
+            this.resetFormulario(); // Llama al método para imprimir la boleta después de realizar la venta
+          },
+          error: (error) => {
+            console.error('Error al obtener la venta:', error);
+            alert('Hubo un error al obtener la venta.');
+          },
+        });
       },
       error: (error) => {
         console.error('Error al realizar la venta:', error);
@@ -390,8 +399,8 @@ export default class VentaComponent
       : 0;
   }
 
-  private imprimirBoleta(): void {
-    const contenidoBoleta = this.generarContenidoBoleta(); // Genera el contenido formateado
+  private imprimirBoleta(venta: Venta): void {
+    const contenidoBoleta = this.generarContenidoBoleta(venta); // Genera el contenido formateado
     const nombreImpresora = 'ImpresoraTermica'; // Reemplaza con el nombre real de la impresora
 
     this.impresoraService
@@ -407,9 +416,9 @@ export default class VentaComponent
       });
   }
 
-  private generarContenidoBoleta(): string {
+  private generarContenidoBoleta(venta: any): string {
     const encabezado = `R.U.T.: 77.163.978-K\nBOLETA ELECTRONICA\n\nINVERSIONES C&C SPA\nVENTA AL POR MENOR DE PRODUCTOS FARMACEUTICOS\nAV SIMON BOLIVAR 4109 MAIPU\n\n`;
-    const fechaObjeto = new Date();
+    const fechaObjeto = new Date(venta.fecha);
     const fechaFormateada = fechaObjeto.toLocaleDateString('es-CL');
     const horaFormateada = fechaObjeto.toLocaleTimeString('es-CL', {
       hour: '2-digit',

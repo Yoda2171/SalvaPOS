@@ -12,6 +12,7 @@ import { SoldMetodoPago } from '../../../../Interface/soldProduct.interface';
 import { Chart, ChartConfiguration, ChartData, registerables } from 'chart.js';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { error } from 'node:console';
 
 Chart.register(...registerables);
 
@@ -60,12 +61,17 @@ export default class ReporteMetodoPagoComponent
       return; // No cargar datos si las fechas no están seleccionadas
     }
 
-    this.ventaService
-      .metodoPagoVendidos(startDate, endDate)
-      .subscribe((data) => {
+    this.ventaService.metodoPagoVendidos(startDate, endDate).subscribe(
+      (data) => {
         this.metodoPagoData = data;
         this.updateChartData();
-      });
+      },
+      (error) => {
+        alert('Error al cargar los datos de métodos de pago');
+        this.dateForm.reset(); // Limpiar formulario
+        console.error('Error al cargar los datos de métodos de pago', error);
+      }
+    );
   }
 
   initializeChart(): void {

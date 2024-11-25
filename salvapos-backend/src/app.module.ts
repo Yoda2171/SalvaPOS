@@ -29,7 +29,6 @@ import { DataRoleService } from './data/data-role/data-role.service';
       password: process.env.DATABASE_PASSWORD, // Contraseña de MySQL
       database: process.env.DATABASE_NAME, // Nombre de la base de datos
       autoLoadEntities: true,
-      timezone: 'Z',
       synchronize: true, // Sincroniza la base de datos según las entidades de TypeORM
     }),
     RoleModule,

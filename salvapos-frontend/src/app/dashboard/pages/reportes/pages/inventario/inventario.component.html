@@ -27,6 +27,9 @@
       <span class="sr-only">Loading...</span>
     </div>
   </div>
+  <div *ngIf="noSalesAlert" class="alert alert-warning" role="alert">
+    No se encontraron ventas en el rango de fechas especificado.
+  </div>
   <table
     *ngIf="!(loading$ | async) && soldProducts.length > 0"
     class="table table-striped mt-4"
@@ -44,9 +47,9 @@
       <tr *ngFor="let product of soldProducts">
         <td>{{ product.nombreProducto }}</td>
         <td>{{ product.categoriaProducto }}</td>
-        <td>{{ this.formatCurrency(product.cantidadTotalVendida) }}</td>
-        <td>{{ this.formatCurrency(product.precioUnitario) }}</td>
-        <td>{{ this.formatCurrency(product.totalVendido) }}</td>
+        <td>{{ formatCurrency(product.cantidadTotalVendida) }}</td>
+        <td>{{ formatCurrency(product.precioUnitario) }}</td>
+        <td>{{ formatCurrency(product.totalVendido) }}</td>
       </tr>
     </tbody>
   </table>

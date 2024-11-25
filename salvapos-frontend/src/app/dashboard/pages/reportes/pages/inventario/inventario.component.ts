@@ -29,6 +29,7 @@ export default class InventoryReportComponent implements OnInit, AfterViewInit {
   chart!: Chart<'pie', number[], string>;
   loading$!: Observable<boolean>;
   dateForm: FormGroup;
+  noSalesAlert = false; // Variable para controlar la visibilidad de la alerta
 
   constructor(
     private readonly ventaService: VentaService,
@@ -44,6 +45,7 @@ export default class InventoryReportComponent implements OnInit, AfterViewInit {
     this.loading$ = this.ventaService.loading$;
 
     this.dateForm.valueChanges.subscribe(() => {
+      this.noSalesAlert = false; // Resetear la alerta antes de cargar los datos
       this.loadSoldProducts();
     });
   }
@@ -62,12 +64,17 @@ export default class InventoryReportComponent implements OnInit, AfterViewInit {
       return; // No cargar datos si las fechas no están seleccionadas
     }
 
-    this.ventaService
-      .productosVendidos(startDate, endDate)
-      .subscribe((data) => {
+    this.ventaService.productosVendidos(startDate, endDate).subscribe({
+      next: (data) => {
         this.soldProducts = data;
         this.updateChartData();
-      });
+        this.noSalesAlert = this.soldProducts.length === 0; // Mostrar alerta si no hay ventas
+      },
+      error: (error) => {
+        alert('Error al cargar los datos de productos vendidos');
+        this.dateForm.reset(); // Limpiar formulario en caso de error
+      },
+    });
   }
 
   initializeChart(): void {

@@ -58,11 +58,19 @@ export default class ReporteVentaComponent implements OnInit {
     // Inicializar el gráfico antes de solicitar los datos
     this.initializeChart();
 
-    this.ventaService.ventasVendidas(startDate, endDate).subscribe((data) => {
-      this.ventasData = data;
-      this.updateChartData();
-      this.showChart = true; // Muestra el gráfico después de recibir los datos
-    });
+    this.ventaService.ventasVendidas(startDate, endDate).subscribe(
+      (data) => {
+        this.ventasData = data;
+        this.updateChartData();
+        this.showChart = true; // Muestra el gráfico después de recibir los datos
+      },
+      (error) => {
+        this.showChart = false; // Ocultar el gráfico en caso de error
+        alert('Error al cargar los datos de ventas');
+        this.dateForm.reset(); // Limpiar los campos de fecha
+        console.error('Error al cargar los datos de ventas:', error);
+      }
+    );
   }
 
   initializeChart(): void {

@@ -60,12 +60,17 @@ export default class ReporteCategoriaComponent
       return; // No cargar datos si las fechas no están seleccionadas
     }
 
-    this.ventaService
-      .categoriasVendidas(startDate, endDate)
-      .subscribe((data) => {
+    this.ventaService.categoriasVendidas(startDate, endDate).subscribe(
+      (data) => {
         this.categoriasVendidas = data;
         this.updateChartData();
-      });
+      },
+      (error) => {
+        alert('Error al cargar las categorías vendidas. Intente nuevamente.');
+        this.dateForm.reset(); // Limpiar formulario
+        console.error('Error al cargar las categorías vendidas:', error);
+      }
+    );
   }
 
   initializeChart(): void {

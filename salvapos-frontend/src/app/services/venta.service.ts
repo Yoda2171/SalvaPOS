@@ -36,6 +36,17 @@ export class VentaService {
     );
   }
 
+  getVentaById(ventaId: string): Observable<Venta> {
+    this.loadingSubject.next(true); // Iniciar el estado de carga
+    const url = `${this.apiUrl}/${ventaId}`; // Construir la URL para la solicitud
+    return this.http.get<Venta>(url).pipe(
+      tap((data) => {
+        this.ventaSubject.next(data); // Actualizar el BehaviorSubject con la venta
+        this.loadingSubject.next(false); // Finalizar el estado de carga
+      })
+    );
+  }
+
   obtenerVentasPorFecha(fecha: string): Observable<Venta[]> {
     this.loadingSubject.next(true); // Iniciar el estado de carga
     const url = `${this.apiUrl}?fecha=${fecha}`; // Construir la URL para la solicitud

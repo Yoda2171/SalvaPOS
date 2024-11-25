@@ -18,6 +18,7 @@ import {
 import { NavbarInventarioComponent } from '../../components/navbarInventario/navbarInventario.component';
 import { Producto } from '../../Interface/producto.interface';
 import { ProductoService } from '../../../services/producto.service';
+import { AuthService } from '../../../services/auth.service';
 declare let window: any;
 
 @Component({
@@ -43,7 +44,7 @@ export default class InventarioComponent implements OnInit {
   limit: number = 12; // Límite por página
   totalItems: number = 0;
   totalPages: number = 0;
-
+  userRole: string | null = null;
   // Formulario de ajuste de stock
   stockForm!: FormGroup;
   selectedProduct: Producto | null = null; // Producto seleccionado para ajuste de stock
@@ -56,11 +57,15 @@ export default class InventarioComponent implements OnInit {
     private readonly productService: ProductoService,
     private readonly cdr: ChangeDetectorRef,
     private readonly fb: FormBuilder,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.cargarProductos(this.searchTerm, this.currentPage);
+
+    const currentUser = this.authService.getCurrentUser();
+    this.userRole = currentUser ? currentUser.role : null;
 
     // Inicializar el formulario de ajuste de stock con validaciones
     this.stockForm = this.fb.group({
