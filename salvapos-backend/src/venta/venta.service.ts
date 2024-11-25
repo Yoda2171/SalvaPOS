@@ -295,4 +295,33 @@ export class VentaService {
       totalVendido: parseFloat(item.totalVendido),
     }));
   }
+
+  async getSoldDayAndUser(startDate: string, endDate: string) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const result = await this.ventaRepository
+      .createQueryBuilder('venta')
+      .select('DATE(venta.fecha)', 'fechaVenta') // Agrupar por día
+      .addSelect('COUNT(venta.id)', 'cantidadVentas')
+      .addSelect('SUM(venta.total)', 'totalVendido')
+      .innerJoin('venta.user', 'user')
+      .where('venta.fecha BETWEEN :start AND :end', { start, end })
+      .groupBy('DATE(venta.fecha)')
+      .orderBy('DATE(venta.fecha)', 'ASC')
+      .getRawMany();
+
+    if (!result || result.length === 0) {
+      throw new NotFoundException(
+        'No se encontraron ventas en el rango de fechas especificado.',
+      );
+    }
+
+    return result.map((item) => ({
+      fechaVenta: item.fechaVenta,
+      nombreUsuario: item.nombreUsuario,
+      cantidadVentas: parseInt(item.cantidadVentas, 10),
+      totalVendido: parseFloat(item.totalVendido),
+    }));
+  }
 }

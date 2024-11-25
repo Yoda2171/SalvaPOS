@@ -41,8 +41,8 @@
     <tbody>
       <tr *ngFor="let categoria of categoriasVendidas">
         <td>{{ categoria.nombreCategoria }}</td>
-        <td>{{ categoria.cantidadTotalVendida }}</td>
-        <td>{{ categoria.totalVendido }}</td>
+        <td>{{ this.formatCurrency(categoria.cantidadTotalVendida) }}</td>
+        <td>{{ this.formatCurrency(categoria.totalVendido) }}</td>
       </tr>
     </tbody>
   </table>

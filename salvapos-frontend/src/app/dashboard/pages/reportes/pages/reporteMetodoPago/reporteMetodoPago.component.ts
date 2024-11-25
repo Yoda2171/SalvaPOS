@@ -133,4 +133,11 @@ export default class ReporteMetodoPagoComponent
       console.warn('El gráfico aún no ha sido inicializado.');
     }
   }
+
+  formatCurrency(value: number | null): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
+  }
 }

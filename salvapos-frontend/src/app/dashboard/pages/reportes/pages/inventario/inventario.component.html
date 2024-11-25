@@ -44,9 +44,9 @@
       <tr *ngFor="let product of soldProducts">
         <td>{{ product.nombreProducto }}</td>
         <td>{{ product.categoriaProducto }}</td>
-        <td>{{ product.cantidadTotalVendida }}</td>
-        <td>{{ product.precioUnitario }}</td>
-        <td>{{ product.totalVendido }}</td>
+        <td>{{ this.formatCurrency(product.cantidadTotalVendida) }}</td>
+        <td>{{ this.formatCurrency(product.precioUnitario) }}</td>
+        <td>{{ this.formatCurrency(product.totalVendido) }}</td>
       </tr>
     </tbody>
   </table>

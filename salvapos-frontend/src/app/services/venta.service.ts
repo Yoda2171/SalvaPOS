@@ -6,6 +6,7 @@ import {
   SoldCategoria,
   SoldMetodoPago,
   SoldProductDto,
+  SoldVenta,
 } from '../dashboard/Interface/soldProduct.interface';
 
 @Injectable({
@@ -90,6 +91,16 @@ export class VentaService {
     this.loadingSubject.next(true); // Iniciar el estado de carga
     const url = `${this.apiUrl}/metodoPago-vendidos/venta?startDate=${startDate}&endDate=${endDate}`; // Construir la URL para la solicitud
     return this.http.get<SoldMetodoPago[]>(url).pipe(
+      tap(() => {
+        this.loadingSubject.next(false); // Finalizar el estado de carga
+      })
+    );
+  }
+
+  ventasVendidas(startDate: string, endDate: string): Observable<SoldVenta[]> {
+    this.loadingSubject.next(true); // Iniciar el estado de carga
+    const url = `${this.apiUrl}/ventasPorDia/venta?startDate=${startDate}&endDate=${endDate}`; // Construir la URL para la solicitud
+    return this.http.get<SoldVenta[]>(url).pipe(
       tap(() => {
         this.loadingSubject.next(false); // Finalizar el estado de carga
       })

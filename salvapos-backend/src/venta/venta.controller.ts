@@ -120,4 +120,27 @@ export class VentaController {
     // Llamar al servicio para obtener las categorías vendidas en el rango de fechas
     return this.ventaService.getSoldMetodoPago(startDate, endDate);
   }
+
+  @Get('ventasPorDia/venta')
+  async getVentasPorDia(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    // Validar el formato de las fechas 'YYYY-MM-DD'
+    if (
+      !startDate ||
+      !endDate ||
+      isNaN(Date.parse(startDate)) ||
+      isNaN(Date.parse(endDate))
+    ) {
+      throw new BadRequestException(
+        'El formato de las fechas debe ser YYYY-MM-DD',
+      );
+    }
+    console.log(
+      `Buscar categorías vendidas desde: ${startDate} hasta: ${endDate}`,
+    );
+    // Llamar al servicio para obtener las categorías vendidas en el rango de fechas
+    return this.ventaService.getSoldDayAndUser(startDate, endDate);
+  }
 }

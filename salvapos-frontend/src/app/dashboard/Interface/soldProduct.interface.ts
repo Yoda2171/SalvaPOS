@@ -17,3 +17,10 @@ export interface SoldCategoria {
   cantidadTotalVendida: number;
   totalVendido: number;
 }
+
+export interface SoldVenta {
+  fechaVenta: string;
+  nombreUsuario: string;
+  cantidadVentas: number;
+  totalVendido: number;
+}
