@@ -18,6 +18,7 @@ import { Categoria } from '../../Interface/categoria.inteface';
 import { NavbarInventarioComponent } from '../../components/navbarInventario/navbarInventario.component';
 import { CategoriaService } from '../../../services/categoria.service';
 import { catchError, Observable, of } from 'rxjs';
+import { AuthService } from '../../../services/auth.service';
 declare let window: any;
 
 @Component({
@@ -44,6 +45,7 @@ export default class CategoriaComponent implements OnInit {
   mensajeError: string | null = null;
   mensajeExito: string | null = null;
   searchTerm = '';
+  userRole: string | null = null;
 
   // Paginación
   currentPage = 1;
@@ -58,13 +60,17 @@ export default class CategoriaComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly cdr: ChangeDetectorRef,
-    private readonly categoriaService: CategoriaService
+    private readonly categoriaService: CategoriaService,
+    private readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.initializeForm();
     this.initializeModal();
     this.loadCategories(this.currentPage);
+
+    const currentUser = this.authService.getCurrentUser();
+    this.userRole = currentUser ? currentUser.role : null;
   }
 
   initializeForm(): void {

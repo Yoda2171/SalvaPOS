@@ -36,19 +36,101 @@ export class VentaController {
   @Get()
   async getHistorialVentas(@Query('fecha') fecha: string) {
     // Validar el formato de la fecha 'DD/MM/YYYY'
-    const [day, month, year] = fecha.split('/');
-    if (
-      !day ||
-      !month ||
-      !year ||
-      isNaN(Date.parse(`${year}-${month}-${day}`))
-    ) {
-      throw new BadRequestException(
-        'El formato de la fecha debe ser DD/MM/YYYY',
-      );
-    }
+
     console.log(`Buscar ventas por fecha: ${fecha}`);
     // Llamar al servicio para obtener el historial de ventas
     return this.ventaService.getHistorialVentasPorFecha(fecha);
+  }
+
+  @Get('productos-vendidos/venta')
+  async getSoldProducts(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    // Validar el formato de las fechas 'YYYY-MM-DD'
+    if (
+      !startDate ||
+      !endDate ||
+      isNaN(Date.parse(startDate)) ||
+      isNaN(Date.parse(endDate))
+    ) {
+      throw new BadRequestException(
+        'El formato de las fechas debe ser YYYY-MM-DD',
+      );
+    }
+    console.log(
+      `Buscar productos vendidos desde: ${startDate} hasta: ${endDate}`,
+    );
+    // Llamar al servicio para obtener los productos vendidos en el rango de fechas
+    return this.ventaService.getSoldProducts(startDate, endDate);
+  }
+
+  @Get('categorias-vendidos/venta')
+  async getSoldCategories(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    // Validar el formato de las fechas 'YYYY-MM-DD'
+    if (
+      !startDate ||
+      !endDate ||
+      isNaN(Date.parse(startDate)) ||
+      isNaN(Date.parse(endDate))
+    ) {
+      throw new BadRequestException(
+        'El formato de las fechas debe ser YYYY-MM-DD',
+      );
+    }
+    console.log(
+      `Buscar categorías vendidas desde: ${startDate} hasta: ${endDate}`,
+    );
+    // Llamar al servicio para obtener las categorías vendidas en el rango de fechas
+    return this.ventaService.getSoldCatengorias(startDate, endDate);
+  }
+
+  @Get('metodoPago-vendidos/venta')
+  async getsSoldMetodoPago(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    // Validar el formato de las fechas 'YYYY-MM-DD'
+    if (
+      !startDate ||
+      !endDate ||
+      isNaN(Date.parse(startDate)) ||
+      isNaN(Date.parse(endDate))
+    ) {
+      throw new BadRequestException(
+        'El formato de las fechas debe ser YYYY-MM-DD',
+      );
+    }
+    console.log(
+      `Buscar categorías vendidas desde: ${startDate} hasta: ${endDate}`,
+    );
+    // Llamar al servicio para obtener las categorías vendidas en el rango de fechas
+    return this.ventaService.getSoldMetodoPago(startDate, endDate);
+  }
+
+  @Get('ventasPorDia/venta')
+  async getVentasPorDia(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    // Validar el formato de las fechas 'YYYY-MM-DD'
+    if (
+      !startDate ||
+      !endDate ||
+      isNaN(Date.parse(startDate)) ||
+      isNaN(Date.parse(endDate))
+    ) {
+      throw new BadRequestException(
+        'El formato de las fechas debe ser YYYY-MM-DD',
+      );
+    }
+    console.log(
+      `Buscar categorías vendidas desde: ${startDate} hasta: ${endDate}`,
+    );
+    // Llamar al servicio para obtener las categorías vendidas en el rango de fechas
+    return this.ventaService.getSoldDayAndUser(startDate, endDate);
   }
 }

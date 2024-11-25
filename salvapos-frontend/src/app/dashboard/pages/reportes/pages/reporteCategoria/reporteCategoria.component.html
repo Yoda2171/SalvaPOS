@@ -1,32 +1,57 @@
 <div class="container mt-4">
   <h2 class="text-center">Reporte de Categorías</h2>
-
-  <!-- Selector de fechas -->
-  <div class="row mb-3">
-    <div class="col-md-4 offset-md-4 text-center">
-      <label for="startDate" class="form-label">Fecha de Inicio:</label>
-      <input
-        type="date"
-        id="startDate"
-        class="form-control"
-        (change)="onDateChange()"
-      />
+  <form [formGroup]="dateForm">
+    <div class="row mb-3">
+      <div class="col">
+        <label for="startDate">Fecha de Inicio</label>
+        <input
+          type="date"
+          id="startDate"
+          formControlName="startDate"
+          class="form-control"
+        />
+      </div>
+      <div class="col">
+        <label for="endDate">Fecha de Fin</label>
+        <input
+          type="date"
+          id="endDate"
+          formControlName="endDate"
+          class="form-control"
+        />
+      </div>
     </div>
-    <div class="col-md-4 text-center">
-      <label for="endDate" class="form-label">Fecha de Fin:</label>
-      <input
-        type="date"
-        id="endDate"
-        class="form-control"
-        (change)="onDateChange()"
-      />
+  </form>
+  <div *ngIf="loading$ | async" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
     </div>
   </div>
-
-  <!-- Gráfico de categorías -->
-  <div class="row mt-4">
-    <div class="col-md-12">
-      <canvas id="categoryChart"></canvas>
+  <table
+    *ngIf="!(loading$ | async) && categoriasVendidas.length > 0"
+    class="table table-striped mt-4"
+  >
+    <thead>
+      <tr>
+        <th>Nombre Categoría</th>
+        <th>Cantidad Total Vendida</th>
+        <th>Total Vendido</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let categoria of categoriasVendidas">
+        <td>{{ categoria.nombreCategoria }}</td>
+        <td>{{ this.formatCurrency(categoria.cantidadTotalVendida) }}</td>
+        <td>{{ this.formatCurrency(categoria.totalVendido) }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div
+    class="d-flex justify-content-center"
+    [hidden]="(loading$ | async) || categoriasVendidas.length === 0"
+  >
+    <div style="width: 60%">
+      <canvas #barChart></canvas>
     </div>
   </div>
 </div>

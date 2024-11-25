@@ -14,6 +14,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { RoleModule } from './role/role.module';
 import { DataRoleService } from './data/data-role/data-role.service';
+import { DataUserService } from './data/data-user/data-user.service';
 
 @Module({
   imports: [
@@ -29,7 +30,6 @@ import { DataRoleService } from './data/data-role/data-role.service';
       password: process.env.DATABASE_PASSWORD, // Contraseña de MySQL
       database: process.env.DATABASE_NAME, // Nombre de la base de datos
       autoLoadEntities: true,
-      timezone: 'Z',
       synchronize: true, // Sincroniza la base de datos según las entidades de TypeORM
     }),
     RoleModule,
@@ -47,6 +47,7 @@ import { DataRoleService } from './data/data-role/data-role.service';
     DataCategoryService,
     DataProductService,
     DataMetodoPagoService,
+    DataUserService,
   ],
 })
 export class AppModule {}

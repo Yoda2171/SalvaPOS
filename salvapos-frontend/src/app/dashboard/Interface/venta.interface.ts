@@ -4,6 +4,7 @@ import { MetodoPago } from './metodoPago.interface';
 export interface Venta {
   id?: number;
   total: number;
+  fecha?: String;
   detalles: DetalleVenta[];
   pagos: Pago[];
   user: User;

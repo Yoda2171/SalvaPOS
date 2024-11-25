@@ -1,122 +1,154 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {
-  Chart,
-  ChartOptions,
-  ChartType,
-  ChartDataset,
-  registerables,
-} from 'chart.js';
+  ChangeDetectionStrategy,
+  Component,
+  AfterViewInit,
+  OnInit,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { VentaService } from '../../../../../services/venta.service';
+import { SoldProductDto } from '../../../../Interface/soldProduct.interface';
+import { Chart, ChartData, ChartConfiguration, registerables } from 'chart.js';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-inventario',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './inventario.component.html',
   styleUrls: ['./inventario.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class InventoryReportComponent implements OnInit {
-  public inventoryChart: any;
-  public chartLabels: string[] = [
-    'Product A',
-    'Product B',
-    'Product C',
-    'Product D',
-  ];
-  public chartData: ChartDataset<'bar'>[] = [
-    {
-      data: [50, 30, 70, 40],
-      label: 'Stock Quantity',
-      backgroundColor: ['rgba(75, 192, 192, 0.2)'],
-      borderColor: ['rgba(75, 192, 192, 1)'],
-      borderWidth: 1,
-    },
-  ];
-  public chartType: ChartType = 'bar';
-  public chartOptions: ChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
-  };
+export default class InventoryReportComponent implements OnInit, AfterViewInit {
+  @ViewChild('barChart') barChart!: ElementRef<HTMLCanvasElement>;
+  soldProducts: SoldProductDto[] = [];
+  chart!: Chart<'pie', number[], string>;
+  loading$!: Observable<boolean>;
+  dateForm: FormGroup;
+  noSalesAlert = false; // Variable para controlar la visibilidad de la alerta
 
-  // Variables para el rango de fechas
-  public startDate: string = '';
-  public endDate: string = '';
-  public loading: boolean = false;
-
-  constructor() {
-    // Registra todos los componentes de Chart.js, necesarios en la versión 3 y superior
-    Chart.register(...registerables);
+  constructor(
+    private readonly ventaService: VentaService,
+    private readonly fb: FormBuilder
+  ) {
+    this.dateForm = this.fb.group({
+      startDate: [''],
+      endDate: [''],
+    });
   }
 
   ngOnInit(): void {
-    this.createChart();
+    this.loading$ = this.ventaService.loading$;
+
+    this.dateForm.valueChanges.subscribe(() => {
+      this.noSalesAlert = false; // Resetear la alerta antes de cargar los datos
+      this.loadSoldProducts();
+    });
   }
 
-  createChart(): void {
-    const chartCanvas = document.getElementById(
-      'inventoryChart'
-    ) as HTMLCanvasElement;
-    if (chartCanvas) {
-      this.inventoryChart = new Chart(chartCanvas, {
-        type: this.chartType,
-        data: {
-          labels: this.chartLabels,
-          datasets: this.chartData,
-        },
-        options: this.chartOptions,
-      });
+  ngAfterViewInit(): void {
+    if (this.barChart) {
+      this.initializeChart();
+    } else {
+      console.warn('El elemento canvas no está disponible en el DOM.');
     }
   }
 
-  onDateChange(event: any, type: string): void {
-    if (type === 'start') {
-      this.startDate = event.target.value;
-    } else if (type === 'end') {
-      this.endDate = event.target.value;
+  loadSoldProducts(): void {
+    const { startDate, endDate } = this.dateForm.value;
+    if (!startDate || !endDate) {
+      return; // No cargar datos si las fechas no están seleccionadas
     }
 
-    if (
-      this.startDate &&
-      this.endDate &&
-      new Date(this.startDate) > new Date(this.endDate)
-    ) {
-      alert('La fecha de inicio no puede ser mayor a la fecha de fin.');
-      return;
-    }
-
-    console.log('Fecha de inicio:', this.startDate);
-    console.log('Fecha de fin:', this.endDate);
-
-    this.updateReportData(this.startDate, this.endDate);
-  }
-
-  updateReportData(startDate: string, endDate: string): void {
-    console.log(
-      `Actualizando datos para el rango de fechas: ${startDate} a ${endDate}`
-    );
-    // Aquí debes filtrar los datos según las fechas seleccionadas.
-    // A modo de ejemplo, cambiaré los datos aleatoriamente.
-
-    this.chartData = [
-      {
-        data: [
-          Math.random() * 100,
-          Math.random() * 100,
-          Math.random() * 100,
-          Math.random() * 100,
-        ],
-        label: 'Stock Quantity',
-        backgroundColor: ['rgba(75, 192, 192, 0.2)'],
-        borderColor: ['rgba(75, 192, 192, 1)'],
-        borderWidth: 1,
+    this.ventaService.productosVendidos(startDate, endDate).subscribe({
+      next: (data) => {
+        this.soldProducts = data;
+        this.updateChartData();
+        this.noSalesAlert = this.soldProducts.length === 0; // Mostrar alerta si no hay ventas
       },
-    ];
-    this.inventoryChart.update(); // Actualizar el gráfico con los nuevos datos
+      error: (error) => {
+        alert('Error al cargar los datos de productos vendidos');
+        this.dateForm.reset(); // Limpiar formulario en caso de error
+      },
+    });
+  }
+
+  initializeChart(): void {
+    const context = this.barChart.nativeElement.getContext('2d');
+    if (context) {
+      // Configuración inicial del gráfico
+      const chartData: ChartData<'pie', number[], string> = {
+        labels: this.soldProducts.map((product) => product.nombreProducto), // Inicial con productos
+        datasets: [
+          {
+            label: 'Cantidad Total Vendida',
+            data: this.soldProducts.map(
+              (product) => product.cantidadTotalVendida
+            ), // Datos iniciales
+            backgroundColor: [
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+            ],
+            borderColor: [
+              'rgba(75, 192, 192, 1)',
+              'rgba(255, 99, 132, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+            ],
+            borderWidth: 1,
+          },
+        ],
+      };
+
+      const config: ChartConfiguration<'pie', number[], string> = {
+        type: 'pie',
+        data: chartData,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+          },
+        },
+      };
+
+      // Inicialización del gráfico
+      this.chart = new Chart(context, config);
+    } else {
+      console.error('No se pudo obtener el contexto del canvas.');
+    }
+  }
+
+  updateChartData(): void {
+    if (this.chart) {
+      // Actualización de etiquetas y datos
+      this.chart.data.labels = this.soldProducts.map(
+        (product) => product.nombreProducto
+      );
+      this.chart.data.datasets[0].data = this.soldProducts.map(
+        (product) => product.cantidadTotalVendida
+      );
+      this.chart.update();
+    } else {
+      console.warn('El gráfico aún no ha sido inicializado.');
+    }
+  }
+
+  formatCurrency(value: number | null): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
   }
 }

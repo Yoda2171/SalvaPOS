@@ -1,73 +1,140 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
+import { VentaService } from '../../../../../services/venta.service';
+import { SoldVenta } from '../../../../Interface/soldProduct.interface';
 import { Chart, registerables } from 'chart.js';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-reporte-venta',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './reporteVenta.component.html',
-  styleUrl: './reporteVenta.component.css',
+  styleUrls: ['./reporteVenta.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class ReporteVentaComponent {
-  salesData = [
-    { id: 'V001', date: '01 Dec 2023', category: 'Medicine', amount: 150, quantity: 100 },
-    { id: 'V002', date: '08 Dec 2023', category: 'Medicine', amount: 200, quantity: 120 },
-    { id: 'V003', date: '15 Dec 2023', category: 'Equipment', amount: 100, quantity: 60 },
-    { id: 'V004', date: '20 Dec 2023', category: 'Medicine', amount: 175, quantity: 80 },
-    { id: 'V005', date: '31 Dec 2023', category: 'Equipment', amount: 300, quantity: 152 }
-  ];
+export default class ReporteVentaComponent implements OnInit {
+  @ViewChild('lineChart') lineChart!: ElementRef<HTMLCanvasElement>;
+  ventasData: SoldVenta[] = [];
+  chart!: Chart<'line', number[], string> | null; // Permitir null para control explícito
+  loading$!: Observable<boolean>;
+  dateForm: FormGroup;
+  showChart = false; // Inicialmente el gráfico está oculto
 
-  @ViewChild('salesChart') salesChart!: ElementRef<HTMLCanvasElement>;
-
-  constructor() {
-    Chart.register(...registerables);  // Registrar Chart.js
+  constructor(
+    private readonly ventaService: VentaService,
+    private readonly fb: FormBuilder
+  ) {
+    this.dateForm = this.fb.group({
+      startDate: [''],
+      endDate: [''],
+    });
+    this.chart = null; // Asegurar que no haya gráfico al inicio
   }
 
-  ngAfterViewInit() {
-    const categories = this.salesData.reduce((acc, sale) => {
-      acc[sale.category] = (acc[sale.category] || 0) + sale.amount;
-      return acc;
-    }, {} as Record<string, number>);
+  ngOnInit(): void {
+    this.loading$ = this.ventaService.loading$;
 
-    const categoryLabels = Object.keys(categories);
-    const categoryData = Object.values(categories);
+    this.dateForm.valueChanges.subscribe(() => {
+      this.loadVentasData();
+    });
+  }
 
-    // Renderizar el gráfico de dona
-    if (this.salesChart && this.salesChart.nativeElement) {
-      new Chart(this.salesChart.nativeElement, {
-        type: 'doughnut',
+  loadVentasData(): void {
+    const { startDate, endDate } = this.dateForm.value;
+    if (!startDate || !endDate) {
+      return; // No cargar datos si las fechas no están seleccionadas
+    }
+
+    // Inicializar el gráfico antes de solicitar los datos
+    this.initializeChart();
+
+    this.ventaService.ventasVendidas(startDate, endDate).subscribe(
+      (data) => {
+        this.ventasData = data;
+        this.updateChartData();
+        this.showChart = true; // Muestra el gráfico después de recibir los datos
+      },
+      (error) => {
+        this.showChart = false; // Ocultar el gráfico en caso de error
+        alert('Error al cargar los datos de ventas');
+        this.dateForm.reset(); // Limpiar los campos de fecha
+        console.error('Error al cargar los datos de ventas:', error);
+      }
+    );
+  }
+
+  initializeChart(): void {
+    // Verificar si ya existe un gráfico y destruirlo
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null; // Asegurar referencia limpia
+    }
+
+    const context = this.lineChart.nativeElement.getContext('2d');
+    if (context) {
+      this.chart = new Chart(context, {
+        type: 'line',
         data: {
-          labels: categoryLabels,
-          datasets: [{
-            label: 'Sales Amount by Category',
-            data: categoryData,
-            backgroundColor: [
-              'rgba(54, 162, 235, 0.7)',  // Color categoría 1
-              'rgba(255, 99, 132, 0.7)'   // Color categoría 2
-            ],
-            borderColor: [
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 99, 132, 1)'
-            ],
-            borderWidth: 2
-          }]
+          labels: [], // Inicial vacío
+          datasets: [
+            {
+              label: 'Total Vendido',
+              data: [], // Inicial vacío
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1,
+            },
+          ],
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,  // Permitir que el gráfico cambie de tamaño según el contenedor
-          aspectRatio: 2,              // Relación de aspecto (puedes ajustarla a lo que desees)
-          plugins: {
-            legend: {
-              display: true,
-              position: 'bottom'  // Leyenda en la parte inferior
-            }
-          }
-        }
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
       });
     } else {
-      console.error('Error: No se encontró el canvas');
+      console.error('No se pudo obtener el contexto del canvas.');
     }
+  }
+
+  updateChartData(): void {
+    if (this.chart) {
+      // Actualiza las etiquetas y los datos
+      this.chart.data.labels = this.ventasData.map((venta) =>
+        this.formatDate(venta.fechaVenta)
+      );
+      this.chart.data.datasets[0].data = this.ventasData.map(
+        (venta) => venta.totalVendido
+      );
+      this.chart.update();
+    }
+  }
+
+  formatCurrency(value: number | null): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Los meses son 0-indexados
+    const year = date.getUTCFullYear();
+    return `${day}-${month}-${year}`;
   }
 }

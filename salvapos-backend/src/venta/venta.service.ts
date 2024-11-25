@@ -13,6 +13,7 @@ import { ProductoService } from 'src/producto/producto.service';
 import { PagoVenta } from './entities/pagoVenta.entity';
 import { Producto } from 'src/producto/entities/producto.entity';
 import { UsersService } from 'src/users/users.service';
+import { SoldProductDto } from './dto/soldProduct.dto';
 
 @Injectable()
 export class VentaService {
@@ -195,5 +196,132 @@ export class VentaService {
       },
       relations: ['detalles', 'pagos', 'user'],
     });
+  }
+
+  async getSoldProducts(
+    startDate: string,
+    endDate: string,
+  ): Promise<SoldProductDto[]> {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const result = await this.detalleVentaRepository
+      .createQueryBuilder('detalle')
+      .select('producto.nombre', 'nombreProducto')
+      .addSelect('categoria.nombre', 'categoriaProducto')
+      .addSelect('SUM(detalle.cantidad)', 'cantidadTotalVendida')
+      .addSelect('detalle.precioUnitario', 'precioUnitario')
+      .addSelect('SUM(detalle.subtotal)', 'totalVendido')
+      .innerJoin('detalle.producto', 'producto')
+      .innerJoin('producto.categoria', 'categoria')
+      .innerJoin('detalle.venta', 'venta')
+      .where('venta.fecha BETWEEN :start AND :end', { start, end })
+      .groupBy('producto.nombre')
+      .addGroupBy('categoria.nombre')
+      .addGroupBy('detalle.precioUnitario')
+      .orderBy('SUM(detalle.cantidad)', 'DESC')
+      .getRawMany();
+
+    if (!result || result.length === 0) {
+      throw new NotFoundException(
+        'No se encontraron productos vendidos en el rango de fechas especificado.',
+      );
+    }
+
+    return result.map((item) => ({
+      nombreProducto: item.nombreProducto,
+      categoriaProducto: item.categoriaProducto,
+      cantidadTotalVendida: parseInt(item.cantidadTotalVendida, 10),
+      precioUnitario: parseFloat(item.precioUnitario),
+      totalVendido: parseFloat(item.totalVendido),
+    }));
+  }
+
+  async getSoldCatengorias(startDate: string, endDate: string) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const result = await this.detalleVentaRepository
+      .createQueryBuilder('detalle')
+      .select('categoria.nombre', 'nombreCategoria')
+      .addSelect('SUM(detalle.cantidad)', 'cantidadTotalVendida')
+      .addSelect('SUM(detalle.subtotal)', 'totalVendido')
+      .innerJoin('detalle.producto', 'producto')
+      .innerJoin('producto.categoria', 'categoria')
+      .innerJoin('detalle.venta', 'venta')
+      .where('venta.fecha BETWEEN :start AND :end', { start, end })
+      .groupBy('categoria.nombre')
+      .orderBy('SUM(detalle.cantidad)', 'DESC')
+      .getRawMany();
+
+    if (!result || result.length === 0) {
+      throw new NotFoundException(
+        'No se encontraron productos vendidos en el rango de fechas especificado.',
+      );
+    }
+
+    return result.map((item) => ({
+      nombreCategoria: item.nombreCategoria,
+      cantidadTotalVendida: parseInt(item.cantidadTotalVendida, 10),
+      totalVendido: parseFloat(item.totalVendido),
+    }));
+  }
+
+  async getSoldMetodoPago(startDate: string, endDate: string) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const result = await this.pagoVentaRepository
+      .createQueryBuilder('pago')
+      .select('metodoPago.nombre', 'nombreMetodoPago')
+      .addSelect('COUNT(pago.id)', 'cantidadVentas')
+      .addSelect('SUM(pago.monto)', 'totalVendido')
+      .innerJoin('pago.metodoPago', 'metodoPago')
+      .innerJoin('pago.venta', 'venta')
+      .where('venta.fecha BETWEEN :start AND :end', { start, end })
+      .groupBy('metodoPago.nombre')
+      .orderBy('COUNT(pago.id)', 'DESC')
+      .getRawMany();
+
+    if (!result || result.length === 0) {
+      throw new NotFoundException(
+        'No se encontraron ventas en el rango de fechas especificado.',
+      );
+    }
+
+    return result.map((item) => ({
+      nombreMetodoPago: item.nombreMetodoPago,
+      cantidadVentas: parseInt(item.cantidadVentas, 10),
+      totalVendido: parseFloat(item.totalVendido),
+    }));
+  }
+
+  async getSoldDayAndUser(startDate: string, endDate: string) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const result = await this.ventaRepository
+      .createQueryBuilder('venta')
+      .select('DATE(venta.fecha)', 'fechaVenta') // Agrupar por día
+      .addSelect('COUNT(venta.id)', 'cantidadVentas')
+      .addSelect('SUM(venta.total)', 'totalVendido')
+      .innerJoin('venta.user', 'user')
+      .where('venta.fecha BETWEEN :start AND :end', { start, end })
+      .groupBy('DATE(venta.fecha)')
+      .orderBy('DATE(venta.fecha)', 'ASC')
+      .getRawMany();
+
+    if (!result || result.length === 0) {
+      throw new NotFoundException(
+        'No se encontraron ventas en el rango de fechas especificado.',
+      );
+    }
+
+    return result.map((item) => ({
+      fechaVenta: item.fechaVenta,
+      nombreUsuario: item.nombreUsuario,
+      cantidadVentas: parseInt(item.cantidadVentas, 10),
+      totalVendido: parseFloat(item.totalVendido),
+    }));
   }
 }

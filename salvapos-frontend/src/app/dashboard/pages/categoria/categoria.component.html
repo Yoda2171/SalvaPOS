@@ -44,7 +44,7 @@
   <!-- Título y botón de agregar categoría -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Lista de Categorías</h2>
-    <button class="btn btn-primary" (click)="openModal('add')">
+    <button *ngIf="userRole" class="btn btn-primary" (click)="openModal('add')">
       <i class="fas fa-plus"></i> Agregar Categoría
     </button>
   </div>
@@ -68,7 +68,7 @@
           <th scope="col">#</th>
           <th scope="col">Categoría</th>
           <th scope="col">Número de productos</th>
-          <th scope="col">Acciones</th>
+          <th *ngIf="userRole" scope="col">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -77,9 +77,10 @@
           <td>{{ categoria.nombre }}</td>
           <td>{{ categoria.productos ? categoria.productos.length : 0 }}</td>
 
-          <td>
+          <td *ngIf="userRole">
             <!-- Icono de editar categoría -->
             <i
+              *ngIf="userRole"
               class="fas fa-edit text-warning mx-2"
               (click)="openModal('edit', categoria)"
               title="Editar"
@@ -88,6 +89,7 @@
 
             <!-- Icono de eliminar categoría -->
             <i
+              *ngIf="userRole"
               class="fas fa-trash-alt text-danger mx-2"
               (click)="confirmDeletion(categoria)"
               title="Eliminar"

@@ -25,11 +25,7 @@
 
 /* Gráfico */
 /* Ajustar el tamaño del gráfico */
-canvas {
-  max-width: 100%;  /* Asegura que no crezca más allá de su contenedor */
-  height: 300px;    /* Cambia la altura según lo que prefieras */
-  margin-top: 20px; /* Añade espacio en la parte superior */
-}
+
 
 
 /* Tabla de detalles */
