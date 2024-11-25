@@ -14,6 +14,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { RoleModule } from './role/role.module';
 import { DataRoleService } from './data/data-role/data-role.service';
+import { DataUserService } from './data/data-user/data-user.service';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { DataRoleService } from './data/data-role/data-role.service';
     DataCategoryService,
     DataProductService,
     DataMetodoPagoService,
+    DataUserService,
   ],
 })
 export class AppModule {}
