@@ -1,24 +1,71 @@
 <div class="container mt-4">
   <h2 class="text-center">Informe de Ventas</h2>
-  <form [formGroup]="dateForm">
-    <div class="row mb-3">
-      <div class="col">
-        <label for="startDate">Fecha de Inicio</label>
-        <input
-          type="date"
-          id="startDate"
-          formControlName="startDate"
-          class="form-control"
-        />
+  <form [formGroup]="dateForm" class="row row-cols-sm-auto pt-4">
+    <div class="col-lg-6">
+      <label for="datepicker" class="form-label">Fecha de inicio</label>
+      <div class="dp-hidden position-absolute">
+        <div class="input-group">
+          <input
+            name="datepicker"
+            class="form-control"
+            ngbDatepicker
+            #datepicker="ngbDatepicker"
+            [autoClose]="'outside'"
+            (dateSelect)="onDateSelection($event)"
+            [displayMonths]="2"
+            [dayTemplate]="t"
+            [markDisabled]="isDisabled"
+            outsideDays="hidden"
+            [startDate]="fromDate!"
+            tabindex="-1"
+          />
+          <ng-template #t let-date let-focused="focused">
+            <span
+              class="custom-day"
+              [class.focused]="focused"
+              [class.range]="isRange(date)"
+              [class.faded]="isHovered(date) || isInside(date)"
+              (mouseenter)="hoveredDate = date"
+              (mouseleave)="hoveredDate = null"
+            >
+              {{ date.day }}
+            </span>
+          </ng-template>
+        </div>
       </div>
-      <div class="col">
-        <label for="endDate">Fecha de Fin</label>
+
+      <div class="input-group">
         <input
-          type="date"
-          id="endDate"
-          formControlName="endDate"
+          #dpFromDate
           class="form-control"
+          placeholder="dd-mm-yyyy"
+          name="dpFromDate"
+          [value]="formatter.format(fromDate)"
+          (input)="fromDate = validateInput(fromDate, dpFromDate.value)"
         />
+        <button
+          class="btn btn-outline-secondary bi bi-calendar3"
+          (click)="datepicker.toggle()"
+          type="button"
+        ></button>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <label for="datepicker" class="form-label">Fecha de Fin </label>
+      <div class="input-group">
+        <input
+          #dpToDate
+          class="form-control"
+          placeholder="dd-mm-yyyy"
+          name="dpToDate"
+          [value]="formatter.format(toDate)"
+          (input)="toDate = validateInput(toDate, dpToDate.value)"
+        />
+        <button
+          class="btn btn-outline-secondary bi bi-calendar3"
+          (click)="datepicker.toggle()"
+          type="button"
+        ></button>
       </div>
     </div>
   </form>
@@ -47,7 +94,7 @@
     </tbody>
   </table>
   <!-- Gráfico inicialmente oculto -->
-  <div class="d-flex justify-content-center" [hidden]="!showChart">
+  <div class="d-flex justify-content-center py-3" [hidden]="!showChart">
     <div style="width: 80%">
       <canvas #lineChart></canvas>
     </div>
