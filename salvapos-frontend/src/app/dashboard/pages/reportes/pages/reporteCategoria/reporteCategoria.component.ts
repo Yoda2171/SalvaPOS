@@ -5,6 +5,7 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VentaService } from '../../../../../services/venta.service';
@@ -12,13 +13,19 @@ import { SoldCategoria } from '../../../../Interface/soldProduct.interface';
 import { Chart, ChartConfiguration, ChartData, registerables } from 'chart.js';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
+import {
+  NgbCalendar,
+  NgbDate,
+  NgbDateParserFormatter,
+  NgbDatepickerModule,
+} from '@ng-bootstrap/ng-bootstrap';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-reporte-categoria',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgbDatepickerModule],
   templateUrl: './reporteCategoria.component.html',
   styleUrls: ['./reporteCategoria.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,10 +39,21 @@ export default class ReporteCategoriaComponent
   loading$!: Observable<boolean>;
   dateForm: FormGroup;
 
+  calendar = inject(NgbCalendar);
+  formatter = inject(NgbDateParserFormatter);
+
+  hoveredDate: NgbDate | null = null;
+  fromDate: NgbDate | null;
+  toDate: NgbDate | null;
+
   constructor(
     private readonly ventaService: VentaService,
     private readonly fb: FormBuilder
   ) {
+    const today = this.calendar.getToday();
+    this.fromDate = this.calendar.getPrev(today, 'm', 1);
+    this.toDate = today;
+
     this.dateForm = this.fb.group({
       startDate: [''],
       endDate: [''],
@@ -54,20 +72,72 @@ export default class ReporteCategoriaComponent
     this.initializeChart();
   }
 
+  onDateSelection(date: NgbDate) {
+    if (!this.fromDate && !this.toDate) {
+      this.fromDate = date;
+    } else if (
+      this.fromDate &&
+      !this.toDate &&
+      date &&
+      date.after(this.fromDate)
+    ) {
+      this.toDate = date;
+    } else {
+      this.toDate = null;
+      this.fromDate = date;
+    }
+    this.loadCategoriasVendidas();
+  }
+
+  isHovered(date: NgbDate) {
+    return (
+      this.fromDate &&
+      !this.toDate &&
+      this.hoveredDate &&
+      date.after(this.fromDate) &&
+      date.before(this.hoveredDate)
+    );
+  }
+
+  isInside(date: NgbDate) {
+    return this.toDate && date.after(this.fromDate) && date.before(this.toDate);
+  }
+
+  isRange(date: NgbDate) {
+    return (
+      date.equals(this.fromDate) ||
+      (this.toDate && date.equals(this.toDate)) ||
+      this.isInside(date) ||
+      this.isHovered(date)
+    );
+  }
+
+  isDisabled = (date: NgbDate) => date.after(this.calendar.getToday());
+
+  validateInput(currentValue: NgbDate | null, input: string): NgbDate | null {
+    const parsed = this.formatter.parse(input);
+    return parsed && this.calendar.isValid(NgbDate.from(parsed))
+      ? NgbDate.from(parsed)
+      : currentValue;
+  }
+
   loadCategoriasVendidas(): void {
-    const { startDate, endDate } = this.dateForm.value;
+    const startDate = this.fromDate ? this.formatter.format(this.fromDate) : '';
+    const endDate = this.toDate ? this.formatter.format(this.toDate) : '';
     if (!startDate || !endDate) {
-      return; // No cargar datos si las fechas no están seleccionadas
+      return;
     }
 
-    this.ventaService.categoriasVendidas(startDate, endDate).subscribe(
+    const endDateWithTime = `${endDate} 23:59:59`;
+
+    this.ventaService.categoriasVendidas(startDate, endDateWithTime).subscribe(
       (data) => {
         this.categoriasVendidas = data;
         this.updateChartData();
       },
       (error) => {
         alert('Error al cargar las categorías vendidas. Intente nuevamente.');
-        this.dateForm.reset(); // Limpiar formulario
+        this.dateForm.reset();
         console.error('Error al cargar las categorías vendidas:', error);
       }
     );
@@ -76,17 +146,16 @@ export default class ReporteCategoriaComponent
   initializeChart(): void {
     const context = this.barChart.nativeElement.getContext('2d');
     if (context) {
-      // Configuración inicial del gráfico
       const chartData: ChartData<'pie', number[], string> = {
         labels: this.categoriasVendidas.map(
           (categoria) => categoria.nombreCategoria
-        ), // Inicial con categorías
+        ),
         datasets: [
           {
             label: 'Cantidad Total Vendida',
             data: this.categoriasVendidas.map(
               (categoria) => categoria.cantidadTotalVendida
-            ), // Datos iniciales
+            ),
             backgroundColor: [
               'rgba(75, 192, 192, 0.2)',
               'rgba(255, 99, 132, 0.2)',
@@ -121,7 +190,6 @@ export default class ReporteCategoriaComponent
         },
       };
 
-      // Inicialización del gráfico
       this.chart = new Chart(context, config);
     } else {
       console.error('No se pudo obtener el contexto del canvas.');
@@ -130,7 +198,6 @@ export default class ReporteCategoriaComponent
 
   updateChartData(): void {
     if (this.chart) {
-      // Actualización de etiquetas y datos
       this.chart.data.labels = this.categoriasVendidas.map(
         (categoria) => categoria.nombreCategoria
       );
@@ -147,6 +214,6 @@ export default class ReporteCategoriaComponent
     if (value === null || value === undefined) {
       return '';
     }
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 }

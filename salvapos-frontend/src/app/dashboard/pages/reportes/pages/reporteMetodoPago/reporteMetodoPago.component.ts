@@ -5,6 +5,7 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VentaService } from '../../../../../services/venta.service';
@@ -12,14 +13,19 @@ import { SoldMetodoPago } from '../../../../Interface/soldProduct.interface';
 import { Chart, ChartConfiguration, ChartData, registerables } from 'chart.js';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { error } from 'node:console';
+import {
+  NgbCalendar,
+  NgbDate,
+  NgbDateParserFormatter,
+  NgbDatepickerModule,
+} from '@ng-bootstrap/ng-bootstrap';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-reporte-metodo-pago',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgbDatepickerModule],
   templateUrl: './reporteMetodoPago.component.html',
   styleUrls: ['./reporteMetodoPago.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,10 +39,21 @@ export default class ReporteMetodoPagoComponent
   loading$!: Observable<boolean>;
   dateForm: FormGroup;
 
+  calendar = inject(NgbCalendar);
+  formatter = inject(NgbDateParserFormatter);
+
+  hoveredDate: NgbDate | null = null;
+  fromDate: NgbDate | null;
+  toDate: NgbDate | null;
+
   constructor(
     private readonly ventaService: VentaService,
     private readonly fb: FormBuilder
   ) {
+    const today = this.calendar.getToday();
+    this.fromDate = this.calendar.getPrev(today, 'm', 1);
+    this.toDate = today;
+
     this.dateForm = this.fb.group({
       startDate: [''],
       endDate: [''],
@@ -51,17 +68,70 @@ export default class ReporteMetodoPagoComponent
     });
   }
 
+  onDateSelection(date: NgbDate) {
+    if (!this.fromDate && !this.toDate) {
+      this.fromDate = date;
+    } else if (
+      this.fromDate &&
+      !this.toDate &&
+      date &&
+      date.after(this.fromDate)
+    ) {
+      this.toDate = date;
+    } else {
+      this.toDate = null;
+      this.fromDate = date;
+    }
+    this.loadMetodoPagoData();
+  }
+
+  isHovered(date: NgbDate) {
+    return (
+      this.fromDate &&
+      !this.toDate &&
+      this.hoveredDate &&
+      date.after(this.fromDate) &&
+      date.before(this.hoveredDate)
+    );
+  }
+
+  isInside(date: NgbDate) {
+    return this.toDate && date.after(this.fromDate) && date.before(this.toDate);
+  }
+
+  isRange(date: NgbDate) {
+    return (
+      date.equals(this.fromDate) ||
+      (this.toDate && date.equals(this.toDate)) ||
+      this.isInside(date) ||
+      this.isHovered(date)
+    );
+  }
+
+  isDisabled = (date: NgbDate) => date.after(this.calendar.getToday());
+
+  validateInput(currentValue: NgbDate | null, input: string): NgbDate | null {
+    const parsed = this.formatter.parse(input);
+    return parsed && this.calendar.isValid(NgbDate.from(parsed))
+      ? NgbDate.from(parsed)
+      : currentValue;
+  }
+
   ngAfterViewInit(): void {
     this.initializeChart();
   }
 
   loadMetodoPagoData(): void {
-    const { startDate, endDate } = this.dateForm.value;
+    const startDate = this.fromDate ? this.formatter.format(this.fromDate) : '';
+    const endDate = this.toDate ? this.formatter.format(this.toDate) : '';
     if (!startDate || !endDate) {
-      return; // No cargar datos si las fechas no están seleccionadas
+      return;
     }
 
-    this.ventaService.metodoPagoVendidos(startDate, endDate).subscribe(
+    // Add the last hour, minute, and second to the end date
+    const endDateWithTime = `${endDate} 23:59:59`;
+
+    this.ventaService.metodoPagoVendidos(startDate, endDateWithTime).subscribe(
       (data) => {
         this.metodoPagoData = data;
         this.updateChartData();

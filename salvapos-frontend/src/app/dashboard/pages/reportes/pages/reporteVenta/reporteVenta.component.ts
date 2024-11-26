@@ -4,6 +4,7 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VentaService } from '../../../../../services/venta.service';
@@ -11,13 +12,19 @@ import { SoldVenta } from '../../../../Interface/soldProduct.interface';
 import { Chart, registerables } from 'chart.js';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
+import {
+  NgbCalendar,
+  NgbDate,
+  NgbDateParserFormatter,
+  NgbDatepickerModule,
+} from '@ng-bootstrap/ng-bootstrap';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-reporte-venta',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgbDatepickerModule],
   templateUrl: './reporteVenta.component.html',
   styleUrls: ['./reporteVenta.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,20 +32,31 @@ Chart.register(...registerables);
 export default class ReporteVentaComponent implements OnInit {
   @ViewChild('lineChart') lineChart!: ElementRef<HTMLCanvasElement>;
   ventasData: SoldVenta[] = [];
-  chart!: Chart<'line', number[], string> | null; // Permitir null para control explícito
+  chart!: Chart<'line', number[], string> | null;
   loading$!: Observable<boolean>;
   dateForm: FormGroup;
-  showChart = false; // Inicialmente el gráfico está oculto
+  showChart = false;
+
+  calendar = inject(NgbCalendar);
+  formatter = inject(NgbDateParserFormatter);
+
+  hoveredDate: NgbDate | null = null;
+  fromDate: NgbDate | null;
+  toDate: NgbDate | null;
 
   constructor(
     private readonly ventaService: VentaService,
     private readonly fb: FormBuilder
   ) {
+    const today = this.calendar.getToday();
+    this.fromDate = this.calendar.getPrev(today, 'm', 1);
+    this.toDate = today;
+
     this.dateForm = this.fb.group({
       startDate: [''],
       endDate: [''],
     });
-    this.chart = null; // Asegurar que no haya gráfico al inicio
+    this.chart = null;
   }
 
   ngOnInit(): void {
@@ -49,35 +67,86 @@ export default class ReporteVentaComponent implements OnInit {
     });
   }
 
+  onDateSelection(date: NgbDate) {
+    if (!this.fromDate && !this.toDate) {
+      this.fromDate = date;
+    } else if (
+      this.fromDate &&
+      !this.toDate &&
+      date &&
+      date.after(this.fromDate)
+    ) {
+      this.toDate = date;
+    } else {
+      this.toDate = null;
+      this.fromDate = date;
+    }
+    this.loadVentasData();
+  }
+
+  isHovered(date: NgbDate) {
+    return (
+      this.fromDate &&
+      !this.toDate &&
+      this.hoveredDate &&
+      date.after(this.fromDate) &&
+      date.before(this.hoveredDate)
+    );
+  }
+
+  isInside(date: NgbDate) {
+    return this.toDate && date.after(this.fromDate) && date.before(this.toDate);
+  }
+
+  isRange(date: NgbDate) {
+    return (
+      date.equals(this.fromDate) ||
+      (this.toDate && date.equals(this.toDate)) ||
+      this.isInside(date) ||
+      this.isHovered(date)
+    );
+  }
+
+  isDisabled = (date: NgbDate) => date.after(this.calendar.getToday());
+
+  validateInput(currentValue: NgbDate | null, input: string): NgbDate | null {
+    const parsed = this.formatter.parse(input);
+    return parsed && this.calendar.isValid(NgbDate.from(parsed))
+      ? NgbDate.from(parsed)
+      : currentValue;
+  }
+
   loadVentasData(): void {
-    const { startDate, endDate } = this.dateForm.value;
+    const startDate = this.fromDate ? this.formatter.format(this.fromDate) : '';
+    const endDate = this.toDate ? this.formatter.format(this.toDate) : '';
     if (!startDate || !endDate) {
-      return; // No cargar datos si las fechas no están seleccionadas
+      return;
     }
 
-    // Inicializar el gráfico antes de solicitar los datos
+    // Add the last hour, minute, and second to the end date
+    const endDateWithTime = `${endDate} 23:59:59`;
+
     this.initializeChart();
 
-    this.ventaService.ventasVendidas(startDate, endDate).subscribe(
+    this.ventaService.ventasVendidas(startDate, endDateWithTime).subscribe(
       (data) => {
         this.ventasData = data;
         this.updateChartData();
-        this.showChart = true; // Muestra el gráfico después de recibir los datos
+        this.showChart = true;
       },
       (error) => {
-        this.showChart = false; // Ocultar el gráfico en caso de error
+        this.showChart = false;
         alert('Error al cargar los datos de ventas');
-        this.dateForm.reset(); // Limpiar los campos de fecha
+        this.dateForm.reset();
         console.error('Error al cargar los datos de ventas:', error);
       }
     );
   }
 
   initializeChart(): void {
-    // Verificar si ya existe un gráfico y destruirlo
     if (this.chart) {
       this.chart.destroy();
-      this.chart = null; // Asegurar referencia limpia
+      this.chart = null;
     }
 
     const context = this.lineChart.nativeElement.getContext('2d');
@@ -85,11 +154,11 @@ export default class ReporteVentaComponent implements OnInit {
       this.chart = new Chart(context, {
         type: 'line',
         data: {
-          labels: [], // Inicial vacío
+          labels: [],
           datasets: [
             {
               label: 'Total Vendido',
-              data: [], // Inicial vacío
+              data: [],
               fill: false,
               borderColor: 'rgb(75, 192, 192)',
               tension: 0.1,
@@ -112,7 +181,6 @@ export default class ReporteVentaComponent implements OnInit {
 
   updateChartData(): void {
     if (this.chart) {
-      // Actualiza las etiquetas y los datos
       this.chart.data.labels = this.ventasData.map((venta) =>
         this.formatDate(venta.fechaVenta)
       );
@@ -127,13 +195,13 @@ export default class ReporteVentaComponent implements OnInit {
     if (value === null || value === undefined) {
       return '';
     }
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     const day = String(date.getUTCDate()).padStart(2, '0');
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Los meses son 0-indexados
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
     const year = date.getUTCFullYear();
     return `${day}-${month}-${year}`;
   }
