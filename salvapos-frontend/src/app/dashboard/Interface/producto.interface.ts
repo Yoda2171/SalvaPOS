@@ -14,6 +14,7 @@ export interface Producto {
   precioVenta: number;
   cantidad: number;
   categoria: Categoria;
+  imagen?: string;
 }
 
 export interface Categoria {
