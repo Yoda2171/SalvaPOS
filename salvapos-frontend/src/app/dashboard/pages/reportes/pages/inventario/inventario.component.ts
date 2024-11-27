@@ -6,6 +6,7 @@ import {
   ViewChild,
   ElementRef,
   inject,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VentaService } from '../../../../../services/venta.service';
@@ -44,10 +45,12 @@ export default class InventoryReportComponent implements OnInit, AfterViewInit {
   hoveredDate: NgbDate | null = null;
   fromDate: NgbDate | null;
   toDate: NgbDate | null;
+  mensajeError: string | null = null;
 
   constructor(
     private readonly ventaService: VentaService,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly cdr: ChangeDetectorRef
   ) {
     const today = this.calendar.getToday();
     this.fromDate = this.calendar.getPrev(today, 'm', 1);
@@ -64,7 +67,6 @@ export default class InventoryReportComponent implements OnInit, AfterViewInit {
 
     this.dateForm.valueChanges.subscribe(() => {
       this.noSalesAlert = false;
-      this.loadSoldProducts();
     });
   }
 
@@ -76,7 +78,7 @@ export default class InventoryReportComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onDateSelection(date: NgbDate) {
+  onDateSelection(date: NgbDate, datepicker: any) {
     if (!this.fromDate && !this.toDate) {
       this.fromDate = date;
     } else if (
@@ -86,6 +88,7 @@ export default class InventoryReportComponent implements OnInit, AfterViewInit {
       date.after(this.fromDate)
     ) {
       this.toDate = date;
+      datepicker.close(); // Cierra el calendario al seleccionar la segunda fecha
     } else {
       this.toDate = null;
       this.fromDate = date;
@@ -138,11 +141,24 @@ export default class InventoryReportComponent implements OnInit, AfterViewInit {
       next: (data) => {
         this.soldProducts = data;
         this.updateChartData();
-        this.noSalesAlert = this.soldProducts.length === 0;
+        this.mensajeError = null;
+        this.cdr.detectChanges();
       },
       error: (error) => {
-        alert('Error al cargar los datos de productos vendidos');
+        this.mensajeError = 'No hay ventas en el rango de fechas ingresado.';
+
+        this.loading$ = new Observable((observer) => {
+          observer.next(false);
+          observer.complete();
+        });
+        setTimeout(() => {
+          this.mensajeError = null;
+          this.cdr.detectChanges();
+        }, 3000);
+        this.soldProducts = [];
+        this.updateChartData();
         this.dateForm.reset();
+        this.cdr.detectChanges();
       },
     });
   }

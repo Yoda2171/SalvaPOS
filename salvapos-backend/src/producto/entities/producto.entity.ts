@@ -17,6 +17,9 @@ export class Producto {
   @Column('int')
   cantidad: number;
 
+  @Column({ nullable: true }) // Imagen opcional
+  imagen?: string;
+
   @ManyToOne(() => Categoria, (categoria) => categoria.productos)
   categoria: Categoria;
 }

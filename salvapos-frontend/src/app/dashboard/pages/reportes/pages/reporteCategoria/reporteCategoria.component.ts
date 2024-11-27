@@ -6,6 +6,7 @@ import {
   ViewChild,
   ElementRef,
   inject,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VentaService } from '../../../../../services/venta.service';
@@ -46,9 +47,12 @@ export default class ReporteCategoriaComponent
   fromDate: NgbDate | null;
   toDate: NgbDate | null;
 
+  mensajeError: string | null = null;
+
   constructor(
     private readonly ventaService: VentaService,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly cdr: ChangeDetectorRef
   ) {
     const today = this.calendar.getToday();
     this.fromDate = this.calendar.getPrev(today, 'm', 1);
@@ -64,7 +68,7 @@ export default class ReporteCategoriaComponent
     this.loading$ = this.ventaService.loading$;
 
     this.dateForm.valueChanges.subscribe(() => {
-      this.loadCategoriasVendidas();
+      this.mensajeError = null;
     });
   }
 
@@ -72,7 +76,7 @@ export default class ReporteCategoriaComponent
     this.initializeChart();
   }
 
-  onDateSelection(date: NgbDate) {
+  onDateSelection(date: NgbDate, datepicker: any) {
     if (!this.fromDate && !this.toDate) {
       this.fromDate = date;
     } else if (
@@ -82,6 +86,7 @@ export default class ReporteCategoriaComponent
       date.after(this.fromDate)
     ) {
       this.toDate = date;
+      datepicker.close();
     } else {
       this.toDate = null;
       this.fromDate = date;
@@ -134,11 +139,24 @@ export default class ReporteCategoriaComponent
       (data) => {
         this.categoriasVendidas = data;
         this.updateChartData();
+        this.mensajeError = null;
+        this.cdr.detectChanges();
       },
       (error) => {
-        alert('Error al cargar las categorías vendidas. Intente nuevamente.');
+        this.categoriasVendidas = [];
+        this.updateChartData();
         this.dateForm.reset();
-        console.error('Error al cargar las categorías vendidas:', error);
+        this.mensajeError = 'No hay ventas en el rango de fechas ingresado.';
+
+        this.loading$ = new Observable((observer) => {
+          observer.next(false);
+          observer.complete();
+        });
+        setTimeout(() => {
+          this.mensajeError = null;
+          this.cdr.detectChanges();
+        }, 3000);
+        this.cdr.detectChanges();
       }
     );
   }

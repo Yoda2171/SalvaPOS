@@ -3,6 +3,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
   Min,
@@ -37,4 +38,8 @@ export class UpdateProductoDto extends PartialType(CreateProductoDto) {
   @IsPositive()
   @IsNumber()
   categoriaId: number;
+
+  @IsOptional()
+  @IsString({ message: 'La imagen debe ser una cadena de texto' })
+  imagen?: string;
 }
