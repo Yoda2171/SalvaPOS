@@ -28,6 +28,7 @@ export default class EditProductoComponent implements OnInit {
   loading$ = new Observable<boolean>();
   productoId!: number;
   currentProducto!: Producto;
+  currentImageUrl: string | null = null;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -71,6 +72,7 @@ export default class EditProductoComponent implements OnInit {
       observer.next(true);
       this.productoService.getProductoById(this.productoId).subscribe({
         next: (producto) => {
+          console.log(producto.imagen);
           if (producto) {
             this.currentProducto = producto;
             this.productoForm.patchValue({
@@ -81,6 +83,7 @@ export default class EditProductoComponent implements OnInit {
               precioCosto: this.formatCurrency(producto.precioCosto),
               precioVenta: this.formatCurrency(producto.precioVenta),
             });
+            this.currentImageUrl = producto.imagen || null;
           }
           observer.next(false);
         },

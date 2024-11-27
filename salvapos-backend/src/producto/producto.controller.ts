@@ -7,8 +7,6 @@ import {
   Param,
   Delete,
   Query,
-  UploadedFile,
-  UseInterceptors,
 } from '@nestjs/common';
 import { ProductoService } from './producto.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
@@ -18,7 +16,6 @@ import { PaginationDto } from './dto/pagination.dto';
 import { Producto } from './entities/producto.entity';
 import { AjustarInventarioDto } from './dto/ajusteInventario.dto';
 import { CheckDto } from './dto/check.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 
