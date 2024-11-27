@@ -83,3 +83,26 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+
+## Generarion de imagen docker
+
+- Para la generacion de la imagen docker se utiliza el siguiente comando
+
+```bash
+docker build -f Dockerfile -t salvapos-backend:1.0-SNAPSHOT .
+```
+
+- Para la ejecucion de la imagen con un contenedor
+
+```bash
+docker-compose up --build -d
+```
+
+
+- Para ver el logs 
+
+```bash
+docker-compose logs -f
+```
