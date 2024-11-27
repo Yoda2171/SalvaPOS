@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProductoService } from './producto.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
@@ -16,6 +18,9 @@ import { PaginationDto } from './dto/pagination.dto';
 import { Producto } from './entities/producto.entity';
 import { AjustarInventarioDto } from './dto/ajusteInventario.dto';
 import { CheckDto } from './dto/check.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { writeFileSync } from 'fs';
+import { join } from 'path';
 
 @ApiTags('Producto')
 @Controller('producto')
@@ -24,7 +29,16 @@ export class ProductoController {
 
   @Post()
   create(@Body() createProductoDto: CreateProductoDto) {
-    return this.productoService.createProducto(createProductoDto);
+    let fileUrl = null;
+    if (createProductoDto.imagen) {
+      const buffer = Buffer.from(createProductoDto.imagen, 'base64');
+      const filename = `${Date.now()}.jpg`;
+      const filePath = join(process.cwd(), 'uploads', filename);
+      writeFileSync(filePath, buffer);
+      fileUrl = `http://localhost:3000/uploads/${filename}`;
+    }
+
+    return this.productoService.createProducto(createProductoDto, fileUrl);
   }
 
   @Get('all')
@@ -42,7 +56,16 @@ export class ProductoController {
     @Param('id') id: string,
     @Body() updateProductoDto: UpdateProductoDto,
   ) {
-    return this.productoService.updateProducto(+id, updateProductoDto);
+    let fileUrl = null;
+    if (updateProductoDto.imagen) {
+      const buffer = Buffer.from(updateProductoDto.imagen, 'base64');
+      const filename = `${Date.now()}.jpg`;
+      const filePath = join(process.cwd(), 'uploads', filename);
+      writeFileSync(filePath, buffer);
+      fileUrl = `http://localhost:3000/uploads/${filename}`;
+    }
+
+    return this.productoService.updateProducto(+id, updateProductoDto, fileUrl);
   }
 
   @Delete(':id')

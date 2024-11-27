@@ -10,7 +10,11 @@
         (opcional).
       </p>
 
-      <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+      <form
+        [formGroup]="productoForm"
+        (ngSubmit)="onSubmit()"
+        enctype="multipart/form-data"
+      >
         <!-- Indicador de carga -->
         <div *ngIf="loading$ | async" class="text-center">
           <div class="spinner-border text-primary" role="status">
@@ -177,8 +181,15 @@
               class="form-control"
               placeholder="Ingresa el precio costo"
               required
-              [value]="formatCurrency(productoForm.get('precioCosto')?.value ?? null)"
-              (ngModelChange)="onMontoChange('precioCosto', productoForm.get('precioCosto')?.value)"
+              [value]="
+                formatCurrency(productoForm.get('precioCosto')?.value ?? null)
+              "
+              (ngModelChange)="
+                onMontoChange(
+                  'precioCosto',
+                  productoForm.get('precioCosto')?.value
+                )
+              "
               (input)="onMontoInput($event, 'precioCosto')"
               [ngClass]="{
                 'is-invalid':
@@ -216,8 +227,15 @@
               class="form-control"
               placeholder="Ingresa el precio venta"
               required
-              [value]="formatCurrency(productoForm.get('precioVenta')?.value ?? null)"
-              (ngModelChange)="onMontoChange('precioVenta', productoForm.get('precioVenta')?.value)"
+              [value]="
+                formatCurrency(productoForm.get('precioVenta')?.value ?? null)
+              "
+              (ngModelChange)="
+                onMontoChange(
+                  'precioVenta',
+                  productoForm.get('precioVenta')?.value
+                )
+              "
               (input)="onMontoInput($event, 'precioVenta')"
               [ngClass]="{
                 'is-invalid':
@@ -243,6 +261,22 @@
                 >No debe exceder 100.000.000.</span
               >
             </div>
+          </div>
+        </div>
+
+        <!-- Fila para imagen -->
+        <div class="row mb-3" *ngIf="!(loading$ | async)">
+          <div class="col-md-12">
+            <label for="imagen" class="form-label fw-bold text-dark"
+              >Imagen (opcional)</label
+            >
+            <input
+              type="file"
+              id="imagen"
+              formControlName="imagen"
+              class="form-control"
+              accept="image/*"
+            />
           </div>
         </div>
 

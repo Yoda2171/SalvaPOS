@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { NavbarComponent } from '../../../../components/navbar/navbar.component';
+
 import {
   FormBuilder,
   Validators,
@@ -21,13 +21,7 @@ import { catchError } from 'rxjs/operators';
 @Component({
   selector: 'app-add-producto',
   standalone: true,
-  imports: [
-    CommonModule,
-    NavbarComponent,
-    ReactiveFormsModule,
-    RouterModule,
-    FormsModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule],
   templateUrl: './addProducto.component.html',
   styleUrls: ['./addProducto.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,6 +56,7 @@ export default class AddProductoComponent implements OnInit {
         null,
         [Validators.required, Validators.min(1), Validators.max(100000000)],
       ],
+      imagen: [null],
     });
 
     // Load categories
@@ -116,18 +111,45 @@ export default class AddProductoComponent implements OnInit {
       return;
     }
 
-    this.productoService.createProducto(this.productoForm.value).subscribe({
-      next: () => {
-        // Redirect to inventory and pass a state with the success message
-        console.log('Redirecting to inventory with success message'); // Debugging
-        this.router.navigate(['/dashboard/inventario'], {
-          state: { mensajeExito: 'Producto agregado correctamente' },
+    const formData = this.productoForm.value;
+
+    const fileInput = document.getElementById('imagen') as HTMLInputElement;
+    const file = fileInput?.files?.[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = (reader.result as string).split(',')[1];
+        formData.imagen = base64String;
+
+        this.productoService.createProducto(formData).subscribe({
+          next: () => {
+            // Redirect to inventory and pass a state with the success message
+            console.log('Redirecting to inventory with success message'); // Debugging
+            this.router.navigate(['/dashboard/inventario'], {
+              state: { mensajeExito: 'Producto agregado correctamente' },
+            });
+          },
+          error: (error) => {
+            console.error('Error al agregar el producto', error);
+          },
         });
-      },
-      error: (error) => {
-        console.error('Error al agregar el producto', error);
-      },
-    });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      this.productoService.createProducto(formData).subscribe({
+        next: () => {
+          // Redirect to inventory and pass a state with the success message
+          console.log('Redirecting to inventory with success message'); // Debugging
+          this.router.navigate(['/dashboard/inventario'], {
+            state: { mensajeExito: 'Producto agregado correctamente' },
+          });
+        },
+        error: (error) => {
+          console.error('Error al agregar el producto', error);
+        },
+      });
+    }
   }
 
   // Función para formatear el monto como moneda

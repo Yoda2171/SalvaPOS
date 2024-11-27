@@ -6,6 +6,7 @@ import {
   ViewChild,
   ElementRef,
   inject,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VentaService } from '../../../../../services/venta.service';
@@ -46,9 +47,12 @@ export default class ReporteMetodoPagoComponent
   fromDate: NgbDate | null;
   toDate: NgbDate | null;
 
+  mensajeError: string | null = null;
+
   constructor(
     private readonly ventaService: VentaService,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly cdr: ChangeDetectorRef
   ) {
     const today = this.calendar.getToday();
     this.fromDate = this.calendar.getPrev(today, 'm', 1);
@@ -64,11 +68,11 @@ export default class ReporteMetodoPagoComponent
     this.loading$ = this.ventaService.loading$;
 
     this.dateForm.valueChanges.subscribe(() => {
-      this.loadMetodoPagoData();
+      this.mensajeError = null;
     });
   }
 
-  onDateSelection(date: NgbDate) {
+  onDateSelection(date: NgbDate, datepicker: any) {
     if (!this.fromDate && !this.toDate) {
       this.fromDate = date;
     } else if (
@@ -78,6 +82,7 @@ export default class ReporteMetodoPagoComponent
       date.after(this.fromDate)
     ) {
       this.toDate = date;
+      datepicker.close();
     } else {
       this.toDate = null;
       this.fromDate = date;
@@ -135,11 +140,24 @@ export default class ReporteMetodoPagoComponent
       (data) => {
         this.metodoPagoData = data;
         this.updateChartData();
+        this.mensajeError = null;
+        this.cdr.detectChanges();
       },
       (error) => {
-        alert('Error al cargar los datos de métodos de pago');
-        this.dateForm.reset(); // Limpiar formulario
-        console.error('Error al cargar los datos de métodos de pago', error);
+        this.metodoPagoData = [];
+        this.updateChartData();
+        this.dateForm.reset();
+        this.mensajeError = 'No hay ventas en el rango de fechas ingresado.';
+        this.loading$ = new Observable((observer) => {
+          observer.next(false);
+          observer.complete();
+        });
+        setTimeout(() => {
+          this.mensajeError = null;
+          this.cdr.detectChanges();
+        }, 3000);
+
+        this.cdr.detectChanges();
       }
     );
   }

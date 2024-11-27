@@ -1,4 +1,11 @@
-import { IsInt, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 //agregale las class validator a las propiedades de la clase
 export class CreateProductoDto {
@@ -27,4 +34,8 @@ export class CreateProductoDto {
 
   @IsNotEmpty({ message: 'La categoría es obligatoria' })
   categoriaId: number;
+
+  @IsOptional()
+  @IsString({ message: 'La imagen debe ser una cadena de texto' })
+  imagen?: string;
 }

@@ -6,7 +6,11 @@
         *Todos los campos son obligatorios, excepto los mencionados como .
       </p>
 
-      <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+      <form
+        [formGroup]="productoForm"
+        (ngSubmit)="onSubmit()"
+        enctype="multipart/form-data"
+      >
         <!-- Indicador de carga -->
         <div *ngIf="loading$ | async" class="text-center">
           <div class="spinner-border text-primary" role="status">
@@ -246,6 +250,21 @@
           </div>
         </div>
 
+        <!-- Fila para imagen -->
+        <div class="row mb-3" *ngIf="!(loading$ | async)">
+          <div class="col-md-12">
+            <label for="imagen" class="form-label fw-bold text-dark"
+              >Imagen (opcional)</label
+            >
+            <input
+              type="file"
+              id="imagen"
+              formControlName="imagen"
+              class="form-control"
+              accept="image/*"
+            />
+          </div>
+        </div>
         <!-- Botón para guardar cambios -->
         <div class="d-grid" *ngIf="!(loading$ | async)">
           <button

@@ -5,6 +5,7 @@ import {
   ViewChild,
   ElementRef,
   inject,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VentaService } from '../../../../../services/venta.service';
@@ -43,10 +44,12 @@ export default class ReporteVentaComponent implements OnInit {
   hoveredDate: NgbDate | null = null;
   fromDate: NgbDate | null;
   toDate: NgbDate | null;
+  mensajeError: string | null = null;
 
   constructor(
     private readonly ventaService: VentaService,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly cdr: ChangeDetectorRef
   ) {
     const today = this.calendar.getToday();
     this.fromDate = this.calendar.getPrev(today, 'm', 1);
@@ -63,11 +66,12 @@ export default class ReporteVentaComponent implements OnInit {
     this.loading$ = this.ventaService.loading$;
 
     this.dateForm.valueChanges.subscribe(() => {
-      this.loadVentasData();
+      this.showChart = false;
+      this.mensajeError = null;
     });
   }
 
-  onDateSelection(date: NgbDate) {
+  onDateSelection(date: NgbDate, datepicker: any): void {
     if (!this.fromDate && !this.toDate) {
       this.fromDate = date;
     } else if (
@@ -77,6 +81,7 @@ export default class ReporteVentaComponent implements OnInit {
       date.after(this.fromDate)
     ) {
       this.toDate = date;
+      datepicker.close();
     } else {
       this.toDate = null;
       this.fromDate = date;
@@ -126,19 +131,30 @@ export default class ReporteVentaComponent implements OnInit {
     // Add the last hour, minute, and second to the end date
     const endDateWithTime = `${endDate} 23:59:59`;
 
-    this.initializeChart();
-
     this.ventaService.ventasVendidas(startDate, endDateWithTime).subscribe(
       (data) => {
+        this.initializeChart();
         this.ventasData = data;
         this.updateChartData();
         this.showChart = true;
+        this.mensajeError = null;
+        this.cdr.detectChanges();
       },
       (error) => {
+        this.chart?.destroy();
+        this.ventasData = [];
         this.showChart = false;
-        alert('Error al cargar los datos de ventas');
         this.dateForm.reset();
-        console.error('Error al cargar los datos de ventas:', error);
+        this.mensajeError = 'No hay ventas en el rango de fechas ingresado.';
+        this.loading$ = new Observable((observer) => {
+          observer.next(false);
+          observer.complete();
+        });
+        setTimeout(() => {
+          this.mensajeError = null;
+          this.cdr.detectChanges();
+        }, 3000);
+        this.cdr.detectChanges();
       }
     );
   }

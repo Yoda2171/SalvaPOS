@@ -54,6 +54,7 @@ export default class EditProductoComponent implements OnInit {
         null,
         [Validators.required, Validators.min(1), Validators.max(100000000)],
       ],
+      imagen: [null],
     });
 
     this.productoId = +this.route.snapshot.paramMap.get('id')!;
@@ -102,33 +103,81 @@ export default class EditProductoComponent implements OnInit {
       categoriaId: +formValue.categoriaId,
     };
 
-    this.productoService
-      .updateProducto(this.productoId, updatedProducto)
-      .subscribe({
-        next: () => {
-          this.router.navigate(['/dashboard/inventario'], {
-            state: { mensajeExito: 'Producto editado correctamente' },
-          });
-        },
-        error: (error) => {
-          console.error('Error al editar el producto', error);
+    const fileInput = document.getElementById('imagen') as HTMLInputElement;
+    const file = fileInput?.files?.[0];
 
-          // Manejo de errores de nombre y código de barras ya existentes
-          if (error.error.message === 'Ya existe un producto con ese nombre') {
-            this.productoForm.get('nombre')?.setErrors({ nombreExists: true });
-            this.productoForm.get('nombre')?.markAsTouched();
-          }
-          if (
-            error.error.message ===
-            'Ya existe un producto con ese código de barras'
-          ) {
-            this.productoForm
-              .get('codigoBarras')
-              ?.setErrors({ codigoBarrasExists: true });
-            this.productoForm.get('codigoBarras')?.markAsTouched();
-          }
-        },
-      });
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = (reader.result as string).split(',')[1];
+        updatedProducto.imagen = base64String;
+
+        this.productoService
+          .updateProducto(this.productoId, updatedProducto)
+          .subscribe({
+            next: () => {
+              this.router.navigate(['/dashboard/inventario'], {
+                state: { mensajeExito: 'Producto editado correctamente' },
+              });
+            },
+            error: (error) => {
+              console.error('Error al editar el producto', error);
+
+              // Manejo de errores de nombre y código de barras ya existentes
+              if (
+                error.error.message === 'Ya existe un producto con ese nombre'
+              ) {
+                this.productoForm
+                  .get('nombre')
+                  ?.setErrors({ nombreExists: true });
+                this.productoForm.get('nombre')?.markAsTouched();
+              }
+              if (
+                error.error.message ===
+                'Ya existe un producto con ese código de barras'
+              ) {
+                this.productoForm
+                  .get('codigoBarras')
+                  ?.setErrors({ codigoBarrasExists: true });
+                this.productoForm.get('codigoBarras')?.markAsTouched();
+              }
+            },
+          });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      this.productoService
+        .updateProducto(this.productoId, updatedProducto)
+        .subscribe({
+          next: () => {
+            this.router.navigate(['/dashboard/inventario'], {
+              state: { mensajeExito: 'Producto editado correctamente' },
+            });
+          },
+          error: (error) => {
+            console.error('Error al editar el producto', error);
+
+            // Manejo de errores de nombre y código de barras ya existentes
+            if (
+              error.error.message === 'Ya existe un producto con ese nombre'
+            ) {
+              this.productoForm
+                .get('nombre')
+                ?.setErrors({ nombreExists: true });
+              this.productoForm.get('nombre')?.markAsTouched();
+            }
+            if (
+              error.error.message ===
+              'Ya existe un producto con ese código de barras'
+            ) {
+              this.productoForm
+                .get('codigoBarras')
+                ?.setErrors({ codigoBarrasExists: true });
+              this.productoForm.get('codigoBarras')?.markAsTouched();
+            }
+          },
+        });
+    }
   }
 
   // Función para formatear el monto como moneda

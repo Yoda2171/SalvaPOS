@@ -1,4 +1,19 @@
 <div class="container mt-4">
+  <!-- Mensaje de advertencia onTop si no hay ventas en el rango de fechas -->
+  <div
+    *ngIf="mensajeError"
+    class="alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x w-30 mt-3"
+    role="alert"
+    style="z-index: 1060"
+  >
+    {{ mensajeError }}
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="mensajeError = null"
+    ></button>
+  </div>
   <h2 class="text-center">Reporte de Métodos de Pago</h2>
   <form [formGroup]="dateForm" class="row row-cols-sm-auto pt-4">
     <div class="col-lg-6">
@@ -11,7 +26,7 @@
             ngbDatepicker
             #datepicker="ngbDatepicker"
             [autoClose]="'outside'"
-            (dateSelect)="onDateSelection($event)"
+            (dateSelect)="onDateSelection($event, datepicker)"
             [displayMonths]="2"
             [dayTemplate]="t"
             [markDisabled]="isDisabled"

@@ -26,6 +26,7 @@ export class ProductoService {
 
   async createProducto(
     createProductoDto: CreateProductoDto,
+    fileUrl?: any,
   ): Promise<Producto> {
     // Verificar si el producto con el código de barras ya existe
     const productoExistente = await this.productoRepository.findOne({
@@ -62,6 +63,7 @@ export class ProductoService {
     nuevoProducto.precioVenta = createProductoDto.precioVenta;
     nuevoProducto.cantidad = createProductoDto.cantidad;
     nuevoProducto.categoria = categoria;
+    nuevoProducto.imagen = fileUrl;
 
     // Validación: el precio de venta no puede ser menor que el precio de costo
     if (nuevoProducto.precioVenta < nuevoProducto.precioCosto) {
@@ -97,6 +99,7 @@ export class ProductoService {
   async updateProducto(
     id: number,
     updateProductoDto: UpdateProductoDto,
+    fileUrl: any,
   ): Promise<Producto> {
     const categoria = await this.categoriaService.findById(
       updateProductoDto.categoriaId,
@@ -147,6 +150,7 @@ export class ProductoService {
     producto.precioVenta = updateProductoDto.precioVenta;
     producto.cantidad = updateProductoDto.cantidad;
     producto.categoria = categoria;
+    producto.imagen = fileUrl;
 
     // Validación: el precio de venta no puede ser menor que el precio de costo
     if (producto.precioVenta < producto.precioCosto) {
