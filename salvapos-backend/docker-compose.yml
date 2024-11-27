@@ -1,27 +1,20 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
+  salvapos-backend:
+    image: salvapos-backend:1.0-SNAPSHOT
+    container_name: salvapos-backend
     environment:
-      MYSQL_ROOT_PASSWORD: 123456  # Cambia esto a tu password de root
-      MYSQL_DATABASE: salvapos_db  # Nombre de la base de datos inicial
-      MYSQL_USER: user_salvapos    # Usuario personalizado
-      MYSQL_PASSWORD: 123456       # Contraseña del usuario
-      TZ: America/Santiago         # Configura la zona horaria a Santiago de Chile
+      - DATABASE_HOST=salvaserver.mysql.database.azure.com
+      - DATABASE_PORT=3306
+      - DATABASE_USERNAME=posadmin
+      - DATABASE_PASSWORD=Capstone24
+      - DATABASE_NAME=salvabase
     ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro # Monta el archivo de zonas horarias en el contenedor
+      - "3000:3000"
     networks:
-      - mysql_network
-
-volumes:
-  mysql_data:
-    driver: local
+      - salvapos_network
 
 networks:
-  mysql_network:
+  salvapos_network:
     driver: bridge
