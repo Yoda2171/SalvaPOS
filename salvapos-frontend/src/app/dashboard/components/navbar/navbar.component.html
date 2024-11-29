@@ -34,10 +34,10 @@
 
       <!-- Mostrar 'Login' y 'Register' solo para usuarios no autenticados -->
       <li class="nav-item" *ngIf="!isPharmacist()">
-        <a class="nav-link" [routerLink]="['/login']">Login</a>
+        <a class="nav-link" [routerLink]="['/login']">Iniciar Sesión</a>
       </li>
       <li class="nav-item" *ngIf="!isPharmacist()">
-        <a class="nav-link" [routerLink]="['/register']">Register</a>
+        <a class="nav-link" [routerLink]="['/register']">Registrarse</a>
       </li>
 
       <!-- Mostrar 'Reportes' solo para superadministradores -->
@@ -47,7 +47,7 @@
 
       <!-- Logout -->
       <li class="nav-item">
-        <a class="nav-link" (click)="logout()">Logout</a>
+        <a class="nav-link" (click)="logout()">Cerrar Sesión</a>
       </li>
     </ul>
   </div>
