@@ -6,10 +6,11 @@ import { CartService } from './services/cart.service';
 import { RouterLink } from '@angular/router';
 import { RouterOutlet } from '@angular/router';
 import { ReturnComponent } from './return/return.component';
+import { AboutComponent } from './component/about/about.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, HomeComponent, CartComponent, RouterLink, RouterOutlet],
+  imports: [CommonModule, HomeComponent, CartComponent, RouterLink, RouterOutlet, AboutComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

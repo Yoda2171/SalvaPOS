@@ -18,14 +18,19 @@
               <!-- Controles -->
               <div class="controls d-flex align-items-center gap-1">
                 <!-- Botón sumar -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-plus text-success" viewBox="0 0 16 16" style="cursor: pointer;">
-                  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                </svg>
+                <p class="mb-1"><strong>{{item.cantidad}}</strong></p>
+                <button (click)="incrementarCantidad(item.id)">
+                  <svg xmlns="http://www.w3.org/2000/svg"   width="20" height="20" fill="currentColor" class="bi bi-plus text-success" viewBox="0 0 16 16" style="cursor: pointer;">
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                  </svg>
+                </button>
   
                 <!-- Botón restar -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-dash text-warning" viewBox="0 0 16 16" style="cursor: pointer;">
-                  <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
-                </svg>
+                <button (click)="reducirCantidad(item.id)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-dash text-warning" viewBox="0 0 16 16" style="cursor: pointer;">
+                    <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
+                  </svg>
+                </button>
   
                 <!-- Botón eliminar -->
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash text-danger" viewBox="0 0 16 16" style="cursor: pointer;">

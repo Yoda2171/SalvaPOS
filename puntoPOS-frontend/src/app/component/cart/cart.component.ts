@@ -14,6 +14,12 @@ import { TransbankService } from '../../services/transbank.service';
 export class CartComponent {
   cart = inject(CartService);
   constructor(private transbankService: TransbankService){}
+  incrementarCantidad(id: number){
+    this.cart.incrementarCantidad(id)
+  }
+  reducirCantidad(id:number){
+    this.cart.reducirCantidad(id)
+  }
   iniciarPago() {
     const paymentData = {
       amount: this.cart.calcularPrecioTotal(), // Monto de la transacción

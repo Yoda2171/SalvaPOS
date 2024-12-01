@@ -19,5 +19,19 @@ export class CartService {
   contador(){
     return this.items.length
   }
+  incrementarCantidad(id: number){
+    const item = this.items.find( item => item.id === id);
+    if (item.cantidad > 0){
+      item.cantidad += 1;
+    }
+  }
+  reducirCantidad(id: number){
+    const item = this.items.find( item => item.id === id);
+    if (item.cantidad > 1){
+      item.cantidad -=1
+    }else{
+      this.items = this.items.filter(producto => producto.id !== id);
+    }
+  }
   
 }
