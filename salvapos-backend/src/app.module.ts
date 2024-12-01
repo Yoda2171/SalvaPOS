@@ -16,6 +16,11 @@ import { RoleModule } from './role/role.module';
 import { DataRoleService } from './data/data-role/data-role.service';
 import { DataUserService } from './data/data-user/data-user.service';
 
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { join } from 'path';
+import { NotificationService } from './notification/notification.service';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -31,6 +36,28 @@ import { DataUserService } from './data/data-user/data-user.service';
       database: process.env.DATABASE_NAME, // Nombre de la base de datos
       autoLoadEntities: true,
       synchronize: true, // Sincroniza la base de datos según las entidades de TypeORM
+    }),
+
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com', // Cambia por tu servidor SMTP
+        port: 587,
+        secure: false, // true para 465, false para otros puertos
+        auth: {
+          user: 'pablo.avila2171@gmail.com', // Tu correo
+          pass: 'cmpt tahp myfq jwkn', // Tu contraseña o token de aplicación
+        },
+      },
+      defaults: {
+        from: '"Soporte" <salvapos@gmail.com>', // Configura el remitente
+      },
+      template: {
+        dir: join(process.cwd(), 'templates'), // Directorio de plantillas
+        adapter: new HandlebarsAdapter(), // Adaptador para plantillas
+        options: {
+          strict: true,
+        },
+      },
     }),
     RoleModule,
     UsersModule,
@@ -48,6 +75,7 @@ import { DataUserService } from './data/data-user/data-user.service';
     DataProductService,
     DataMetodoPagoService,
     DataUserService,
+    NotificationService,
   ],
 })
 export class AppModule {}

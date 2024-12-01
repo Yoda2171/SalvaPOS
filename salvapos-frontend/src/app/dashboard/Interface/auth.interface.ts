@@ -10,3 +10,12 @@ export interface Register {
   password: string;
   role: string;
 }
+
+export interface ResetPassword {
+  resetToken: string;
+  password: string;
+}
+
+export interface RequestResetPassword {
+  email: string;
+}

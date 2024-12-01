@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -9,7 +15,8 @@ import {
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../services/auth.service';
 import { Observable } from 'rxjs';
-
+import { UserService } from '../../../../services/user.service';
+import { Modal } from 'bootstrap';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -20,18 +27,29 @@ import { Observable } from 'rxjs';
 })
 export default class LoginComponent {
   loginForm: FormGroup;
+  forgotPasswordForm: FormGroup;
   invalidCredentials: boolean = false;
   errorMessage: string = '';
+  successMessage: string = '';
   loading$: Observable<boolean>;
+
+  @ViewChild('forgotPasswordModal') forgotPasswordModal!: ElementRef;
+  @ViewChild('successToast') successToast!: ElementRef;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly userService: UserService,
+    private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+    });
+
+    this.forgotPasswordForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
     });
 
     this.loading$ = this.authService.loading$;
@@ -59,5 +77,29 @@ export default class LoginComponent {
     } else {
       console.log('Formulario inválido');
     }
+  }
+
+  requestPasswordReset() {
+    if (this.forgotPasswordForm.invalid) {
+      this.errorMessage = 'Por favor ingresa un correo válido.';
+      return;
+    }
+
+    const email = this.forgotPasswordForm.value.email;
+
+    this.userService.requestPassword({ email }).subscribe(
+      () => {
+        alert('Solicitud de restablecimiento enviada.');
+        setTimeout(() => {
+          location.reload();
+        }, 500);
+      },
+      (error) => {
+        console.error('Error al solicitar restablecimiento', error);
+        this.errorMessage =
+          error.error.message || 'Error al solicitar restablecimiento.';
+        this.cdr.detectChanges();
+      }
+    );
   }
 }

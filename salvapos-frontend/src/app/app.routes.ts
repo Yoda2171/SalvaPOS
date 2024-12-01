@@ -122,6 +122,13 @@ export const routes: Routes = [
       },
     ],
   },
+
+  {
+    path: 'resetpassword/:token',
+    title: 'Reset Password',
+    loadComponent: () =>
+      import('./dashboard/pages/resetPassword/resetPassword.component'),
+  },
   {
     path: 'login',
     loadComponent: () => import('./dashboard/pages/auth/login/login.component'),
