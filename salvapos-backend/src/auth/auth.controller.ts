@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -41,11 +42,6 @@ export class AuthController {
   //   @Post('forgot-password')
   //   forgotPassword(@Body()) {
   //     return this.authService.forgotPassword();
-  //   }
-
-  //   @Post('reset-password')
-  //   resetPassword(@Body()) {
-  //     return this.authService.resetPassword();
   //   }
 
   //   @Post('change-password')

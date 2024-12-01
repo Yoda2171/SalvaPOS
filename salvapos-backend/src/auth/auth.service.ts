@@ -81,13 +81,30 @@ export class AuthService {
       message: 'User created successfully',
     };
   }
+
   forgotPassword() {
     return 'This action sends a password reset email';
   }
 
-  resetPassword() {
-    return 'This action resets a user password';
-  }
+  /*  async resetPassword(
+    requestResetPasswordDto: RequestResetPasswordDto,
+  ): Promise<any> {
+    const { email } = requestResetPasswordDto;
+
+    const user = await this.usersService.findOneByEmail(email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+   
+
+    user.resetPasswordToken = v4();
+    this.usersService.rester(user);
+    return {
+      message: 'Password reset email sent successfully',
+  
+    };
+  } */
 
   changePassword() {
     return 'This action changes a user password';

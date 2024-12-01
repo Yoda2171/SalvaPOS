@@ -38,6 +38,7 @@ export class NavbarComponent implements OnInit {
       .filter((route) => !route.path?.includes('reportesventa'))
       .filter((route) => !route.path?.includes('reportescategoria'))
       .filter((route) => !route.path?.includes('reportesmetodopago'))
+      .filter((route) => !route.path?.includes('resetpassword'))
       .filter((route) => !route.path?.includes('categoria'))
       .filter((route) => this.isRouteAccessible(route))
       .filter((route) => route.title);
@@ -63,7 +64,9 @@ export class NavbarComponent implements OnInit {
 
     if (
       !this.userRole &&
-      ['inventario', 'venta', 'home', 'login'].includes(route.path)
+      ['inventario', 'venta', 'home', 'login', 'resetPassword'].includes(
+        route.path
+      )
     ) {
       return true; // Usuarios sin rol solo pueden ver inventario, venta, home y login
     }

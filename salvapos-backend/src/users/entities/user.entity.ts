@@ -25,6 +25,14 @@ export class User {
   @Column({ nullable: false })
   password: string;
 
+  @Column({
+    type: 'uuid',
+    nullable: true,
+    unique: true,
+    name: 'reset_password_token',
+  })
+  resetPasswordToken: string;
+
   @ManyToOne(() => Role, (role) => role.users)
   role: Role;
 
