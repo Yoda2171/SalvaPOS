@@ -95,6 +95,17 @@ export default class LoginComponent {
         }, 500);
       },
       (error) => {
+        if (error.error.message === 'User not found') {
+          alert('Este correo no esta ingresado en el sistema.');
+
+          setTimeout(() => {
+            location.reload();
+          }, 500);
+
+          return location.reload();
+        }
+
+        alert('Error al solicitar restablecimiento. intenta de nuevo.');
         console.error('Error al solicitar restablecimiento', error);
         this.errorMessage =
           error.error.message || 'Error al solicitar restablecimiento.';
