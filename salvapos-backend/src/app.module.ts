@@ -50,7 +50,7 @@ import { TransbankModule } from './transbank/transbank.module';
         },
       },
       defaults: {
-        from: '"Soporte" <salvapos@gmail.com>', // Configura el remitente
+        from: '"Soporte SalvaPos" <salvapos@gmail.com>', // Configura el remitente
       },
       template: {
         dir: join(process.cwd(), 'templates'), // Directorio de plantillas
