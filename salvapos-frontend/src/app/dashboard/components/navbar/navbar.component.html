@@ -7,7 +7,7 @@
     [attr.aria-expanded]="isNavbarOpen"
     aria-label="Toggle navigation"
   >
-    <i class="fa-solid fa-bars"></i>
+    <i class="fa-solid fa-bars text-light"></i>
   </button>
 
   <div
@@ -30,6 +30,9 @@
       <!-- Enlaces del menú -->
       <li class="nav-item" *ngFor="let item of menuItems">
         <a class="nav-link" [routerLink]="[item.path]">{{ item.title }}</a>
+      </li>
+      <li class="nav-item" *ngIf="!userRole">
+        <a class="nav-link" [routerLink]="['/dashboard/cart']">Cart</a>
       </li>
       <li class="nav-item" *ngIf="!userRole">
         <a class="nav-link" [routerLink]="['/login']">Login</a>

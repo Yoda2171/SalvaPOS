@@ -71,7 +71,7 @@ export default class InventarioComponent implements OnInit {
     this.stockForm = this.fb.group({
       cantidadAjuste: [
         null,
-        [Validators.required, Validators.min(1)], // Validación para campo requerido y mínimo de 1
+        [Validators.required, Validators.min(-999), Validators.max(999)],
       ],
     });
 

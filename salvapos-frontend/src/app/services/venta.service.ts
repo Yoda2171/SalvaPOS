@@ -26,7 +26,7 @@ export class VentaService {
 
   constructor() {}
 
-  createVenta(venta: VentaAPI): Observable<Venta> {
+  createVenta(venta: any): Observable<Venta> {
     this.loadingSubject.next(true); // Iniciar el estado de carga
     console.log(venta);
     return this.http.post<Venta>(this.apiUrl, venta).pipe(

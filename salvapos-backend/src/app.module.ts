@@ -20,6 +20,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
 import { NotificationService } from './notification/notification.service';
+import { TransbankModule } from './transbank/transbank.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { NotificationService } from './notification/notification.service';
     VentaModule,
     MetodoPagoModule,
     AuthModule,
+    TransbankModule,
   ],
   controllers: [AppController],
   providers: [

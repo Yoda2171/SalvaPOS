@@ -64,9 +64,7 @@ export class NavbarComponent implements OnInit {
 
     if (
       !this.userRole &&
-      ['inventario', 'venta', 'home', 'login', 'resetPassword'].includes(
-        route.path
-      )
+      ['cart', 'home', 'login', 'resetPassword'].includes(route.path)
     ) {
       return true; // Usuarios sin rol solo pueden ver inventario, venta, home y login
     }
