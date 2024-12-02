@@ -114,6 +114,19 @@ export const routes: Routes = [
         canActivate: [RoleGuard],
         data: { expectedRole: 'Cajero' },
       },
+      {
+        path: 'return',
+        loadComponent: () =>
+          import('./dashboard/pages/return/return.component'),
+      },
+      {
+        path: 'cart',
+        loadComponent: () => import('./dashboard/pages/cart/cart.component'),
+      },
+      {
+        path: 'about',
+        loadComponent: () => import('./dashboard/pages/about/about.component'),
+      },
       // Redirigir desde 'dashboard' a 'dashboard/home' si la ruta está vacía
       {
         path: '',
@@ -133,6 +146,7 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./dashboard/pages/auth/login/login.component'),
   },
+
   {
     path: 'register',
     loadComponent: () =>

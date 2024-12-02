@@ -1,0 +1,120 @@
+<div
+  class="container vh-100 d-flex flex-column align-items-start justify-content-start p-4"
+>
+  <div class="container bg-light p-3 rounded">
+    <div class="row">
+      <div class="d-flex flex-column col-10">
+        <div
+          *ngFor="let item of cart.getproductos(); trackBy: trackById"
+          class="d-flex align-items-center justify-content-start mb-2 p-2 border-bottom"
+        >
+          <!-- Imagen -->
+          <div class="img me-2" style="width: 100px">
+            <img
+              src="{{ item.imagen }}"
+              alt="{{ item.nombre }}"
+              class="w-100 img-fluid"
+            />
+          </div>
+
+          <!-- Detalles del producto -->
+          <div class="options d-flex flex-column align-items-start me-3">
+            <p class="mb-1">
+              <strong>{{ item.nombre }}</strong>
+            </p>
+            <p class="mb-1">
+              <strong>$ {{ formatCurrency(item.precioVenta) }}</strong>
+            </p>
+          </div>
+
+          <!-- Controles -->
+          <div class="controls d-flex align-items-center gap-1">
+            <!-- Botón sumar -->
+            <button
+              class="btn btn-outline-success btn-sm"
+              (click)="
+                item.id !== undefined ? incrementarCantidad(item.id) : null
+              "
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="currentColor"
+                class="bi bi-plus"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"
+                />
+              </svg>
+            </button>
+
+            <!-- Cantidad -->
+            <p class="mb-1">
+              <strong>{{ item.cantidad }}</strong>
+            </p>
+
+            <!-- Botón restar -->
+            <button
+              class="btn btn-outline-warning btn-sm"
+              (click)="item.id !== undefined ? reducirCantidad(item.id) : null"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="currentColor"
+                class="bi bi-dash"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"
+                />
+              </svg>
+            </button>
+
+            <!-- Botón eliminar -->
+            <button
+              class="btn btn-outline-danger btn-sm"
+              (click)="item.id !== undefined ? eliminarItem(item.id) : null"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="currentColor"
+                class="bi bi-trash"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"
+                />
+                <path
+                  d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        class="col-2 d-flex flex-column align-items-center justify-content-center"
+      >
+        <p>Total a pagar</p>
+        <p>
+          <strong> $ {{ formatCurrency(cart.calcularPrecioTotal()) }}</strong>
+        </p>
+        <button
+          class="btn"
+          (click)="iniciarPago()"
+          [ngClass]="
+            cart.calcularPrecioTotal() === 0 ? 'btn-warning' : 'btn-success'
+          "
+        >
+          {{ cart.calcularPrecioTotal() === 0 ? "Agrega Productos" : "Pagar" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

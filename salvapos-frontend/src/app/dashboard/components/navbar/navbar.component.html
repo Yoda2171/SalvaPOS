@@ -32,6 +32,9 @@
         <a class="nav-link" [routerLink]="[item.path]">{{ item.title }}</a>
       </li>
       <li class="nav-item" *ngIf="!userRole">
+        <a class="nav-link" [routerLink]="['/dashboard/cart']">Cart</a>
+      </li>
+      <li class="nav-item" *ngIf="!userRole">
         <a class="nav-link" [routerLink]="['/login']">Login</a>
       </li>
       <li class="nav-item" *ngIf="userRole === 'Administrador'">
