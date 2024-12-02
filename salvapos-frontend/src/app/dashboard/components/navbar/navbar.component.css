@@ -19,7 +19,7 @@
 }
 
 .sidebar.collapsed {
-  width: 80px;
+  width: 50px;
 }
 
 .sidebar .hamburger-btn {
@@ -44,7 +44,6 @@
   border-radius: 5px;
 }
 
-
 /* Logo del sidebar */
 .side-bar-logo {
   height: auto; /* Asegura que el contenedor se ajuste automáticamente */
@@ -60,6 +59,7 @@
   max-height: 128px; /* Cambia este valor según el tamaño que desees */
   object-fit: contain; /* Ajusta la imagen dentro del contenedor */
 }
+
 .sidebar.collapsed + .main-content {
   margin-left: 80px;
 }
@@ -75,6 +75,21 @@
 
 @media (max-width: 991px) {
   .sidebar {
-    display: none;
+    width: 80px;
+  }
+
+  .sidebar.collapsed {
+    width: 50px;
+  }
+
+  .sidebar .hamburger-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1040;
+  }
+
+  .sidebar.show {
+    left: 0;
   }
 }
