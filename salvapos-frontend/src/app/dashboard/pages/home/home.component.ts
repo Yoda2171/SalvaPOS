@@ -10,6 +10,7 @@ import { ProductoService } from '../../../services/producto.service';
 import { Observable } from 'rxjs';
 import { Pagination, Producto } from '../../Interface/producto.interface';
 import { CartService } from '../../../services/cart.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -28,15 +29,18 @@ export default class HomeComponent implements OnInit {
   totalItems: number = 0;
   totalPages: number = 0;
 
+  userRole: string | null = null;
   private readonly productoService = inject(ProductoService);
   private readonly cartService = inject(CartService);
 
-  constructor() {
+  constructor(private readonly authService: AuthService) {
     this.loading$ = this.productoService.loading$;
   }
 
   ngOnInit(): void {
     this.getProductos();
+    const currentUser = this.authService.getCurrentUser();
+    this.userRole = currentUser ? currentUser.role : null;
   }
 
   getProductos(): void {
