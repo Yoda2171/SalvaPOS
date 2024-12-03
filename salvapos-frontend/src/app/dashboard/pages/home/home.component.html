@@ -47,7 +47,12 @@
           <strong>${{ formatCurrency(producto.precioVenta) }}</strong>
         </p>
         <!-- Botón -->
-        <button (click)="agregar(producto)" class="btn btn-primary mt-auto">
+
+        <button
+          *ngIf="!userRole"
+          (click)="agregar(producto)"
+          class="btn btn-primary mt-auto"
+        >
           Agregar al carro
         </button>
       </div>
