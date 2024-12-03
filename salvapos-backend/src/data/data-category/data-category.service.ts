@@ -1,45 +1,38 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 import { CategoriaService } from 'src/categoria/categoria.service';
-import { CreateCategoriaDto } from 'src/categoria/dto/create-categoria.dto';
-import { faker } from '@faker-js/faker';
 
 @Injectable()
 export class DataCategoryService implements OnModuleInit {
+  private readonly baseUrl =
+    'https://farmaciaelquimico.cl/collections/medicamentos';
+
   constructor(private readonly categoriaService: CategoriaService) {}
 
   async onModuleInit() {
-    const count = await this.categoriaService.count(); // Verificar si hay registros
-
-    if (count > 0) {
-      console.log(
-        'La tabla de categorías ya está poblada. No se insertaron datos.',
-      );
-      return;
-    }
-
-    const categorias = this.generateCategories(15);
+    console.log('Iniciando scraping de categorías...');
+    const categorias = await this.scrapeCategories();
 
     for (const categoria of categorias) {
-      await this.categoriaService.createCategory(categoria);
+      await this.categoriaService.createCategory({ nombre: categoria });
     }
 
-    console.log('15 categorías insertadas en la base de datos.');
+    console.log(
+      `${categorias.length} categorías insertadas en la base de datos.`,
+    );
   }
 
-  generateCategories(cantidad: number): CreateCategoriaDto[] {
-    const categorias: CreateCategoriaDto[] = [];
-    const nombres = new Set<string>();
+  private async scrapeCategories(): Promise<string[]> {
+    const response = await axios.get(this.baseUrl);
+    const $ = cheerio.load(response.data);
 
-    while (categorias.length < cantidad) {
-      let nombre: string;
-      do {
-        nombre = faker.commerce.department();
-      } while (nombres.has(nombre));
+    const categorias = new Set<string>();
+    $('.filter-item').each((_idx, el) => {
+      const nombre = $(el).text().trim();
+      if (nombre) categorias.add(nombre);
+    });
 
-      categorias.push({ nombre });
-      nombres.add(nombre);
-    }
-
-    return categorias;
+    return Array.from(categorias).slice(0, 10); // Limitar a 10 categorías
   }
 }
