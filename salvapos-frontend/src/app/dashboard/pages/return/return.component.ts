@@ -66,7 +66,7 @@ export default class ReturnComponent {
       detalles,
       pagos,
       total: this.cartService.calcularPrecioTotal(),
-      userId: 12,
+      userId: 3,
     };
 
     this.ventaService.createVenta(venta).subscribe({
