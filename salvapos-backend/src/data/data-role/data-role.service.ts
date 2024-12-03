@@ -6,7 +6,7 @@ export class DataRoleService {
   constructor(private readonly roleService: RoleService) {}
 
   async onModuleInit() {
-    const rolesPorDefecto = ['Administrador', 'Cajero'];
+    const rolesPorDefecto = ['Administrador', 'Cajero', 'User'];
 
     for (const nombre of rolesPorDefecto) {
       const rolesExistentes = await this.roleService.findAll();
