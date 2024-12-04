@@ -1,8 +1,8 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { CategoriaService } from 'src/categoria/categoria.service';
 import { ProductoService } from 'src/producto/producto.service';
-import { faker } from '@faker-js/faker';
-import { CreateProductoDto } from 'src/producto/dto/create-producto.dto';
+import { CategoriaService } from 'src/categoria/categoria.service';
+import * as path from 'path';
+import * as xlsx from 'xlsx';
 
 @Injectable()
 export class DataProductService implements OnModuleInit {
@@ -12,79 +12,66 @@ export class DataProductService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    const productoCount = await this.productoService.count(); // Verificar si ya hay productos
+    console.log('Verificando si existen productos en la base de datos...');
 
-    if (productoCount > 0) {
+    // Verificar si ya existen productos
+    const existingProducts = await this.productoService.findAllProducts(); // Suponiendo que `findAll` devuelve los productos actuales
+    if (existingProducts.length > 0) {
       console.log(
-        'La tabla de productos ya está poblada. No se insertaron datos.',
+        'La tabla de productos ya tiene datos. No se realizará la inserción.',
       );
       return;
     }
 
-    const categorias = await this.categoriaService.findAll(); // Obtener todas las categorías
+    console.log(
+      'No se encontraron productos. Procediendo a insertar desde Excel.',
+    );
 
-    if (categorias.length === 0) {
-      console.log(
-        'No hay categorías disponibles. No se pueden insertar productos.',
-      );
-      return;
-    }
+    // Leer el archivo Excel
+    const filePath = path.join(process.cwd(), 'products.xlsx'); // Cambia la ruta si es necesario
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-    const productos = this.generateRandomProducts(categorias, 100);
+    for (const row of data) {
+      const codigoBarras = row['CODIGODEBARRA']?.toString().trim() || null;
+      const nombre = row['NOMBRE']?.trim();
+      const precioCosto = parseFloat(row['PRECIO_DE_COMPRA']) || 0;
+      const precioVenta = parseFloat(row['PRECIO_DE_VENTA']) || 0;
+      const categoriaNombre = row['CATEGORIA']?.trim();
+      const cantidad = parseInt(row['Cantidad']) || 0;
 
-    for (const producto of productos) {
-      await this.productoService.createProducto(producto);
-    }
-
-    console.log('100 productos insertados en la base de datos.');
-  }
-
-  generateRandomProducts(
-    categorias: any[],
-    cantidad: number,
-  ): CreateProductoDto[] {
-    const productos: CreateProductoDto[] = [];
-    const codigosBarras = new Set<string>();
-    const nombres = new Set<string>();
-
-    while (productos.length < cantidad) {
-      const categoria =
-        categorias[Math.floor(Math.random() * categorias.length)]; // Selección aleatoria
-
-      let codigoBarras: string;
-      do {
-        codigoBarras = faker.string.alphanumeric(8);
-      } while (codigosBarras.has(codigoBarras));
-
-      let nombre: string;
-      do {
-        nombre = faker.commerce.productName();
-      } while (nombres.has(nombre));
-
-      let precioCosto: number;
-      let precioVenta: number;
-      do {
-        precioCosto = parseFloat(
-          faker.commerce.price({ min: 0, max: 1000000 }),
+      if (!nombre || !categoriaNombre) {
+        console.warn(
+          `Datos incompletos para el producto: ${JSON.stringify(row)}`,
         );
-        precioVenta = parseFloat(
-          faker.commerce.price({ min: 0, max: 1000000 }),
-        );
-      } while (precioVenta <= precioCosto);
+        continue;
+      }
 
-      productos.push({
-        codigoBarras,
-        nombre,
-        precioCosto,
-        precioVenta,
-        cantidad: faker.number.int({ min: 0, max: 999 }),
-        categoriaId: categoria.id, // Asignar categoría aleatoria
-      });
+      // Busca o crea la categoría
+      let categoria = await this.categoriaService.findByName(categoriaNombre);
+      if (!categoria) {
+        categoria = await this.categoriaService.createCategory({
+          nombre: categoriaNombre,
+        });
+      }
 
-      codigosBarras.add(codigoBarras);
-      nombres.add(nombre);
+      // Inserta el producto
+      try {
+        await this.productoService.createProducto({
+          codigoBarras,
+          nombre,
+          precioCosto,
+          precioVenta,
+          cantidad,
+          categoriaId: categoria.id,
+        });
+        console.log(`Producto "${nombre}" insertado correctamente.`);
+      } catch (error) {
+        console.error(`Error al insertar el producto "${nombre}":`, error);
+      }
     }
 
-    return productos;
+    console.log('Carga de datos de productos completada.');
   }
 }

@@ -1,45 +1,45 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { CategoriaService } from 'src/categoria/categoria.service';
-import { CreateCategoriaDto } from 'src/categoria/dto/create-categoria.dto';
-import { faker } from '@faker-js/faker';
+import * as path from 'path';
+import * as xlsx from 'xlsx';
 
 @Injectable()
 export class DataCategoryService implements OnModuleInit {
   constructor(private readonly categoriaService: CategoriaService) {}
 
   async onModuleInit() {
-    const count = await this.categoriaService.count(); // Verificar si hay registros
-
-    if (count > 0) {
+    // Verificar si ya existen categorías
+    const existingCategories = await this.categoriaService.findAll(); // Suponiendo que `findAll` devuelve las categorías actuales
+    if (existingCategories.length > 0) {
       console.log(
-        'La tabla de categorías ya está poblada. No se insertaron datos.',
+        'La tabla de categorías ya tiene datos. No se realizará la inserción.',
       );
       return;
     }
 
-    const categorias = this.generateCategories(15);
+    console.log(
+      'No se encontraron categorías. Procediendo a insertar desde Excel.',
+    );
 
-    for (const categoria of categorias) {
-      await this.categoriaService.createCategory(categoria);
+    // Leer el archivo Excel
+    const filePath = path.join(process.cwd(), 'category.xlsx'); // Cambia la ruta si es necesario
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    for (const row of data) {
+      const categoryName = row['Nombre']; // Cambia según el nombre exacto de la columna
+      if (categoryName && categoryName.trim() !== '') {
+        try {
+          await this.categoriaService.createCategory({ nombre: categoryName });
+          console.log(`Categoría "${categoryName}" insertada correctamente.`);
+        } catch (error) {
+          console.error(
+            `Error al insertar la categoría "${categoryName}":`,
+            error,
+          );
+        }
+      }
     }
-
-    console.log('15 categorías insertadas en la base de datos.');
-  }
-
-  generateCategories(cantidad: number): CreateCategoriaDto[] {
-    const categorias: CreateCategoriaDto[] = [];
-    const nombres = new Set<string>();
-
-    while (categorias.length < cantidad) {
-      let nombre: string;
-      do {
-        nombre = faker.commerce.department();
-      } while (nombres.has(nombre));
-
-      categorias.push({ nombre });
-      nombres.add(nombre);
-    }
-
-    return categorias;
   }
 }

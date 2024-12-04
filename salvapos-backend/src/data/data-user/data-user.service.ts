@@ -33,6 +33,13 @@ export class DataUserService {
         password: '12345678',
         roleId: 2, // Cajero
       },
+      {
+        firstname: 'Usuario',
+        lastname: 'Externo',
+        email: 'usuarioexterno@duoc.cl',
+        password: '12345678',
+        roleId: 3, // User
+      },
     ];
 
     for (const user of users) {

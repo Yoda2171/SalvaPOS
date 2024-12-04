@@ -217,4 +217,20 @@ export default class CategoriaComponent implements OnInit {
     this.currentPage = page;
     this.loadCategories(page);
   }
+
+  getPageRange(): number[] {
+    const maxVisiblePages = 10; // Número máximo de páginas visibles en la barra de paginación
+    const startPage = Math.max(
+      this.currentPage - Math.floor(maxVisiblePages / 2),
+      1
+    );
+    const endPage = Math.min(startPage + maxVisiblePages - 1, this.totalPages);
+
+    const pageRange: number[] = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pageRange.push(i);
+    }
+
+    return pageRange;
+  }
 }
