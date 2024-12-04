@@ -1,97 +1,77 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import axios from 'axios';
-import * as cheerio from 'cheerio';
 import { ProductoService } from 'src/producto/producto.service';
 import { CategoriaService } from 'src/categoria/categoria.service';
-import { CreateProductoDto } from 'src/producto/dto/create-producto.dto';
+import * as path from 'path';
+import * as xlsx from 'xlsx';
 
 @Injectable()
 export class DataProductService implements OnModuleInit {
-  private readonly baseUrl =
-    'https://farmaciaelquimico.cl/collections/medicamentos';
-
   constructor(
     private readonly productoService: ProductoService,
     private readonly categoriaService: CategoriaService,
   ) {}
 
   async onModuleInit() {
-    console.log('Iniciando scraping de productos...');
-    const categorias = await this.categoriaService.findAll();
+    console.log('Verificando si existen productos en la base de datos...');
 
-    if (categorias.length === 0) {
-      console.log('No hay categorías disponibles. No se insertaron productos.');
+    // Verificar si ya existen productos
+    const existingProducts = await this.productoService.findAllProducts(); // Suponiendo que `findAll` devuelve los productos actuales
+    if (existingProducts.length > 0) {
+      console.log(
+        'La tabla de productos ya tiene datos. No se realizará la inserción.',
+      );
       return;
     }
 
-    const productos = await this.scrapeProducts(categorias);
-
-    for (const producto of productos) {
-      await this.productoService.createProducto(producto);
-    }
-
     console.log(
-      `${productos.length} productos insertados en la base de datos.`,
+      'No se encontraron productos. Procediendo a insertar desde Excel.',
     );
-  }
 
-  private async scrapeProducts(
-    categorias: any[],
-  ): Promise<CreateProductoDto[]> {
-    const response = await axios.get(this.baseUrl);
-    const $ = cheerio.load(response.data);
+    // Leer el archivo Excel
+    const filePath = path.join(process.cwd(), 'products.xlsx'); // Cambia la ruta si es necesario
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-    const productos: CreateProductoDto[] = [];
+    for (const row of data) {
+      const codigoBarras = row['CODIGODEBARRA']?.toString().trim() || null;
+      const nombre = row['NOMBRE']?.trim();
+      const precioCosto = parseFloat(row['PRECIO_DE_COMPRA']) || 0;
+      const precioVenta = parseFloat(row['PRECIO_DE_VENTA']) || 0;
+      const categoriaNombre = row['CATEGORIA']?.trim();
+      const cantidad = parseInt(row['Cantidad']) || 0;
 
-    const productCards = $('.product-card').toArray();
+      if (!nombre || !categoriaNombre) {
+        console.warn(
+          `Datos incompletos para el producto: ${JSON.stringify(row)}`,
+        );
+        continue;
+      }
 
-    for (const el of productCards) {
-      const nombre = $(el).find('.product-title').text().trim();
-      const precioTexto = $(el)
-        .find('.price')
-        .first()
-        .text()
-        .replace(/\D/g, '');
-      const imagen = $(el).find('.product-card__image img').attr('src');
-      const relativeUrl = $(el).find('a').attr('href'); // URL relativa al producto
+      // Busca o crea la categoría
+      let categoria = await this.categoriaService.findByName(categoriaNombre);
+      if (!categoria) {
+        categoria = await this.categoriaService.createCategory({
+          nombre: categoriaNombre,
+        });
+      }
 
-      if (nombre && precioTexto && imagen && relativeUrl) {
-        const precioVenta = parseInt(precioTexto);
-        const precioCosto = Math.round(precioVenta * 0.8); // Estimar precio costo
-
-        const productPageUrl = `https://farmaciaelquimico.cl${relativeUrl}`;
-        const codigoBarras = await this.scrapeProductSku(productPageUrl); // Obtener SKU desde la página del producto
-
-        productos.push({
+      // Inserta el producto
+      try {
+        await this.productoService.createProducto({
           codigoBarras,
           nombre,
           precioCosto,
           precioVenta,
-          cantidad: Math.floor(Math.random() * 100) + 1, // Cantidad aleatoria
-          categoriaId:
-            categorias[Math.floor(Math.random() * categorias.length)].id, // Categoría aleatoria
-          imagen: imagen.startsWith('http') ? imagen : `https:${imagen}`, // Asegurar URL válida
+          cantidad,
+          categoriaId: categoria.id,
         });
+        console.log(`Producto "${nombre}" insertado correctamente.`);
+      } catch (error) {
+        console.error(`Error al insertar el producto "${nombre}":`, error);
       }
     }
 
-    return productos.slice(0, 50); // Limitar a 50 productos
-  }
-
-  private async scrapeProductSku(productPageUrl: string): Promise<string> {
-    try {
-      const response = await axios.get(productPageUrl);
-      const $ = cheerio.load(response.data);
-
-      // Ajusta el selector para el código de barras o SKU según el DOM de la página
-      const codigoBarras = $('[data-sku], .product-sku').text().trim();
-      return codigoBarras || Math.random().toString(36).substring(2, 12); // Genera uno si no existe
-    } catch (error) {
-      console.error(
-        `Error obteniendo el SKU del producto: ${productPageUrl}`,
-        error,
-      );
-      return Math.random().toString(36).substring(2, 12); // Genera uno si falla
-    }
+    console.log('Carga de datos de productos completada.');
   }
 }

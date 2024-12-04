@@ -1,38 +1,45 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import axios from 'axios';
-import * as cheerio from 'cheerio';
 import { CategoriaService } from 'src/categoria/categoria.service';
+import * as path from 'path';
+import * as xlsx from 'xlsx';
 
 @Injectable()
 export class DataCategoryService implements OnModuleInit {
-  private readonly baseUrl =
-    'https://farmaciaelquimico.cl/collections/medicamentos';
-
   constructor(private readonly categoriaService: CategoriaService) {}
 
   async onModuleInit() {
-    console.log('Iniciando scraping de categorías...');
-    const categorias = await this.scrapeCategories();
-
-    for (const categoria of categorias) {
-      await this.categoriaService.createCategory({ nombre: categoria });
+    // Verificar si ya existen categorías
+    const existingCategories = await this.categoriaService.findAll(); // Suponiendo que `findAll` devuelve las categorías actuales
+    if (existingCategories.length > 0) {
+      console.log(
+        'La tabla de categorías ya tiene datos. No se realizará la inserción.',
+      );
+      return;
     }
 
     console.log(
-      `${categorias.length} categorías insertadas en la base de datos.`,
+      'No se encontraron categorías. Procediendo a insertar desde Excel.',
     );
-  }
 
-  private async scrapeCategories(): Promise<string[]> {
-    const response = await axios.get(this.baseUrl);
-    const $ = cheerio.load(response.data);
+    // Leer el archivo Excel
+    const filePath = path.join(process.cwd(), 'category.xlsx'); // Cambia la ruta si es necesario
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-    const categorias = new Set<string>();
-    $('.filter-item').each((_idx, el) => {
-      const nombre = $(el).text().trim();
-      if (nombre) categorias.add(nombre);
-    });
-
-    return Array.from(categorias).slice(0, 10); // Limitar a 10 categorías
+    for (const row of data) {
+      const categoryName = row['Nombre']; // Cambia según el nombre exacto de la columna
+      if (categoryName && categoryName.trim() !== '') {
+        try {
+          await this.categoriaService.createCategory({ nombre: categoryName });
+          console.log(`Categoría "${categoryName}" insertada correctamente.`);
+        } catch (error) {
+          console.error(
+            `Error al insertar la categoría "${categoryName}":`,
+            error,
+          );
+        }
+      }
+    }
   }
 }

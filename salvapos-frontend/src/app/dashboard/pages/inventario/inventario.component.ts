@@ -181,4 +181,20 @@ export default class InventarioComponent implements OnInit {
     }
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formateo con puntos como separadores de miles
   }
+
+  getPageRange(): number[] {
+    const maxVisiblePages = 10; // Número máximo de páginas visibles en la barra de paginación
+    const startPage = Math.max(
+      this.currentPage - Math.floor(maxVisiblePages / 2),
+      1
+    );
+    const endPage = Math.min(startPage + maxVisiblePages - 1, this.totalPages);
+
+    const pageRange: number[] = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pageRange.push(i);
+    }
+
+    return pageRange;
+  }
 }
