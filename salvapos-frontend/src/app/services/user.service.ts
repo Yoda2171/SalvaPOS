@@ -6,13 +6,14 @@ import {
   RequestResetPassword,
   ResetPassword,
 } from '../dashboard/Interface/auth.interface';
+import { environment } from '../../environment/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://[::1]:3000/user';
+  private readonly apiUrl = environment.apiUrl + '/user';
 
   // BehaviorSubject for loading state
   private readonly loadingSubject = new BehaviorSubject<boolean>(false);

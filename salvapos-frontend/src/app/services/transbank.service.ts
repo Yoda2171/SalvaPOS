@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environment/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TransbankService {
-  private readonly baseUrl = 'http://localhost:3000/transbank';
+  private readonly baseUrl = environment.apiUrl + '/transbank';
   constructor(private readonly http: HttpClient) {}
   iniciarTransaccion(data: {
     amount: number;

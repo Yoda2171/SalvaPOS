@@ -9,7 +9,7 @@ export class NotificationService {
     email: string,
     resetToken: string,
   ): Promise<void> {
-    const resetUrl = `http://localhost:4200/resetpassword/${resetToken}`; // Cambia por tu URL de frontend
+    const resetUrl = `${process.env.URL_FRONTEND}/resetpassword/${resetToken}`; // Cambia por tu URL de frontend
 
     await this.mailerService.sendMail({
       to: email, // Correo del destinatario
