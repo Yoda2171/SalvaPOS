@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TransbankService } from '../../../services/transbank.service';
 import { CartService } from '../../../services/cart.service';
+import { environment } from '../../../../environment/environment';
 
 @Component({
   selector: 'app-cart',
@@ -24,7 +25,7 @@ export default class CartComponent {
       amount: this.cart.calcularPrecioTotal(), // Monto de la transacción
       sessionId: 'random', // Identificador de sesión
       buyOrder: `order-${Date.now()}`, // Orden única basada en el tiempo
-      returnUrl: 'http://localhost:4200/dashboard/return', // URL de retorno al frontend
+      returnUrl: environment.apiUrlFront + '/dashboard/return', // URL de retorno al frontend
     };
 
     this.transbankService.iniciarTransaccion(paymentData).subscribe({

@@ -6,13 +6,14 @@ import {
   Pagination,
   Producto,
 } from '../dashboard/Interface/producto.interface';
+import { environment } from '../../environment/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductoService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://[::1]:3000/producto';
+  private readonly apiUrl = environment.apiUrl + '/producto';
 
   // BehaviorSubjects para el estado de carga y los datos
   private readonly loadingSubject = new BehaviorSubject<boolean>(false);

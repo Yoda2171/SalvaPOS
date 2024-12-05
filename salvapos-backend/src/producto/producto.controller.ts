@@ -32,7 +32,7 @@ export class ProductoController {
       const filename = `${Date.now()}.jpg`;
       const filePath = join(process.cwd(), 'uploads', filename);
       writeFileSync(filePath, buffer);
-      fileUrl = `http://localhost:3000/uploads/${filename}`;
+      fileUrl = `${process.env.FILE_URL}/uploads/${filename}`;
     }
 
     return this.productoService.createProducto(createProductoDto, fileUrl);
@@ -59,7 +59,7 @@ export class ProductoController {
       const filename = `${Date.now()}.jpg`;
       const filePath = join(process.cwd(), 'uploads', filename);
       writeFileSync(filePath, buffer);
-      fileUrl = `http://localhost:3000/uploads/${filename}`;
+      fileUrl = `${process.env.API_URL}/uploads/${filename}`;
     }
 
     return this.productoService.updateProducto(+id, updateProductoDto, fileUrl);

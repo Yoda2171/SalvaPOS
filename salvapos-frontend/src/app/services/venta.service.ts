@@ -8,13 +8,14 @@ import {
   SoldProductDto,
   SoldVenta,
 } from '../dashboard/Interface/soldProduct.interface';
+import { environment } from '../../environment/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class VentaService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://[::1]:3000/venta';
+  private readonly apiUrl = environment.apiUrl + '/venta';
 
   // BehaviorSubjects para el estado de carga y los datos
   private readonly loadingSubject = new BehaviorSubject<boolean>(false);

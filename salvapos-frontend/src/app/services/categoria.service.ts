@@ -6,13 +6,14 @@ import {
 } from '../dashboard/Interface/categoria.inteface';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap, finalize } from 'rxjs/operators';
+import { environment } from '../../environment/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CategoriaService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://[::1]:3000/categoria';
+  private readonly apiUrl = environment.apiUrl + '/categoria';
 
   // BehaviorSubjects para el estado de carga y los datos
   private readonly loadingSubject = new BehaviorSubject<boolean>(false);

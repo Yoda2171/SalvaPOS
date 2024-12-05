@@ -3,13 +3,14 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap, finalize } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
+import { environment } from '../../environment/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://[::1]:3000/auth';
+  private readonly apiUrl = environment.apiUrl + '/auth';
 
   // BehaviorSubject for loading state
   private readonly loadingSubject = new BehaviorSubject<boolean>(false);
