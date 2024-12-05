@@ -125,6 +125,7 @@ export const routes: Routes = [
       },
       {
         path: 'about',
+        title: 'About',
         loadComponent: () => import('./dashboard/pages/about/about.component'),
       },
       // Redirigir desde 'dashboard' a 'dashboard/home' si la ruta está vacía
@@ -141,6 +142,10 @@ export const routes: Routes = [
     title: 'Reset Password',
     loadComponent: () =>
       import('./dashboard/pages/resetPassword/resetPassword.component'),
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./dashboard/pages/auth/login/login.component'),
   },
   {
     path: 'login',
