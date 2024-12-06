@@ -34,7 +34,7 @@ spec:
               value: posadmin
 
             - name: FILE_URL
-              value: https://salvapos-api.3itapp.com/
+              value: https://salvapos-api.3itapp.com
             - name: URL_FRONTEND
               value: https://salvapos-front.3itapp.com
 
