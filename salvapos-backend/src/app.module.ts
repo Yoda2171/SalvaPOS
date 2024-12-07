@@ -37,7 +37,7 @@ import { TransbankModule } from './transbank/transbank.module';
       database: process.env.DATABASE_NAME, // Nombre de la base de datos
       autoLoadEntities: true,
       synchronize: true, // Sincroniza la base de datos según las entidades de TypeORM
-      timezone: 'Z', // Zona horaria
+      timezone: 'local', // Zona horaria
     }),
 
     MailerModule.forRoot({
