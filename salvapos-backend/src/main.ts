@@ -31,7 +31,9 @@ async function bootstrap() {
   SwaggerModule.setup('swagger-ui.html', app, document);
 
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.URL_FRONTEND,
+  });
 
   await app.listen(3000);
   console.log(`Application is running on: ${await app.getUrl()}`);
