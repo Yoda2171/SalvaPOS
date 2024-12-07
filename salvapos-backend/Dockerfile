@@ -1,6 +1,8 @@
 # Use the official Node.js 16 image as the base image
 FROM node:22-slim
 
+ENV TZ=America/Santiago
+
 # Set the working directory inside the container
 WORKDIR /app
 
