@@ -1,14 +1,21 @@
 import { NestFactory } from '@nestjs/core';
-
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import * as express from 'express';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import serverlessExpress from '@vendia/serverless-express';
+
+let server;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const expressApp = express();
+  const app = await NestFactory.create(
+    AppModule,
+    new ExpressAdapter(expressApp),
+  );
 
   const uploadDir = join(process.cwd(), 'uploads');
   if (!existsSync(uploadDir)) {
@@ -30,12 +37,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger-ui.html', app, document);
 
-  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
-  app.enableCors({
-    origin: process.env.URL_FRONTEND,
-  });
+  await app.init();
 
-  await app.listen(3000);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  return serverlessExpress({ app: expressApp });
 }
-bootstrap();
+
+export const handler = async (event, context) => {
+  server = server ?? (await bootstrap());
+  return server(event, context);
+};
